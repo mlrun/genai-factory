@@ -11,5 +11,8 @@ export default defineConfig({
     alias: {
       '@icons': resolve(__dirname, 'src/assets/icons')
     }
+  },
+  server: {
+    port: 3000,
   }
 })
