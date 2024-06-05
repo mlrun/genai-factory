@@ -16,7 +16,7 @@ const Message = ({ setter }: Props) => {
     setter(prevMessages => [...prevMessages, { role: 'Human', content: inputValue, sources: [] }])
     setInputValue('')
     setTimeout(function () {
-      var lastBubble = document.getElementsByClassName('help-text').length - 1
+      const lastBubble = document.getElementsByClassName('help-text').length - 1
       document.getElementsByClassName('help-text')[lastBubble].scrollIntoView(false)
     }, 50)
 
@@ -44,12 +44,12 @@ const Message = ({ setter }: Props) => {
           placeholder="Send message..."
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
         />
         <div
           className="icon-button mic-icon"
           onClick={event => {
-            ;(event.target as HTMLElement).classList.toggle('selected')
+            return (event.target as HTMLElement).classList.toggle('selected')
           }}
         ></div>
         <Button label="Send" onClick={submitMessage} />
