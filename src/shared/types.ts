@@ -18,3 +18,12 @@ export type Source = {
   source: string
   title: string
 }
+
+export type TableData = {
+  //eslint-disable-next-line
+  name: any
+  created: string
+  updated: string
+  tags: string
+  resolved: boolean
+}

@@ -1,14 +1,18 @@
+import { useContext } from 'react'
+import React from 'react'
+import './Topbar.css'
 import Logo from '@assets/mlrun.png'
-import './Header.css'
+import AppContext from '@services/AppContext'
 
 type Props = {
   user: string
-  onLogout: () => void
+  onLoginChange: (value: boolean) => void
 }
+const Topbar = ({ user, onLoginChange }: Props) => {
+  const { admin, setAdmin } = useContext(AppContext)
 
-const Header = (props: Props) => {
   return (
-    <div className="comp-header">
+    <div className="comp-topbar">
       <div className="logo">
         <img src={Logo} />
       </div>
@@ -43,7 +47,7 @@ const Header = (props: Props) => {
           </div>
         </summary>
         <div className="menu">
-          <div className="menu-item disabled username">{props.user}</div>
+          <div className="menu-item disabled username">{user}</div>
           <div className="menu-item">
             <div className="menu-icon settings"></div>
             Settings
@@ -51,7 +55,7 @@ const Header = (props: Props) => {
           <div
             className="menu-item"
             onClick={() => {
-              props.onLogout()
+              onLoginChange(true)
             }}
           >
             <div className="menu-icon logout"></div>
@@ -63,4 +67,4 @@ const Header = (props: Props) => {
   )
 }
 
-export default Header
+export default Topbar

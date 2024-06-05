@@ -1,5 +1,5 @@
 import { UserSession } from '@shared/types';
-import Data from '../assets/data.json';
+import Data from '@assets/data.json';
 
 class MockClient {
 

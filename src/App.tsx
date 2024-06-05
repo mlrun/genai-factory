@@ -5,6 +5,7 @@ import AppContext from '@services/AppContext'
 import Leftbar from '@components/feature/Leftbar'
 import { useState } from 'react'
 import './App.css'
+import Admin from '@components/feature/Admin'
 
 function App() {
   const [sessionId, setSessionId] = useState('')
@@ -24,7 +25,7 @@ function App() {
             </div>
           ) : (
             <div className="app-flex">
-              <h1>Admin</h1>
+              <Admin />
             </div>
           )
         ) : (

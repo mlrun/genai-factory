@@ -1,0 +1,21 @@
+.comp-admin {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    background-color: #ffffff;
+}
+
+.comp-admin .flex {
+    display: flex;
+    flex-grow: 1;
+}
+
+.comp-admin .content{
+    width: 100%;
+    margin: 32px;
+    display: flex;
+    flex-direction: column;
+}

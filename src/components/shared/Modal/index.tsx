@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { AppContext } from '../../../services/AppContext'
+import { AppContext } from '@services/AppContext'
 import './Modal.css'
 
 type Props = {

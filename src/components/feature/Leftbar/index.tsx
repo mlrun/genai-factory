@@ -4,7 +4,7 @@ import Client from '@services/Api'
 import AppContext, { generateSessionId } from '@services/AppContext'
 import Header from '@components/shared/Header'
 import Button from '@components/shared/Button'
-import ChatHistoryList from '../ChatHistoryList'
+import ChatHistoryList from '@components/feature/ChatHistoryList'
 import { ChatHistory } from '@shared/types'
 
 const Leftbar = () => {
