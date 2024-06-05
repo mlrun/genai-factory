@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext } from 'react'
-import Header from '../Header'
-import History from '../History'
-import Button from '../Button'
 import './Leftbar.css'
 import Client from '@services/Api'
-import { ChatHistory } from '@shared/types'
 import AppContext, { generateSessionId } from '@services/AppContext'
+import Header from '@components/shared/Header'
+import Button from '@components/shared/Button'
+import ChatHistoryList from '../ChatHistoryList'
+import { ChatHistory } from '@shared/types'
 
 const Leftbar = () => {
   const { sessionId, setSessionId, username, setUsername } = useContext(AppContext)
@@ -67,7 +67,7 @@ const Leftbar = () => {
       <Header user={username} onLogout={changeLogin} />
       <div className="inner">
         {/* <Search /> */}
-        <History history={history} setNew={setIsNew} />
+        <ChatHistoryList history={history} setNew={setIsNew} />
       </div>
       <div className="footer-flex">
         <Button label="New chat" onClick={newChat} />

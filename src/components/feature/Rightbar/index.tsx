@@ -1,9 +1,9 @@
-import Dropdown from '@components/Dropdown'
-import Icon from '@components/Icon'
-import Input from '@components/Input'
-import Paragraph from '@components/Paragraph'
-import Slider from '@components/Slider'
-import Textarea from '@components/Textarea'
+import Dropdown from '@components/shared/Dropdown'
+import Icon from '@components/shared/Icon'
+import Input from '@components/shared/Input'
+import Paragraph from '@components/shared/Paragraph'
+import Slider from '@components/shared/Slider'
+import Textarea from '@components/shared/Textarea'
 import './Rightbar.css'
 
 const Rightbar = () => {

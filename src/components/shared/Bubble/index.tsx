@@ -1,4 +1,4 @@
-import Sources from '@components/Sources'
+import Sources from '@components/shared/Sources'
 import { Source } from '@shared/types'
 import Markdown from 'react-markdown'
 import './Bubble.css'

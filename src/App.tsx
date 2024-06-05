@@ -1,8 +1,8 @@
-import Chat from '@components/Chat'
-import Login from '@components/Login'
-import Rightbar from '@components/Rightbar'
+import Chat from '@components/feature/Chat'
+import Login from '@components/feature/Login'
+import Rightbar from '@components/feature/Rightbar'
 import AppContext from '@services/AppContext'
-import Leftbar from 'components/Leftbar'
+import Leftbar from '@components/feature/Leftbar'
 import { useState } from 'react'
 import './App.css'
 

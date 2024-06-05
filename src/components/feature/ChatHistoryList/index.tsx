@@ -1,16 +1,16 @@
 import { useContext, useEffect } from 'react'
-import './History.css'
-import Modal from '../Modal'
-import { AppContext } from '../../services/AppContext'
+import './ChatHistoryList.css'
 import { selectFunc } from '@shared/utils'
 import { ChatHistory } from '@shared/types'
+import AppContext from '@services/AppContext'
+import Modal from '@components/shared/Modal'
 
 type Props = {
   history: ChatHistory[]
   setNew(newChat: boolean): void
 }
 
-const History = (props: Props) => {
+const ChatHistoryList = (props: Props) => {
   const { sessionId, setSessionId } = useContext(AppContext)
   const histories = props.history
   const { modal, setModal } = useContext(AppContext)
@@ -92,4 +92,4 @@ const History = (props: Props) => {
   )
 }
 
-export default History
+export default ChatHistoryList

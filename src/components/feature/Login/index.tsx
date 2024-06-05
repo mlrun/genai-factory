@@ -3,8 +3,8 @@ import { useContext } from 'react'
 import './Login.css'
 import Logo from '@assets/mlrun.png'
 import AppContext from '@services/AppContext'
-import Button from '@components/Button'
-import Input from '@components/Input'
+import Button from '@components/shared/Button'
+import Input from '@components/shared/Input'
 
 const Login = () => {
   const { setUsername, admin, setAdmin } = useContext(AppContext)

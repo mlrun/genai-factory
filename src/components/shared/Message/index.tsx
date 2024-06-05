@@ -1,4 +1,4 @@
-import Button from '@components/Button'
+import Button from '@components/shared/Button'
 import Client from '@services/Api'
 import AppContext from '@services/AppContext'
 import { ChatHistory } from '@shared/types'
