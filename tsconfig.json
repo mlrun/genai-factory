@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -15,19 +16,26 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@components/*": ["./components/*"],
+      "@assets/*": ["./assets/*"],
+      "@services/*": ["./services/*"],
+      "@icons/*": ["./assets/icons/*"]
+    },
+    "types": ["node"],
+    "forceConsistentCasingInFileNames": true
   },
-
 
   "ecmaVersion": "latest",
   "sourceType": "module",
+
   "project": ["./tsconfig.json", "./tsconfig.node.json"],
   "tsconfigRootDir": "__dirname",
-  "include": ["src"],
+  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

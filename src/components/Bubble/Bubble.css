@@ -1,0 +1,159 @@
+.comp-bubble {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-direction: row-reverse;
+    margin-left: 140px;
+    margin-right: 40px;
+    position: relative;
+}
+
+.comp-bubble.AI {
+    flex-direction: row;
+    margin-left: 40px;
+    margin-right: 140px;
+}
+
+.comp-bubble .flex-column {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+
+.comp-bubble .inner-bubble {
+    background-color: var(--button-bg-color);
+    color: var(--leftbar-text-color);
+    padding: 32px;
+    width: calc(100% - 64px);
+    border-radius: 16px 16px 0 16px;
+}
+
+.comp-bubble.AI .inner-bubble {
+    background-color: var(--bot-bubble-bg-color);
+    color: var(--text-color);
+    border-radius: 16px 16px 16px 0;
+    font-size: var(--text-size-16);
+    line-height: 150%;
+}
+
+
+.comp-bubble .inner-bubble p {
+    margin: 0;
+}
+
+.comp-bubble .inner-bubble img {
+    border-radius: 6px;
+    margin-top: 2px;
+    max-width: 98%;
+}
+
+.comp-bubble .inner-bubble img[src="/assets/thinking.gif"] {
+    height: 25px;
+}
+
+.comp-bubble .inner-bubble:has(img[src="/assets/thinking.gif"]) {
+    padding: 22px 32px;
+}
+
+.comp-bubble svg {
+    width: 32px;
+    height: 32px;
+    padding: 8px;
+    border-radius: 9999px;
+    color: var(--text-color);
+    color: var(--button-bg-color);
+    background-color: var(--bot-bubble-bg-color);
+    height: fit-content;
+}
+
+.comp-bubble.AI svg {
+    color: var(--text-color);
+}
+
+.comp-bubble .help-text {
+    position: absolute;
+    right: 0;
+    bottom: calc(var(--text-size-16) * -2);
+    color: var(--search-text-color);
+    font-size: var(--text-size-12);
+}
+
+.comp-bubble .help-text button {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.comp-bubble .help-text button:hover {
+    background-color: var(--rightbar-bg-color);
+}
+
+.comp-bubble .help-text button:active {
+    background-color: var(--bot-bubble-bg-color);
+}
+
+.comp-bubble .copy-icon {
+    background-color: var(--leftbar-text-color);
+    position: absolute;
+    border: 1px solid var(--bot-copyicon-border-color);
+    border-radius: 999px;
+    aspect-ratio: 1 / 1;
+    width: 32px;
+    height: 32px;
+    padding: 16px;
+    color: var(--history-hover-color);
+    top: 50%;
+    right: -48px;
+    transform: translateY(-50%);
+    display: none;
+    cursor: pointer;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px;
+}
+
+.comp-bubble.AI .copy-icon {
+    display: block;
+    opacity: 0;
+}
+
+.comp-bubble.AI:hover .copy-icon {
+    opacity: 1;
+}
+
+.comp-bubble .copy-icon svg {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 4px;
+    width: 16px;
+    height: 16px;
+}
+
+.comp-bubble h1,
+.comp-bubble h2,
+.comp-bubble h3,
+.comp-bubble h4,
+.comp-bubble h5,
+.comp-bubble h6 {
+    margin: 0;
+    margin-bottom: 0.6em;
+    padding: 0;
+}
+
+.comp-bubble .html-code:empty {
+    display: none;
+}
+
+@media screen and (max-width: 480px) {
+
+    .comp-bubble,
+    .comp-bubble.AI {
+        width: calc(100% - 24px);
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+}

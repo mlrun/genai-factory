@@ -1,0 +1,35 @@
+.comp-search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% - 16px);
+    padding-right: 16px;
+    background-color: var(--search-bg-color);
+    color: var(--search-text-color);
+    border-radius: 8px;
+}
+
+.comp-search:focus-within {
+    outline: 1px solid;
+}
+
+.comp-search input {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    flex-grow: 1;
+    padding: 12px 16px;
+    background-color: transparent;
+    color: var(--leftbar-text-color);
+    border: none;
+    outline: none;
+    font-size: var(--text-size-15);
+}
+
+.comp-search input::placeholder {
+    color: var(--search-text-color);
+}
+
+.comp-search svg {
+    width: 24px;
+    height: 24px;
+}

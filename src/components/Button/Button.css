@@ -1,0 +1,23 @@
+.comp-button {
+    border-radius: 8px;
+    background: var(--button-bg-color);
+    color: var(--leftbar-text-color);
+    padding: 6px 24px;
+    border: none;
+    outline: none;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: var(--text-size-16);
+    min-height: 32px;
+    cursor: pointer;
+}
+.comp-button:hover{
+    background-color: var(--button-bg-hover-color);
+}
+.comp-button:active{
+    background-color: var(--button-bg-pressed-color);
+}
+.comp-button:focus-visible{
+    background-color: var(--button-bg-hover-color);
+    outline: 1px solid var(--leftbar-text-color);
+}

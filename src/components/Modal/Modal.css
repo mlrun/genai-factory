@@ -1,0 +1,82 @@
+.comp-modal {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    left: 0;
+    z-index: 9;
+    background-color: #00000088;
+}
+
+.comp-modal .modal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--text-size-14);
+    color: var(--leftbar-bg-color);
+    margin: 0;
+    padding: 32px;
+    max-width: 320px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.comp-modal .modal h2 {
+    padding: 0;
+    margin: 0;
+}
+.comp-modal .modal p{
+    line-height: 150%;
+}
+
+.comp-modal .modal footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 32px;
+    justify-content: flex-end;
+}
+
+.comp-modal .modal footer button {
+    border-radius: 8px;
+    background: var(--button-bg-color);
+    color: var(--leftbar-text-color);
+    padding: 6px 24px;
+    min-width: 120px;
+    display: flex;
+    justify-content: center;
+    border: none;
+    outline: none;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: var(--text-size-16);
+    cursor: pointer;
+}
+
+.comp-modal .modal footer button:hover {
+    background-color: var(--button-bg-hover-color);
+}
+
+.comp-modal .modal footer button:active {
+    background-color: var(--button-bg-pressed-color);
+}
+
+.comp-modal .modal footer button:focus-visible {
+    outline: 2px solid var(--link-text-color);
+}
+
+.comp-modal .modal footer .second-button {
+    background-color: transparent;
+    color: var(--leftbar-bg-color);
+}
+
+.comp-modal .modal footer .second-button:hover {
+    background-color: var(--bot-bubble-bg-color);
+}
+
+.comp-modal .modal footer .second-button:active {
+    background-color: var(--rightbar-input-border-color);
+}
