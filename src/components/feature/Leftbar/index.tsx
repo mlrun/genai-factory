@@ -1,14 +1,17 @@
-import { useState, useEffect, useContext } from 'react'
-import './Leftbar.css'
-import Client from '@services/Api'
-import AppContext, { generateSessionId } from '@services/AppContext'
-import Header from '@components/shared/Header'
-import Button from '@components/shared/Button'
 import ChatHistoryList from '@components/feature/ChatHistoryList'
+import Button from '@components/shared/Button'
+import Header from '@components/shared/Header'
+import Client from '@services/Api'
 import { ChatHistory } from '@shared/types'
+import { generateSessionId } from '@shared/utils'
+import { sessionIdAtom, usernameAtom } from 'atoms'
+import { useAtom } from 'jotai'
+import { useEffect, useState } from 'react'
+import './Leftbar.css'
 
 const Leftbar = () => {
-  const { sessionId, setSessionId, username, setUsername } = useContext(AppContext)
+  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
+  const [username, setUsername] = useAtom(usernameAtom)
   const [history, setHistory] = useState<ChatHistory[]>([])
   const [isNew, setIsNew] = useState(true)
 

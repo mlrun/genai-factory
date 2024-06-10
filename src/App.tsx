@@ -1,21 +1,21 @@
 import Chat from '@components/feature/Chat'
 import Login from '@components/feature/Login'
 import Rightbar from '@components/feature/Rightbar'
-import AppContext from '@services/AppContext'
 import Leftbar from '@components/feature/Leftbar'
-import { useState } from 'react'
 import './App.css'
 import Admin from '@components/feature/Admin'
+import { useAtom } from 'jotai'
+import { adminAtom, modalAtom, sessionIdAtom, usernameAtom } from 'atoms'
+import { Provider as JotaiProvider } from 'jotai'
 
 function App() {
-  const [sessionId, setSessionId] = useState('')
-  const [username, setUsername] = useState('')
-  const [admin, setAdmin] = useState(false)
-  const [modal, setModal] = useState(false)
+  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
+  const [username, setUsername] = useAtom(usernameAtom)
+  const [admin, setAdmin] = useAtom(adminAtom)
 
   return (
-    <div className="app-flex">
-      <AppContext.Provider value={{ sessionId, setSessionId, username, setUsername, admin, setAdmin, modal, setModal }}>
+    <JotaiProvider>
+      <div className="app-flex">
         {username ? (
           !admin ? (
             <div className="app-flex">
@@ -35,8 +35,8 @@ function App() {
             </h1>
           </div>
         )}
-      </AppContext.Provider>
-    </div>
+      </div>
+    </JotaiProvider>
   )
 }
 

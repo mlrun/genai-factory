@@ -3,14 +3,17 @@ import Button from '@components/shared/Button'
 import Message from '@components/shared/Message'
 import Search from '@components/shared/Search'
 import Client from '@services/Api'
-import AppContext from '@services/AppContext'
 import { ChatHistory } from '@shared/types'
-import { useContext, useEffect, useState } from 'react'
+import { adminAtom, sessionIdAtom, usernameAtom } from 'atoms'
+import { useAtom } from 'jotai'
+import { useEffect, useState } from 'react'
 import './Chat.css'
 
 const Chat = () => {
   const [messages, setMessages] = useState<ChatHistory[]>([])
-  const { sessionId, setSessionId, username, setUsername, admin, setAdmin } = useContext(AppContext)
+  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
+  const [username, setUsername] = useAtom(usernameAtom)
+  const [admin, setAdmin] = useAtom(adminAtom)
 
   useEffect(() => {
     async function fetchData() {

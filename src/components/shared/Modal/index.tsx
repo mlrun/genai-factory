@@ -1,5 +1,5 @@
-import { useContext } from 'react'
-import { AppContext } from '@services/AppContext'
+import { modalAtom } from 'atoms'
+import { useAtom } from 'jotai'
 import './Modal.css'
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
   mainFunc: () => void
 }
 const Modal = (props: Props) => {
-  const { setModal } = useContext(AppContext)
+  const [modal, setModal] = useAtom(modalAtom)
   return (
     <div className="comp-modal">
       <div className="modal">

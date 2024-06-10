@@ -1,15 +1,14 @@
 import Topbar from '@components/feature/Topbar'
-import AppContext from '@services/AppContext'
-import { useContext } from 'react'
 import Sidebar from '@components/feature/Sidebar'
 import './Admin.css'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import Table from '@components/feature/Table'
 import Tabs from '@components/shared/Tabs'
+import { useAtom } from 'jotai'
+import { usernameAtom } from 'atoms'
 
 const Admin = () => {
-  const { username, setUsername } = useContext(AppContext)
-
+  const [username, setUsername] = useAtom(usernameAtom)
   const changeLogin = (data: boolean) => {
     setUsername('')
   }

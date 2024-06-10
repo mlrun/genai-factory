@@ -1,16 +1,11 @@
-import { useContext } from 'react'
-import React from 'react'
-import './Topbar.css'
 import Logo from '@assets/mlrun.png'
-import AppContext from '@services/AppContext'
+import './Topbar.css'
 
 type Props = {
   user: string
   onLoginChange: (value: boolean) => void
 }
 const Topbar = ({ user, onLoginChange }: Props) => {
-  const { admin, setAdmin } = useContext(AppContext)
-
   return (
     <div className="comp-topbar">
       <div className="logo">

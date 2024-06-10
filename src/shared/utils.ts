@@ -9,3 +9,7 @@ export const selectFunc = (sid: string) => {
     element.classList.add('selected')
   }
 }
+
+export const generateSessionId = () =>
+  Math.floor(Math.random() * 1000000).toString()
+

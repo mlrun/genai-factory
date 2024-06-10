@@ -1,13 +1,16 @@
-import React, { useState } from 'react'
-import { useContext } from 'react'
-import './Login.css'
 import Logo from '@assets/mlrun.png'
-import AppContext from '@services/AppContext'
 import Button from '@components/shared/Button'
 import Input from '@components/shared/Input'
+import { adminAtom, usernameAtom } from 'atoms'
+import { useAtom } from 'jotai'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import './Login.css'
 
 const Login = () => {
-  const { setUsername, admin, setAdmin } = useContext(AppContext)
+  const navigate = useNavigate()
+  const [username, setUsername] = useAtom(usernameAtom)
+  const [admin, setAdmin] = useAtom(adminAtom)
   const [LoginError, setLoginError] = useState('')
   const [formuser, setFormuser] = useState('guest')
   const [password, setPassword] = useState('XxYaz12345')
@@ -19,6 +22,11 @@ const Login = () => {
       setLoginError('Incorrect email or password, please enter your sign in information again')
     } else {
       setUsername(formuser)
+      if (admin) {
+        navigate('/admin')
+      } else {
+        navigate('/chat')
+      }
     }
   }
 

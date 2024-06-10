@@ -1,9 +1,10 @@
-import { useContext, useEffect } from 'react'
-import './ChatHistoryList.css'
-import { selectFunc } from '@shared/utils'
-import { ChatHistory } from '@shared/types'
-import AppContext from '@services/AppContext'
 import Modal from '@components/shared/Modal'
+import { ChatHistory } from '@shared/types'
+import { selectFunc } from '@shared/utils'
+import { modalAtom, sessionIdAtom } from 'atoms'
+import { useAtom } from 'jotai'
+import { useEffect } from 'react'
+import './ChatHistoryList.css'
 
 type Props = {
   history: ChatHistory[]
@@ -11,9 +12,9 @@ type Props = {
 }
 
 const ChatHistoryList = (props: Props) => {
-  const { sessionId, setSessionId } = useContext(AppContext)
+  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
+  const [modal, setModal] = useAtom(modalAtom)
   const histories = props.history
-  const { modal, setModal } = useContext(AppContext)
 
   const selectChat = (sid: string) => {
     console.log('MODAL: ', modal)
