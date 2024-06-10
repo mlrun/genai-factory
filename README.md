@@ -7,9 +7,8 @@
 2. `npm run dev` - to start project
 3. Project can be found at at http://localhost:3000
 
-## 2. Project Structure
 
-### 2. Project Structure
+## 2. Project Structure
 
 The project structure follows a typical React + TypeScript setup. Here is a brief overview:
 
