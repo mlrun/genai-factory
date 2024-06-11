@@ -62,3 +62,11 @@ function Counter() {
 ```
 
 For more information and advanced usage of Jotai, refer to the official documentation: [Jotai Documentation](https://github.com/pmndrs/jotai).
+
+### 4. UI Library
+To enhance the styling and user interface of our application, we are utilizing the [Chakra UI Library](https://chakra-ui.com/).
+
+Chakra UI is a simple and accessible component library that provides a set of customizable UI components for React applications.
+
+To get started with Chakra UI, visit the official documentation [Chakra UI Documentation](https://chakra-ui.com/docs/getting-started).
+
