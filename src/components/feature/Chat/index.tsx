@@ -59,7 +59,7 @@ const Chat = () => {
       </details>
 
       <div className="chat-flex">
-        <div className="bubbles-flex">
+        <div className="bubbles-flex p-8">
           {messages.map((chatHistory, key) => (
             <Bubble
               key={key}

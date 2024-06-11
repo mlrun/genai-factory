@@ -25,6 +25,7 @@
       "@components/*": ["./components/*"],
       "@assets/*": ["./assets/*"],
       "@services/*": ["./services/*"],
+      "@atoms/*": ["./atoms/*"],
       "@icons/*": ["./assets/icons/*"]
     },
     "types": ["node"],
@@ -36,6 +37,6 @@
 
   "project": ["./tsconfig.json", "./tsconfig.node.json"],
   "tsconfigRootDir": "__dirname",
-  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*"],
+  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*","./atoms/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

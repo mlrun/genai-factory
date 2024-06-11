@@ -7,6 +7,7 @@
   position: relative;
   position: relative;
   overflow: hidden;
+  height: calc(100vh - 92px);
 }
 
 .mobile-menu {

@@ -3,7 +3,7 @@
   color: var(--text-color);
   min-width: 0;
   max-width: 0;
-  height: 100vh;
+  height: calc(100vh - 92px);
   padding: 16px 0;
   position: relative;
   display: flex;

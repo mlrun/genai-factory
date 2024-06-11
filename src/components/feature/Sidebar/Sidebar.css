@@ -1,21 +1,21 @@
 .comp-sidebar {
-    background-color: var(--leftbar-bg-color);
-    color: var(--leftbar-text-color);
-    height: 100%;
-    width: 400px;
-    padding: 24px;
+  background-color: var(--leftbar-bg-color);
+  color: var(--leftbar-text-color);
+  width: 264px;
+  padding: 24px;
+  height: calc(100vh - 92px);
 }
 
 .comp-sidebar .side-item {
-    padding: 12px 16px;
-    border-radius: 8px;
-    cursor: pointer;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .comp-sidebar .side-item:hover {
-    background-color: var(--history-hover-color);
+  background-color: var(--history-hover-color);
 }
 
 .comp-sidebar .side-item:active {
-    background-color: var(--history-pressed-color);
+  background-color: var(--history-pressed-color);
 }

@@ -6,7 +6,7 @@ type Props = {
   onLogout: () => void
 }
 
-const Header = (props: Props) => {
+const Header = ({ onLogout, user }: Props) => {
   return (
     <div className="comp-header">
       <div className="logo">
@@ -43,7 +43,7 @@ const Header = (props: Props) => {
           </div>
         </summary>
         <div className="menu">
-          <div className="menu-item disabled username">{props.user}</div>
+          <div className="menu-item disabled username">{user}</div>
           <div className="menu-item">
             <div className="menu-icon settings"></div>
             Settings
@@ -51,7 +51,7 @@ const Header = (props: Props) => {
           <div
             className="menu-item"
             onClick={() => {
-              props.onLogout()
+              onLogout()
             }}
           >
             <div className="menu-icon logout"></div>
