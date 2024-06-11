@@ -8,12 +8,14 @@ import { sessionIdAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import './Leftbar.css'
+import { useNavigate, useNavigation } from 'react-router-dom'
 
 const Leftbar = () => {
   const [sessionId, setSessionId] = useAtom(sessionIdAtom)
   const [username, setUsername] = useAtom(usernameAtom)
   const [history, setHistory] = useState<ChatHistory[]>([])
   const [isNew, setIsNew] = useState(true)
+  const navigate = useNavigate()
 
   const newChat = async () => {
     const sid = generateSessionId()
@@ -23,7 +25,8 @@ const Leftbar = () => {
 
   const changeLogin = () => {
     setUsername('')
-    //  setHistory([]);
+    console.log('heheh')
+    navigate('/')
   }
 
   const fetchSessions = async () => {

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  overflow-y: scroll;
+  position: inherit !important;
+}
 :root {
   --leftbar-bg-color: #2b2d30;
   --leftbar-text-color: #ffffff;
@@ -35,10 +39,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-body {
-  overflow-x: hidden;
-  overflow-y: scroll;
 }
 em,
 i {

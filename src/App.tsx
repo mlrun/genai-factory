@@ -6,6 +6,7 @@ import { Provider as JotaiProvider } from 'jotai'
 import { LoginPage } from 'pages/LoginPage'
 import { AdminPage } from 'pages/AdminPage'
 import { ChatPage } from 'pages/ChatPage'
+import { ChakraProvider } from '@chakra-ui/react'
 function App() {
   const queryClient = new QueryClient()
 
@@ -26,7 +27,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <JotaiProvider>
-        <RouterProvider router={router} />
+        <ChakraProvider>
+          <RouterProvider router={router} />
+        </ChakraProvider>
       </JotaiProvider>
     </QueryClientProvider>
   )

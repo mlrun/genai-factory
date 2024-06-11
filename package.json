@@ -13,10 +13,14 @@
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
     "@tanstack/query-core": "^5.40.0",
     "@tanstack/react-query": "^5.40.1",
     "ag-grid-react": "^31.3.2",
     "axios": "^1.7.2",
+    "framer-motion": "^11.2.10",
     "jotai": "^2.8.3",
     "jotai-tanstack-query": "^0.8.5",
     "react": "^18.2.0",
