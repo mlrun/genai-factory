@@ -4,6 +4,7 @@
 
 body {
   overflow-y: scroll;
+  position: inherit !important;
 }
 :root {
   --leftbar-bg-color: #2b2d30;
