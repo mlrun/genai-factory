@@ -17,7 +17,7 @@ The project structure follows a typical React + TypeScript setup. Here is a brie
   - `pages/`: This directory contains the main pages of the application.
   - `utils/`: This directory contains utility functions and helper modules.
   - `App.tsx`: This is the entry point of the application.
-  - `index.tsx`: This file renders the root component and mounts it to the DOM.
+  - `main.tsx`: This file renders the root component and mounts it to the DOM.
 
 
 
