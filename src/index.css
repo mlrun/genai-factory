@@ -4,13 +4,11 @@
 
 body {
   overflow-y: scroll;
-  position: inherit !important;
 }
 :root {
   --leftbar-bg-color: #2b2d30;
   --leftbar-text-color: #ffffff;
   --rightbar-bg-color: #f8f9fc;
-  --text-color: #334155;
   --search-bg-color: #1e1f21;
   --search-text-color: #94a3b8;
   --button-bg-color: #0066f3;

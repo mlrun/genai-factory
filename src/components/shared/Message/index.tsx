@@ -1,4 +1,5 @@
-import Button from '@components/shared/Button'
+import { ArrowUpIcon } from '@chakra-ui/icons'
+import { IconButton, Input } from '@chakra-ui/react'
 import Client from '@services/Api'
 import { ChatHistory } from '@shared/types'
 import { sessionIdAtom, usernameAtom } from 'atoms'
@@ -38,10 +39,10 @@ const Message = ({ setter }: Props) => {
   }
 
   return (
-    <div className="comp-message">
-      <div className="input">
+    <div className="flex w-full px-4 py-8 ">
+      <div className="flex w-full gap-2">
         <div className="icon-button plus-icon"></div>
-        <input
+        <Input
           type="text"
           placeholder="Send message..."
           value={inputValue}
@@ -54,14 +55,10 @@ const Message = ({ setter }: Props) => {
             return (event.target as HTMLElement).classList.toggle('selected')
           }}
         ></div>
-        <Button label="Send" onClick={submitMessage} />
+        <IconButton aria-label="Send" icon={<ArrowUpIcon />} />
       </div>
     </div>
   )
 }
-
-// [X] TODO: Add admin pages for Leftbar categories + selected
-// [X] TODO: Add graphs for an option for a drilldown screen
-// [X] TODO: Tabs component for table/ pages/ whatever
 
 export default Message

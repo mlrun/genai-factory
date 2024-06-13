@@ -1,4 +1,29 @@
 import Logo from '@assets/mlrun.png'
+import { HamburgerIcon, Icon, MoonIcon, SettingsIcon, SunIcon } from '@chakra-ui/icons'
+import {
+  Box,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  Flex,
+  FormControl,
+  FormLabel,
+  IconButton,
+  Image,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Switch,
+  Text,
+  useColorMode,
+  useDisclosure
+} from '@chakra-ui/react'
+import { colors } from '@shared/theme'
 import './Topbar.css'
 
 type Props = {
@@ -6,59 +31,86 @@ type Props = {
   onLoginChange: (value: boolean) => void
 }
 const Topbar = ({ user, onLoginChange }: Props) => {
-  return (
-    <div className="comp-topbar">
-      <div className="logo">
-        <img src={Logo} />
-      </div>
-      <details>
-        <summary>
-          <div className="icon-button">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-              />
-            </svg>
+  const { colorMode, toggleColorMode } = useColorMode()
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6 size-12"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-            </svg>
-          </div>
-        </summary>
-        <div className="menu">
-          <div className="menu-item disabled username">{user}</div>
-          <div className="menu-item">
-            <div className="menu-icon settings"></div>
-            Settings
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => {
-              onLoginChange(true)
-            }}
-          >
-            <div className="menu-icon logout"></div>
-            Logout
-          </div>
+  return (
+    <Flex
+      alignItems={'center'}
+      justifyContent={'space-between'}
+      h={20}
+      bg={colorMode == 'dark' ? colors.topbarDark : colors.topbarLight}
+    >
+      <Flex alignItems={'center'}>
+        <Box paddingLeft={4} display={{ sm: 'flex', md: 'none' }}>
+          <Menu>
+            <MenuButton as={IconButton} icon={<HamburgerIcon />} />
+            <MenuList>
+              <MenuItem>Users</MenuItem>
+              <MenuItem>Chat Histories</MenuItem>
+              <MenuItem>Data Sets</MenuItem>
+              <MenuItem>Documents</MenuItem>
+              <MenuItem>Pipelines</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
+        <div className={colorMode === 'dark' ? 'logo-dark' : 'logo'}>
+          <Image src={Logo} w={40} />
         </div>
-      </details>
-    </div>
+      </Flex>
+      <Flex paddingRight={4}>
+        <IconButton onClick={onOpen} aria-label="Settings" icon={<SettingsIcon />} />
+        <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader>Preferences</DrawerHeader>
+
+            <DrawerBody>
+              <FormControl display="flex" alignItems="center" justifyContent={'flex-start'}>
+                <Flex alignItems={'center'} gap={2}>
+                  <SunIcon />
+                  <Switch defaultChecked={colorMode === 'dark'} onChange={toggleColorMode} />
+                  <MoonIcon />
+                </Flex>
+              </FormControl>
+              {/* <div className="title">Properties</div>
+              <div className="">
+                <Paragraph
+                  header="Paragraph component"
+                  content="Bibendum vehicula aenean parturient blandit aliquam. Amet ipsum turpis integer gravida pulvinar aenean dictumst faucibus."
+                />
+                <Input
+                  onChange={e => console.log(e)}
+                  type="text"
+                  content="Please type name"
+                  placeholder="Placeholder only"
+                />
+                <Dropdown
+                  onChange={e => console.log(e)}
+                  header="Dropdown component"
+                  content="Please select company"
+                  option={['Apple', 'Samsung', 'OnePlus', 'Google', 'Xiaomi']}
+                />
+                <Dropdown
+                  onChange={e => console.log(e)}
+                  header="Another dropdown"
+                  content="What's the best beverage?"
+                  option={['Water', 'Coke', 'Orange Juice', 'Cider', 'Coffee', 'Tea', 'Chai']}
+                />
+                <Textarea content="Please type description" placeholder="Placeholder only" />
+                <Slider content="Values are between 1 and 18" min={1} max={18} />
+                <Slider content="Values are between 1 and 99" min={1} max={99} />
+              </div> */}
+            </DrawerBody>
+
+            <DrawerFooter>
+              <Text fontSize={'xs'}>All rights reserved</Text>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      </Flex>
+    </Flex>
   )
 }
 

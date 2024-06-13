@@ -6,15 +6,6 @@
   justify-content: space-between;
 }
 
-.comp-topbar .logo {
-  height: 34px;
-  width: fit-content;
-}
-
-.comp-topbar .logo img {
-  height: 100%;
-}
-
 .comp-topbar .icon-button {
   display: flex;
   justify-content: center;
@@ -106,4 +97,13 @@
 
 .comp-topbar .menu-icon.logout {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>');
+}
+
+.logo {
+  filter: invert(100%);
+}
+
+.logo-dark {
+  filter: invert(0%);
+  padding: 24px;
 }

@@ -29,5 +29,3 @@ export const setAdminAtom = atom(null, (_get, set, admin: boolean) => {
 export const setModalAtom = atom(null, (_get, set, modal: boolean) => {
   set(modalAtom, modal);
 });
-
-const loadableAtom = loadable(asyncAtom)

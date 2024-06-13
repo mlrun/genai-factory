@@ -4,7 +4,7 @@ import { useAtom } from 'jotai'
 import { usernameAtom } from 'atoms'
 import Sidebar from '../Sidebar'
 import { useNavigate } from 'react-router-dom'
-import RightBar from '../Rightbar'
+import { Box, Flex } from '@chakra-ui/react'
 
 type LayoutProps = {
   children: ReactNode
@@ -18,14 +18,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/')
   }
   return (
-    <>
+    <Flex direction={'column'}>
       <TopBar user={username} onLoginChange={changeLogin} />
-      <div className="flex justify-between">
-        <Sidebar />
-        <div className="flex w-full">{children}</div>
-        <RightBar />
-      </div>
-    </>
+      <Flex justifyContent={'space-between'}>
+        <Box display={{ base: 'none', md: 'flex' }}>
+          <Sidebar />
+        </Box>
+        <Flex width={'100%'} height={'91vh'}>
+          {children}
+        </Flex>
+      </Flex>
+    </Flex>
   )
 }
 

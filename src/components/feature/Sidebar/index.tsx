@@ -1,14 +1,28 @@
+import { Flex, Menu, MenuItem, useColorMode } from '@chakra-ui/react'
+import { colors } from '@shared/theme'
 import './Sidebar.css'
 
 const Sidebar = () => {
+  const { colorMode } = useColorMode()
+
   return (
-    <div className="comp-sidebar">
-      <div className="side-item">Users</div>
-      <div className="side-item">Chat Histories</div>
-      <div className="side-item">Data Sets</div>
-      <div className="side-item">Documents</div>
-      <div className="side-item">Pipelines</div>
-    </div>
+    <Flex
+      width={72}
+      height={'91vh'}
+      bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight}
+      flexFlow={'column'}
+      gap={4}
+      padding={4}
+      alignItems={'flex-start'}
+    >
+      <Menu>
+        <MenuItem>Users</MenuItem>
+        <MenuItem>Chat Histories</MenuItem>
+        <MenuItem>Data Sets</MenuItem>
+        <MenuItem>Documents</MenuItem>
+        <MenuItem>Pipelines</MenuItem>
+      </Menu>
+    </Flex>
   )
 }
 
