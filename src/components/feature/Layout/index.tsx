@@ -1,10 +1,10 @@
-import React, { ReactNode } from 'react'
-import TopBar from '@components/feature/Topbar'
-import { useAtom } from 'jotai'
-import { usernameAtom } from 'atoms'
-import Sidebar from '../Sidebar'
-import { useNavigate } from 'react-router-dom'
 import { Box, Flex } from '@chakra-ui/react'
+import TopBar from '@components/feature/Topbar'
+import { usernameAtom } from 'atoms'
+import { useAtom } from 'jotai'
+import React, { ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Sidebar from '../Sidebar'
 
 type LayoutProps = {
   children: ReactNode

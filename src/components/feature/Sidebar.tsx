@@ -1,6 +1,5 @@
 import { Flex, Menu, MenuItem, useColorMode } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
-import './Sidebar.css'
 
 const Sidebar = () => {
   const { colorMode } = useColorMode()
