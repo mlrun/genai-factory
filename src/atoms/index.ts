@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { atomWithQuery } from 'jotai-tanstack-query';
-import { atomWithStorage, loadable } from "jotai/utils"
-export const usernameAtom = atom<string>('');
+import { atomWithStorage } from "jotai/utils";
+export const usernameAtom = atom<string>('guest');
 export const sessionIdAtom = atom<string>('');
 export const adminAtom = atomWithStorage('admin', false);
 export const modalAtom = atom<boolean>(false);

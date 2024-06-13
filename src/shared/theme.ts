@@ -15,10 +15,30 @@ const breakpoints = {
 }
 export const colors = {
   topbarDark: '#1A202C',
-  topbarLight: '#EDF2F7',
+  topbarLight: '#E2E8F0',
   sidebarDark: '#2D3748',
-  sidebarLight: '#E2E8F0',
+  sidebarLight: '#EDF2F7',
+
+  primary: '#007BFF',
+  secondary: '#6C757D',
+  success: '#28A745',
+  info: '#17A2B8',
+  warning: '#FFC107',
+  danger: '#DC3545',
+  light: '#F8F9FA',
+  dark: '#343A40',
+
+  gray100: '#F7FAFC',
+  gray200: '#EDF2F7',
+  gray300: '#E2E8F0',
+  gray400: '#CBD5E0',
+  gray500: '#A0AEC0',
+  gray600: '#718096',
+  gray700: '#4A5568',
+  gray800: '#2D3748',
+  gray900: '#1A202C',
 }
+
 
 const theme = extendTheme({ config, breakpoints, colors })
 

@@ -1,5 +1,5 @@
 import Logo from '@assets/mlrun.png'
-import { HamburgerIcon, Icon, MoonIcon, SettingsIcon, SunIcon } from '@chakra-ui/icons'
+import { HamburgerIcon, MoonIcon, SettingsIcon, SunIcon } from '@chakra-ui/icons'
 import {
   Box,
   Drawer,
@@ -11,7 +11,6 @@ import {
   DrawerOverlay,
   Flex,
   FormControl,
-  FormLabel,
   IconButton,
   Image,
   Menu,
@@ -68,10 +67,15 @@ const Topbar = ({ user, onLoginChange }: Props) => {
 
             <DrawerBody>
               <FormControl display="flex" alignItems="center" justifyContent={'flex-start'}>
-                <Flex alignItems={'center'} gap={2}>
-                  <SunIcon />
-                  <Switch defaultChecked={colorMode === 'dark'} onChange={toggleColorMode} />
-                  <MoonIcon />
+                <Flex gap={4} width={'100%'} flexDirection={'column'}>
+                  <Flex alignItems={'center'} gap={2}>
+                    <SunIcon />
+                    <Switch defaultChecked={colorMode === 'dark'} onChange={toggleColorMode} />
+                    <MoonIcon />
+                  </Flex>
+                  <Menu>
+                    <MenuItem onClick={() => onLoginChange(false)}>Logout</MenuItem>
+                  </Menu>
                 </Flex>
               </FormControl>
               {/* <div className="title">Properties</div>
