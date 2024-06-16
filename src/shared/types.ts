@@ -27,3 +27,8 @@ export type TableData = {
   tags: string
   resolved: boolean
 }
+
+export type BreadcrumbData = {
+  page: string
+  url: string
+}

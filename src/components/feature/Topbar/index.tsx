@@ -53,9 +53,7 @@ const Topbar = ({ user, onLoginChange }: Props) => {
             </MenuList>
           </Menu>
         </Box>
-        <div className={colorMode === 'dark' ? 'logo-dark' : 'logo'}>
-          <Image src={Logo} w={40} />
-        </div>
+        <Image paddingLeft={4} filter={colorMode === 'light' ? 'invert(100%)' : ''} src={Logo} w={40} />
       </Flex>
       <Flex paddingRight={4}>
         <IconButton onClick={onOpen} aria-label="Settings" icon={<SettingsIcon />} />

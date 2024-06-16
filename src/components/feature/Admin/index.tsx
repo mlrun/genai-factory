@@ -10,7 +10,18 @@ const Admin = () => {
 
   return (
     <div className="flex flex-col w-full grow p-12">
-      <Breadcrumbs />
+      <Breadcrumbs
+        crumbs={[
+          {
+            page: 'Home',
+            url: '/'
+          },
+          {
+            page: 'Admin',
+            url: '/admin'
+          }
+        ]}
+      />
       <Tabs label={['First tab', 'Second one', 'Center one', 'Forth forth', 'Last tab']} selected={0} />
       <Table
         data={[
