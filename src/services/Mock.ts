@@ -1,5 +1,5 @@
-import { UserSession } from '@shared/types';
 import Data from '@assets/data.json';
+import { UserSession } from '@shared/types';
 
 class MockClient {
 
@@ -26,7 +26,7 @@ class MockClient {
   async submitQuery(id: string, question: string) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve({ answer: "I don't know", sources: null, state: {} });
+        resolve({ answer: "  I don't know what to say to that, I'm sorry. Is there anything else I can help you with?", sources: null, state: {} });
       }, 2000);
     });
   }

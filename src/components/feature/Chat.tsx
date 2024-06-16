@@ -56,7 +56,7 @@ const Chat = () => {
           />
         ))}
       </Flex>
-      <Box paddingBottom={{ base: 'env(safe-area-inset-bottom)', md: '0' }}>
+      <Box>
         <Message setter={setMessages} />
       </Box>
     </Flex>

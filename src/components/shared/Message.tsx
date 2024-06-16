@@ -21,7 +21,7 @@ const Message = ({ setter }: Props) => {
       document.getElementsByClassName('help-text')[lastBubble].scrollIntoView(false)
     }, 50)
 
-    setter(prevMessages => [...prevMessages, { role: 'AI', content: '![Thinking](/assets/thinking.gif)', sources: [] }])
+    setter(prevMessages => [...prevMessages, { role: 'AI', content: '...', sources: [] }])
     const result = await Client.submitQuery(sessionId, inputValue, username)
     setter(prevMessages => [
       ...prevMessages.slice(0, -1),
