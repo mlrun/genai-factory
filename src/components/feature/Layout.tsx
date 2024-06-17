@@ -1,9 +1,9 @@
-import { Box, Flex } from '@chakra-ui/react'
+import { Box, Flex, Menu, MenuItem } from '@chakra-ui/react'
 import { usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import React, { ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Leftbar from './Leftbar'
+import Chatbar from './Chatbar'
 import Sidebar from './Sidebar'
 import TopBar from './Topbar'
 type LayoutProps = {
@@ -22,7 +22,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <Flex direction={'column'}>
       <TopBar user={username} onLoginChange={changeLogin} />
       <Flex justifyContent={'space-between'}>
-        <Box display={{ base: 'none', md: 'flex' }}>{pathname === '/chat' ? <Leftbar /> : <Sidebar />}</Box>
+        <Box display={{ base: 'none', md: 'flex' }}>
+          <Sidebar>
+            {pathname === '/chat' ? (
+              <Chatbar />
+            ) : (
+              <Menu>
+                <MenuItem onClick={() => navigate('/admin/users')}>Users</MenuItem>
+                <MenuItem onClick={() => navigate('/admin/chat-histories')}>Chat Histories</MenuItem>
+                <MenuItem>Data Sets</MenuItem>
+                <MenuItem>Documents</MenuItem>
+                <MenuItem>Pipelines</MenuItem>
+              </Menu>
+            )}
+          </Sidebar>
+        </Box>
         <Flex width={'100%'} height={'91vh'}>
           {children}
         </Flex>

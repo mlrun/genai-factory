@@ -1,12 +1,12 @@
-import './App.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+import { ChakraProvider } from '@chakra-ui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider as JotaiProvider } from 'jotai'
-import { LoginPage } from 'pages/LoginPage'
-import { AdminPage } from 'pages/AdminPage'
+import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
-import { ChakraProvider } from '@chakra-ui/react'
+import { LoginPage } from 'pages/LoginPage'
+import { UsersTablePage } from 'pages/UsersTablePage'
 
 function App() {
   const queryClient = new QueryClient()
@@ -17,8 +17,12 @@ function App() {
       element: <LoginPage />
     },
     {
-      path: '/admin',
-      element: <AdminPage />
+      path: '/admin/users',
+      element: <UsersTablePage />
+    },
+    {
+      path: '/admin/chat-histories',
+      element: <ChatHistoriesTablePage />
     },
     {
       path: '/chat',

@@ -32,3 +32,15 @@ export type BreadcrumbData = {
   page: string
   url: string
 }
+
+export interface DataRow<T> {
+  id: number
+  data: T
+}
+
+export type User = {
+  name: string
+  email: string
+  role: string
+  registered: string
+}

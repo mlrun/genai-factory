@@ -4,7 +4,7 @@ import { atomWithQuery } from 'jotai-tanstack-query';
 import { atomWithStorage } from "jotai/utils";
 export const usernameAtom = atom<string>('guest');
 export const sessionIdAtom = atom<string>('');
-export const adminAtom = atomWithStorage('admin', false);
+export const adminAtom = atomWithStorage('admin', localStorage.getItem('admin') === 'true');
 export const modalAtom = atom<boolean>(false);
 export const asyncAtom = atom<boolean>(false);
 export const messagesAtom = atom<ChatHistory[]>([]);

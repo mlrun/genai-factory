@@ -32,7 +32,7 @@ const ChatHistoryList = (props: Props) => {
   })
 
   return (
-    <Flex width={72} flexFlow={'column'} gap={4} padding={4} alignItems={'flex-start'}>
+    <Flex width={72} flexFlow={'column'} gap={4} alignItems={'flex-start'}>
       <Flex width={'100%'} justifyContent={'space-between'} direction="column" gap={2}>
         {histories.map((history, index) => (
           <Flex gap={4} justifyContent={'space-between'} alignItems={'space-between'} key={index}>

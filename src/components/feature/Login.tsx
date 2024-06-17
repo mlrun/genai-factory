@@ -23,7 +23,7 @@ const Login = () => {
     event.preventDefault()
 
     if (admin) {
-      navigate('/admin')
+      navigate('/admin/users')
     } else {
       navigate('/chat')
     }
@@ -74,7 +74,7 @@ const Login = () => {
             <FormLabel htmlFor="admin-mode" mb="0">
               Admin mode
             </FormLabel>
-            <Switch defaultChecked={admin} onChange={() => setAdmin(!admin)} id="admin-mode" />
+            <Switch defaultChecked={!!admin} onChange={() => setAdmin(!admin)} id="admin-mode" />
           </Flex>
           <Button isLoading={isLoading} onClick={submitFunc}>
             Login

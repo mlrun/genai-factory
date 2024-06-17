@@ -7,9 +7,9 @@ import { conversationsAtom, sessionIdAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ChatHistoryList from '../ChatHistoryList'
+import ChatHistoryList from './ChatHistoryList'
 
-const Leftbar = () => {
+const Chatbar = () => {
   const [sessionId, setSessionId] = useAtom(sessionIdAtom)
   const [username, setUsername] = useAtom(usernameAtom)
   const [history, setHistory] = useAtom<ChatHistory[]>(conversationsAtom)
@@ -25,7 +25,6 @@ const Leftbar = () => {
 
   const changeLogin = () => {
     setUsername('')
-    console.log('heheh')
     navigate('/')
   }
 
@@ -69,9 +68,9 @@ const Leftbar = () => {
   }, [username])
 
   return (
-    <Flex bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight} flexDirection={'column'}>
+    <Flex gap={8} bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight} flexDirection={'column'}>
       <ChatHistoryList history={history} setNew={setIsNew} />
-      <Box p={4}>
+      <Box>
         <Button width={'100%'} onClick={newChat}>
           New Chat
         </Button>
@@ -80,4 +79,4 @@ const Leftbar = () => {
   )
 }
 
-export default Leftbar
+export default Chatbar
