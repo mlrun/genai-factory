@@ -1,21 +1,21 @@
-import ChatHistoryList from '@components/feature/ChatHistoryList'
-import Button from '@components/shared/Button'
-import Header from '@components/shared/Header'
+import { Box, Button, Flex, useColorMode } from '@chakra-ui/react'
 import Client from '@services/Api'
+import { colors } from '@shared/theme'
 import { ChatHistory } from '@shared/types'
 import { generateSessionId } from '@shared/utils'
-import { sessionIdAtom, usernameAtom } from 'atoms'
+import { conversationsAtom, sessionIdAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
-import './Leftbar.css'
-import { useNavigate, useNavigation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import ChatHistoryList from '../ChatHistoryList'
 
 const Leftbar = () => {
   const [sessionId, setSessionId] = useAtom(sessionIdAtom)
   const [username, setUsername] = useAtom(usernameAtom)
-  const [history, setHistory] = useState<ChatHistory[]>([])
+  const [history, setHistory] = useAtom<ChatHistory[]>(conversationsAtom)
   const [isNew, setIsNew] = useState(true)
   const navigate = useNavigate()
+  const { colorMode } = useColorMode()
 
   const newChat = async () => {
     const sid = generateSessionId()
@@ -69,16 +69,14 @@ const Leftbar = () => {
   }, [username])
 
   return (
-    <div className="comp-leftbar">
-      <Header user={username} onLogout={changeLogin} />
-      <div className="inner">
-        {/* <Search /> */}
-        <ChatHistoryList history={history} setNew={setIsNew} />
-      </div>
-      <div className="footer-flex">
-        <Button label="New chat" onClick={newChat} />
-      </div>
-    </div>
+    <Flex bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight} flexDirection={'column'}>
+      <ChatHistoryList history={history} setNew={setIsNew} />
+      <Box p={4}>
+        <Button width={'100%'} onClick={newChat}>
+          New Chat
+        </Button>
+      </Box>
+    </Flex>
   )
 }
 

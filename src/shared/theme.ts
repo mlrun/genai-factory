@@ -20,6 +20,7 @@ export const colors = {
   sidebarLight: '#EDF2F7',
 
   primary: '#007BFF',
+  primaryLight: '#17A2B8',
   secondary: '#6C757D',
   success: '#28A745',
   info: '#17A2B8',
@@ -43,5 +44,3 @@ export const colors = {
 const theme = extendTheme({ config, breakpoints, colors })
 
 export default theme
-
-

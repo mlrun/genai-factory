@@ -3,7 +3,6 @@ import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
 import { userAtom } from 'atoms'
 import { useAtom } from 'jotai'
-import './Admin.css'
 
 const Admin = () => {
   const user = useAtom(userAtom)
