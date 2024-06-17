@@ -41,7 +41,7 @@ const Message = ({ setter }: Props) => {
   }
 
   return (
-    <Flex padding={'0 40px'} justifyContent={'center'} gap={4} maxWidth={'100%'}>
+    <Flex justifyContent={'center'} gap={4} maxWidth={'100%'}>
       <IconButton aria-label="Send" icon={<AttachmentIcon />} />
 
       <Input

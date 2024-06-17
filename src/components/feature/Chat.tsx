@@ -33,6 +33,7 @@ const Chat = () => {
 
   return (
     <Flex
+      marginX={{ sm: '5%', lg: '25%' }}
       paddingBottom={4}
       flexDir={'column'}
       justifyContent={'space-between'}
