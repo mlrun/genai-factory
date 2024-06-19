@@ -1,7 +1,9 @@
 import { Box, useColorMode } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
 import { DataRow } from '@shared/types'
-import DataTable, { TableColumn, createTheme } from 'react-data-table-component'
+import { useMemo, useState } from 'react'
+import DataTable, { Alignment, TableColumn, createTheme } from 'react-data-table-component'
+import FilterComponent from './Filter'
 
 createTheme(
   'dark',
@@ -33,7 +35,34 @@ type Props = {
   title: string
   expandableRows?: boolean
 }
+
 const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => {
+  const [filterText, setFilterText] = useState('')
+  const [resetPaginationToggle, setResetPaginationToggle] = useState(false)
+  const filteredItems = data.filter(
+    item =>
+      (item.data.name && item.data.name.toLowerCase().includes(filterText.toLowerCase())) ||
+      (item.data.email && item.data.email.toLowerCase().includes(filterText.toLowerCase())) ||
+      (item.data.role && item.data.role.toLowerCase().includes(filterText.toLowerCase())) ||
+      (item.data.user && item.data.user.toLowerCase().includes(filterText.toLowerCase()))
+  )
+
+  const subHeaderComponentMemo = useMemo(() => {
+    const handleClear = () => {
+      if (filterText) {
+        setResetPaginationToggle(!resetPaginationToggle)
+        setFilterText('')
+      }
+    }
+
+    return (
+      <FilterComponent
+        onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
+        onClear={handleClear}
+        filterText={filterText}
+      />
+    )
+  }, [filterText, resetPaginationToggle])
   const { colorMode } = useColorMode()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ExpandedComponent = ({ data }: any) => <pre>{JSON.stringify(data, null, 2)}</pre>
@@ -45,8 +74,13 @@ const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => 
         title={title}
         theme={colorMode}
         columns={columns}
-        data={data}
+        data={filteredItems}
         pagination
+        paginationResetDefaultPage={resetPaginationToggle}
+        subHeader
+        subHeaderComponent={subHeaderComponentMemo}
+        persistTableHead
+        subHeaderAlign={Alignment.LEFT}
       />
     </Box>
   )
