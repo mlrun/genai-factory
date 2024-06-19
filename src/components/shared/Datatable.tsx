@@ -81,6 +81,8 @@ const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => 
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
         subHeaderAlign={Alignment.LEFT}
+        selectableRows
+        onSelectedRowsChange={e => console.log(e.selectedRows)}
       />
     </Box>
   )
