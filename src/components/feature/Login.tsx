@@ -16,17 +16,17 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   function submitFunc(event: React.MouseEvent<HTMLButtonElement>) {
+    setIsLoading(true)
     setTimeout(() => {
-      setIsLoading(true)
-    }, 1500)
-    setIsLoading(false)
-    event.preventDefault()
+      setIsLoading(false)
+      event.preventDefault()
 
-    if (admin) {
-      navigate('/admin/users')
-    } else {
-      navigate('/chat')
-    }
+      if (admin) {
+        navigate('/admin/users')
+      } else {
+        navigate('/chat')
+      }
+    }, 1000)
   }
 
   return (
