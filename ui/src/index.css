@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  overflow-y: scroll;
+  position: inherit !important;
+  font-size: var(--text-size-16);
+}
+:root {
+  --leftbar-bg-color: #2b2d30;
+  --leftbar-text-color: #ffffff;
+  --rightbar-bg-color: #f8f9fc;
+  --search-bg-color: #1e1f21;
+  --search-text-color: #94a3b8;
+  --button-bg-color: #0066f3;
+  --button-bg-hover-color: #0054c9;
+  --button-bg-pressed-color: #0045a4;
+  --link-text-color: #3d8dff;
+  --history-hover-color: #494f55;
+  --history-pressed-color: #3f4348;
+  --bot-bubble-bg-color: #f4f5f8;
+  --bot-copyicon-border-color: #e3e3e3;
+  --rightbar-input-border-color: #dcdfe8;
+  --failed-color: #fc3426;
+
+  --text-size-number: 0.0625rem;
+
+  --text-size-12: calc(var(--text-size-number) * 12);
+  --text-size-14: calc(var(--text-size-number) * 14);
+  --text-size-15: calc(var(--text-size-number) * 15);
+  --text-size-16: calc(var(--text-size-number) * 16);
+  --text-size-24: calc(var(--text-size-number) * 24);
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+em,
+i {
+  font-style: italic;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
