@@ -6,9 +6,9 @@ from sqlalchemy.orm import sessionmaker
 
 from model import ApiResponse
 
-from . import model
-from .config import config, logger
-from .sqldb import Base, ChatSessionContext, DocumentCollection, User
+import model
+from config import config, logger
+from sqldb import Base, ChatSessionContext, DocumentCollection, User
 
 
 class SqlClient:
