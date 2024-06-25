@@ -1,2 +1,4 @@
 npm run lint
 npm run build
+
+exit 1
