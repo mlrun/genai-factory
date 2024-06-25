@@ -4,8 +4,7 @@ from fastapi import APIRouter, Depends, FastAPI, File, Header, Request, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-import llmapps.app.actions as actions
-from llmapps.app.schema import QueryItem
+from .model import QueryItem
 
 from . import model
 from .config import logger
@@ -102,12 +101,6 @@ async def create_collection(
 ):
     collection.owner_name = auth.username
     return client.create_collection(collection, session=session)
-
-
-@router.post("/collection/{name}/ingest")
-async def ingest(name, item: actions.IngestItem, session=Depends(get_db)):
-    return actions.ingest(session, name, item)
-
 
 @router.get("/users")
 async def list_users(

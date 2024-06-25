@@ -4,7 +4,7 @@ from typing import Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from llmapps.app.schema import ApiResponse
+from model import ApiResponse
 
 from . import model
 from .config import config, logger

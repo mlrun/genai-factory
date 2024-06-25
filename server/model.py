@@ -1,11 +1,81 @@
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 import yaml
 from pydantic import BaseModel
+from http.client import HTTPException
 
-from llmapps.app.schema import Conversation, Message
+
+# ============================== from llmapps/app/schema.py ==============================
+# Temporary: This was copied to here to avoid import from the app like this:
+# from llmapps.app.schema import Conversation, Message
+class ApiResponse(BaseModel):
+    success: bool
+    data: Optional[Union[list, BaseModel, dict]] = None
+    error: Optional[str] = None
+
+    def with_raise(self, format=None) -> "ApiResponse":
+        if not self.success:
+            format = format or "API call failed: %s"
+            raise ValueError(format % self.error)
+        return self
+
+    def with_raise_http(self, format=None) -> "ApiResponse":
+        if not self.success:
+            format = format or "API call failed: %s"
+            raise HTTPException(status_code=400, detail=format % self.error)
+        return self
+
+
+class ChatRole(str, Enum):
+    Human = "Human"
+    AI = "AI"
+    System = "System"
+    User = "User"  # for co-pilot user (vs Human?)
+    Agent = "Agent"  # for co-pilot agent
+
+
+class Message(BaseModel):
+    role: ChatRole
+    content: str
+    html: Optional[str] = None
+    sources: Optional[List[dict]] = None
+    rating: Optional[int] = None
+    suggestion: Optional[str] = None
+
+
+class Conversation(BaseModel):
+    messages: list[Message] = []
+    saved_index: int = 0
+
+    def __str__(self):
+        return "\n".join([f"{m.role}: {m.content}" for m in self.messages])
+
+    def add_message(self, role, content, sources=None):
+        self.messages.append(Message(role=role, content=content, sources=sources))
+
+    def to_list(self):
+        return self.dict()["messages"]
+        # return self.model_dump(mode="json")["messages"]
+
+    def to_dict(self):
+        return self.dict()["messages"]
+        # return self.model_dump(mode="json")["messages"]
+
+    @classmethod
+    def from_list(cls, data: list):
+        return cls.parse_obj({"messages": data or []})
+        # return cls.model_validate({"messages": data or []})
+
+
+class QueryItem(BaseModel):
+    question: str
+    session_id: Optional[str] = None
+    filter: Optional[List[Tuple[str, str]]] = None
+    collection: Optional[str] = None
+# ========================================================================================
+
 
 metadata_fields = [
     "name",
