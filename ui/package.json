@@ -20,7 +20,6 @@
     "@emotion/styled": "^11.11.5",
     "@tanstack/query-core": "^5.40.0",
     "@tanstack/react-query": "^5.40.1",
-    "ag-grid-react": "^31.3.2",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.10",
     "jotai": "^2.8.3",
