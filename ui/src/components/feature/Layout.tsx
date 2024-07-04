@@ -6,7 +6,7 @@ import React, { ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Chatbar from './Chatbar'
 import Sidebar from './Sidebar'
-import TopBar from './Topbar'
+import TopBar from './Topbar/Topbar'
 
 type LayoutProps = {
   children: ReactNode
