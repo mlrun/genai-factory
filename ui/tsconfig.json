@@ -28,7 +28,7 @@
       "@atoms/*": ["./atoms/*"],
       "@icons/*": ["./assets/icons/*"]
     },
-    "types": ["node"],
+    "types": ["node", "jest", "@testing-library/jest-dom"],
     "forceConsistentCasingInFileNames": true
   },
 
@@ -37,6 +37,6 @@
 
   "project": ["./tsconfig.json", "./tsconfig.node.json"],
   "tsconfigRootDir": "__dirname",
-  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*","./atoms/*"],
+  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*","./atoms/*", "setupTests.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
