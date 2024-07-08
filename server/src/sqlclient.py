@@ -4,9 +4,8 @@ from typing import Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from server.src.model import ApiResponse
-
 from server.src import model
+from server.src.model import ApiResponse
 
 from .config import config, logger
 from .sqldb import Base, ChatSessionContext, DocumentCollection, User
@@ -15,7 +14,9 @@ from .sqldb import Base, ChatSessionContext, DocumentCollection, User
 class SqlClient:
     def __init__(self, db_url: str, verbose: bool = False):
         self.db_url = db_url
-        self.engine = sqlalchemy.create_engine(db_url, echo=verbose, connect_args={'check_same_thread': False})
+        self.engine = sqlalchemy.create_engine(
+            db_url, echo=verbose, connect_args={"check_same_thread": False}
+        )
         self._session_maker = sessionmaker(bind=self.engine)
         self._local_maker = sessionmaker(
             autocommit=False, autoflush=False, bind=self.engine

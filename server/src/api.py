@@ -1,12 +1,12 @@
 from typing import List, Optional, Tuple, Union
 
-from fastapi import APIRouter, Depends, FastAPI, File, Header, Request, UploadFile
+from fastapi import (APIRouter, Depends, FastAPI, File, Header, Request,
+                     UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .model import ChatSession, DocCollection, OutputMode, QueryItem, User
-
 from .config import logger
+from .model import ChatSession, DocCollection, OutputMode, QueryItem, User
 from .sqlclient import client
 
 app = FastAPI()
@@ -127,7 +127,7 @@ async def get_user(username: str, session=Depends(get_db)):
 @router.post("/user/{username}")
 async def create_user(
     user: User,
-    # username: str,
+    username: str,
     session=Depends(get_db),
 ):
     """This is the user command"""
@@ -164,9 +164,7 @@ async def update_user(
 
 # add routs for chat sessions, list_sessions, get_session
 @router.post("/session")
-async def create_session(
-    chat_session: ChatSession, session=Depends(get_db)
-):
+async def create_session(chat_session: ChatSession, session=Depends(get_db)):
     return client.create_session(chat_session, session=session)
 
 

@@ -1,10 +1,10 @@
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Union, Tuple
+from http.client import HTTPException
+from typing import Dict, List, Optional, Tuple, Union
 
 import yaml
 from pydantic import BaseModel
-from http.client import HTTPException
 
 
 # ============================== from llmapps/app/schema.py ==============================
@@ -74,6 +74,8 @@ class QueryItem(BaseModel):
     session_id: Optional[str] = None
     filter: Optional[List[Tuple[str, str]]] = None
     collection: Optional[str] = None
+
+
 # ========================================================================================
 
 
