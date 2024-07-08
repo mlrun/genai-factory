@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, FastAPI, File, Header, Request, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from model import QueryItem
+from .model import ChatSession, DocCollection, OutputMode, QueryItem, User
 
-import model
-from config import logger
-from sqlclient import client
+from .config import logger
+from .sqlclient import client
 
 app = FastAPI()
 
@@ -54,6 +53,11 @@ async def get_auth_user(
         return AuthInfo(username="yhaviv@gmail.com", token=token)
 
 
+@router.post("/tables")
+async def create_tables(drop_old: bool = False, names: list[str] = None):
+    return client.create_tables(drop_old=drop_old, names=names)
+
+
 @router.post("/pipeline/{name}/run")
 async def run_pipeline(
     request: Request, name: str, item: QueryItem, auth=Depends(get_auth_user)
@@ -78,7 +82,7 @@ async def run_pipeline(
 async def list_collections(
     owner: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
-    mode: model.OutputMode = model.OutputMode.Details,
+    mode: OutputMode = OutputMode.Details,
     session=Depends(get_db),
 ):
     return client.list_collections(
@@ -95,18 +99,19 @@ async def get_collection(name: str, session=Depends(get_db)):
 async def create_collection(
     request: Request,
     name: str,
-    collection: model.DocCollection,
+    collection: DocCollection,
     session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ):
     collection.owner_name = auth.username
     return client.create_collection(collection, session=session)
 
+
 @router.get("/users")
 async def list_users(
     email: str = None,
     username: str = None,
-    mode: model.OutputMode = model.OutputMode.Details,
+    mode: OutputMode = OutputMode.Details,
     session=Depends(get_db),
 ):
     return client.list_users(
@@ -121,8 +126,8 @@ async def get_user(username: str, session=Depends(get_db)):
 
 @router.post("/user/{username}")
 async def create_user(
-    user: model.User,
-    username: str,
+    user: User,
+    # username: str,
     session=Depends(get_db),
 ):
     """This is the user command"""
@@ -140,7 +145,7 @@ async def list_user_sessions(
     username: str,
     last: int = 0,
     created: str = None,
-    mode: model.OutputMode = model.OutputMode.Details,
+    mode: OutputMode = OutputMode.Details,
     session=Depends(get_db),
 ):
     return client.list_sessions(
@@ -148,13 +153,29 @@ async def list_user_sessions(
     )
 
 
+@router.put("/user/{username}")
+async def update_user(
+    user: User,
+    username: str,
+    session=Depends(get_db),
+):
+    return client.update_user(user, session=session)
+
+
 # add routs for chat sessions, list_sessions, get_session
+@router.post("/session")
+async def create_session(
+    chat_session: ChatSession, session=Depends(get_db)
+):
+    return client.create_session(chat_session, session=session)
+
+
 @router.get("/sessions")
 async def list_sessions(
     username: str = None,
     last: int = 0,
     created: str = None,
-    mode: model.OutputMode = model.OutputMode.Details,
+    mode: OutputMode = OutputMode.Details,
     session=Depends(get_db),
     auth=Depends(get_auth_user),
 ):
@@ -173,6 +194,14 @@ async def get_session(
         user = auth.username
         session_id = None
     return client.get_session(session_id, user, session=session)
+
+
+@router.put("/session/{session_id}")
+async def update_session(
+    session_id: str, chat_session: ChatSession, session=Depends(get_db)
+):
+    chat_session.name = session_id
+    return client.update_session(chat_session, session=session)
 
 
 @router.post("/transcribe")
