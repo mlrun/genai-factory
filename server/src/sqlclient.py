@@ -1,20 +1,36 @@
+# Copyright 2023 Iguazio
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import datetime
 from typing import Union
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from model import ApiResponse
+from server.src import model
+from server.src.model import ApiResponse
 
-import model
-from config import config, logger
-from sqldb import Base, ChatSessionContext, DocumentCollection, User
+from .config import config, logger
+from .sqldb import Base, ChatSessionContext, DocumentCollection, User
 
 
 class SqlClient:
     def __init__(self, db_url: str, verbose: bool = False):
         self.db_url = db_url
-        self.engine = sqlalchemy.create_engine(db_url, echo=verbose)
+        self.engine = sqlalchemy.create_engine(
+            db_url, echo=verbose, connect_args={"check_same_thread": False}
+        )
         self._session_maker = sessionmaker(bind=self.engine)
         self._local_maker = sessionmaker(
             autocommit=False, autoflush=False, bind=self.engine
@@ -33,6 +49,7 @@ class SqlClient:
         if drop_old:
             Base.metadata.drop_all(self.engine, tables=tables)
         Base.metadata.create_all(self.engine, tables=tables, checkfirst=True)
+        return ApiResponse(success=True)
 
     def _update(self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs):
         session = self.get_db_session(session)
