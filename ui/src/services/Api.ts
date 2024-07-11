@@ -1,7 +1,7 @@
-import MockClient from './Mock'
 import axios, { AxiosResponse } from 'axios'
+import MockClient from './Mock'
 
-const debugMode = true // Set this to true if you are in debug mode
+const debugMode = false // Set this to true if you are in debug mode
 
 class ApiClient {
   private client

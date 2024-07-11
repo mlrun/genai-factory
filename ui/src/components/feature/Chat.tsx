@@ -47,7 +47,7 @@ const Chat = () => {
         paddingBottom="92px"
         overflowY="scroll" // Ensures scrolling when messages exceed the container height
       >
-        {messages.map((chatHistory, index) => (
+        {messages?.map((chatHistory, index) => (
           <Bubble
             key={index}
             content={chatHistory.content}
