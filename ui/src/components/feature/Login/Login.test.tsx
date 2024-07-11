@@ -1,17 +1,22 @@
+// src/components/LoginForm.test.tsx
 import { ChakraProvider } from '@chakra-ui/react'
+import useAuth from '@hooks/useAuth'
 import theme from '@shared/theme' // Ensure this path matches your theme file location
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'jotai'
 import React from 'react'
-import { BrowserRouter, useNavigate } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import Login from './Login'
 
+const mockedNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn()
+  useNavigate: () => mockedNavigate
 }))
 
-const mockNavigate = useNavigate as jest.Mock
+jest.mock('@hooks/useAuth')
+
+const mockLogin = jest.fn()
 
 const renderWithProviders = (ui: React.ReactElement) => {
   const Wrapper: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
@@ -28,7 +33,12 @@ const renderWithProviders = (ui: React.ReactElement) => {
 
 describe('Login Component', () => {
   beforeEach(() => {
-    mockNavigate.mockReset()
+    mockedNavigate.mockReset()
+    ;(useAuth as jest.Mock).mockReturnValue({
+      user: null,
+      login: mockLogin,
+      logout: jest.fn()
+    })
   })
 
   it('renders Login component', () => {
@@ -49,7 +59,7 @@ describe('Login Component', () => {
     fireEvent.change(usernameInput, { target: { value: 'testuser' } })
     expect(usernameInput).toHaveValue('testuser')
 
-    fireEvent.change(usernameInput, { target: { value: 'testpassword' } })
+    fireEvent.change(passwordInput, { target: { value: 'testpassword' } })
     expect(passwordInput).toHaveValue('testpassword')
   })
 
@@ -68,9 +78,14 @@ describe('Login Component', () => {
 
     const loginButton = screen.getByRole('button', { name: /login/i })
     fireEvent.click(loginButton)
+
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalled()
+    })
+
     setTimeout(async () => {
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/chat')
+        expect(mockedNavigate).toHaveBeenCalledWith('/chat')
       })
     }, 1000)
   })

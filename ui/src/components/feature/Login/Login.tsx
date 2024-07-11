@@ -1,26 +1,35 @@
+// src/components/LoginForm.tsx
 import Logo from '@assets/mlrun.png'
+import { adminAtom, userAtom, usernameAtom } from '@atoms/index'
 import { Box, Button, Flex, FormControl, FormLabel, Image, Input, Switch, useColorMode } from '@chakra-ui/react'
+import useAuth from '@hooks/useAuth'
 import { colors } from '@shared/theme'
-import { adminAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
   const navigate = useNavigate()
   const { colorMode } = useColorMode()
-
   const [username, setUsername] = useAtom(usernameAtom)
   const [admin, setAdmin] = useAtom(adminAtom)
   const [password, setPassword] = useState('XxYaz12345')
   const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
+  const [user, setUser] = useAtom(userAtom)
 
-  function submitFunc(event: React.MouseEvent<HTMLButtonElement>) {
+  useEffect(() => {
+    if (user) {
+      navigate('/chat')
+    }
+  }, [navigate])
+
+  const submitFunc = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
     setIsLoading(true)
     setTimeout(() => {
       setIsLoading(false)
-      event.preventDefault()
-
+      login(username, password, admin)
       if (admin) {
         navigate('/admin/users')
       } else {

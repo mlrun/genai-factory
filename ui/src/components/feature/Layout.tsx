@@ -1,5 +1,6 @@
 import { Box, Flex, Menu, MenuItem } from '@chakra-ui/react'
-import { usernameAtom } from 'atoms'
+import useAuth from '@hooks/useAuth'
+import { userAtom, usernameAtom } from 'atoms'
 import { motion as m } from 'framer-motion'
 import { useAtom } from 'jotai'
 import React, { ReactNode } from 'react'
@@ -14,10 +15,14 @@ type LayoutProps = {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [username, setUsername] = useAtom(usernameAtom)
+  const [user, setUser] = useAtom(userAtom)
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { logout } = useAuth()
   const changeLogin = (data: boolean) => {
-    setUsername('')
+    if (user?.username) {
+      logout()
+    }
     navigate('/')
   }
   return (
