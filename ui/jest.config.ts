@@ -17,6 +17,7 @@ const config: Config.InitialOptions = {
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
     '^@assets/(.*)$': '<rootDir>/src/assets/$1',
     '^@atoms/(.*)$': '<rootDir>/src/atoms/$1',
+    '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^atoms$': '<rootDir>/src/atoms',
   },
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
