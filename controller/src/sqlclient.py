@@ -18,11 +18,11 @@ from typing import Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from server.src import model
-from server.src.model import ApiResponse
+from controller.src import model
+from controller.src.model import ApiResponse
 
-from .config import config, logger
-from .sqldb import Base, ChatSessionContext, DocumentCollection, User
+from controller.src.config import config, logger
+from controller.src.sqldb import Base, ChatSessionContext, DocumentCollection, User
 
 
 class SqlClient:

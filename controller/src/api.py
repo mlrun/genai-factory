@@ -19,9 +19,9 @@ from fastapi import (APIRouter, Depends, FastAPI, File, Header, Request,
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .config import logger
-from .model import ChatSession, DocCollection, OutputMode, QueryItem, User
-from .sqlclient import client
+from controller.src.config import logger
+from controller.src.model import ChatSession, DocCollection, OutputMode, QueryItem, User
+from controller.src.sqlclient import client
 
 app = FastAPI()
 

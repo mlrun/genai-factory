@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-DOCKERFILES_DIR = "dockerfiles"
 CONTROLLER_NAME = "genai-factory-controller"
 
 .PHONY: controller
 controller:
 	# Build controller's image:
-	docker build -f $(DOCKERFILES_DIR)/controller/Dockerfile -t $(CONTROLLER_NAME):latest .
+	docker build -f controller/Dockerfile -t $(CONTROLLER_NAME):latest .
 
-	# Run controller locally:
+	# Run controller locally in a container:
 	docker run -d -p 8001:80 --name $(CONTROLLER_NAME) $(CONTROLLER_NAME):latest
 
+	# Announce the server is running:
 	@echo "GenAI Factory Controller is running in the background"
