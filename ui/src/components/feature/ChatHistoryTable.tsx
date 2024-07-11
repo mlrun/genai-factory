@@ -7,7 +7,7 @@ const ChatHistoryTable = () => {
   type ChatHistory = {
     user: string
   }
-  const data: DataRow<ChatHistory>[] = [
+  const data: DataRow<Partial<ChatHistory>>[] = [
     { id: 1, data: { user: 'John Doe' } },
     { id: 2, data: { user: 'Jane Smith' } },
     { id: 3, data: { user: 'Alice Johnson' } },
@@ -28,7 +28,7 @@ const ChatHistoryTable = () => {
   const columns = [
     {
       name: 'User',
-      selector: (row: DataRow<ChatHistory>) => row.data.user,
+      selector: (row: DataRow<Partial<ChatHistory>>) => row.data.user ?? '',
       sortable: true
     }
   ]

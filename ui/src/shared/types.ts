@@ -39,8 +39,12 @@ export interface DataRow<T> {
 }
 
 export type User = {
-  name: string
-  email: string
-  role: string
-  registered: string
+  name?: string
+  email?: string
+  role?: string
+  registered?: string
+  username: string
+  admin: boolean
+  token: string
 }
+

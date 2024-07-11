@@ -4,7 +4,7 @@ import DataTableComponent from '@components/shared/Datatable'
 import { DataRow, User } from '@shared/types'
 
 const UsersTable = () => {
-  const data: DataRow<User>[] = [
+  const data: DataRow<Partial<User>>[] = [
     { id: 1, data: { name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', registered: '2021-01-10' } },
     { id: 2, data: { name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User', registered: '2021-02-14' } },
     {
@@ -52,22 +52,22 @@ const UsersTable = () => {
   const columns = [
     {
       name: 'Name',
-      selector: (row: DataRow<User>) => row.data.name,
+      selector: (row: DataRow<Partial<User>>) => row.data.name ?? '',
       sortable: true
     },
     {
       name: 'Email',
-      selector: (row: DataRow<User>) => row.data.email,
+      selector: (row: DataRow<Partial<User>>) => row.data.email ?? '',
       sortable: true
     },
     {
       name: 'Role',
-      selector: (row: DataRow<User>) => row.data.role,
+      selector: (row: DataRow<Partial<User>>) => row.data.role ?? '',
       sortable: true
     },
     {
       name: 'Registered',
-      selector: (row: DataRow<User>) => row.data.registered,
+      selector: (row: DataRow<Partial<User>>) => row.data.registered ?? '',
       sortable: true
     }
   ]

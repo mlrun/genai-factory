@@ -29,9 +29,9 @@ createTheme(
 )
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: DataRow<any>[]
+  data: DataRow<Partial<any>>[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: TableColumn<DataRow<any>>[]
+  columns: TableColumn<DataRow<Partial<any>>>[]
   title: string
   expandableRows?: boolean
 }
