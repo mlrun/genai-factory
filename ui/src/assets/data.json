@@ -1,0 +1,73 @@
+{
+  "name": "5c3c04ce538d461d91931112e14c0a37",
+  "username": "yhaviv@gmail.com",
+  "agent_name": null,
+  "history": [
+    {
+      "role": "Human",
+      "content": "what is x?\n",
+      "sources": []
+    },
+    {
+      "role": "AI",
+      "content": "Maybe this:\n\n ![Loona toy robot](assets/robot.jpg)",
+      "sources": []
+    },
+    {
+      "role": "Human",
+      "content": "which mobile plans you have?",
+      "sources": []
+    },
+    {
+      "role": "AI",
+      "content": "## Title test\n The *mobile plans* offered include Emirati Freedom plans, **New Freedom plans**, and Roam Like Home service. Emirati Freedom plans offer unlimited local and international calls, Roam Like Home service, and other lifestyle benefits. New Freedom plans provide unlimited calls to mobile or fixed non-premium numbers in the UAE or selected international countries. The fair usage policy in Roam Like Home includes data and minutes caps.",
+      "html": "<br/><h4>HTML image:</h4><img src='/assets/robot.jpg' alt='Loona toy robot' />",
+      "sources": [
+        {
+          "service": "mobile",
+          "topic": "postpaid",
+          "subtopic": "emirati-freedom-plans",
+          "section": "overview-and-benefits",
+          "title": "mobile/postpaid/emirati-freedom-plans/What benefits do I get with Emirati Freedom plans?",
+          "source": "https://www.etisalat.ae/en/c/support/mobile/postpaid/emirati-freedom-plans/overview-and-benefits.html#accordion-1811e60d38-item-64a9c4ce4d-button",
+          "doc_uid": "b4875b05f3f14b5fa4180494a6c5dcbf"
+        },
+        {
+          "service": "mobile",
+          "topic": "postpaid",
+          "subtopic": "new-freedom-plans",
+          "section": "overview-and-benefits",
+          "title": "mobile/postpaid/new-freedom-plans/How do I make unlimited calls with the new plans?",
+          "source": "https://www.etisalat.ae/en/c/support/mobile/postpaid/new-freedom-plans/overview-and-benefits.html#accordion-984bd5dc4b-item-18f24f6a47-button",
+          "doc_uid": "c5e73ffdd3e64ba8b19b3f670766c790"
+        },
+        {
+          "service": "mobile",
+          "topic": "postpaid",
+          "subtopic": "new-freedom-plans",
+          "section": "overview-and-benefits",
+          "title": "mobile/postpaid/new-freedom-plans/What are New Freedom plans?",
+          "source": "https://www.etisalat.ae/en/c/support/mobile/postpaid/new-freedom-plans/overview-and-benefits.html#accordion-7c5b1038ff-item-4d685bd534-button",
+          "doc_uid": "30c3cd4285174c2da30703e86be6f6cc"
+        },
+        {
+          "service": "mobile",
+          "topic": "postpaid",
+          "subtopic": "emirati-freedom-plans",
+          "section": "overview-and-benefits",
+          "title": "mobile/postpaid/emirati-freedom-plans/What is the fair usage policy applied in Roam Like Home? ",
+          "source": "https://www.etisalat.ae/en/c/support/mobile/postpaid/emirati-freedom-plans/overview-and-benefits.html#accordion-6b07d097ce-item-a5c177a568-button",
+          "doc_uid": "11cad7a8d9fe4f81912c0cafe149617e"
+        }
+      ],
+      "rating": null,
+      "suggestion": null
+    }
+  ],
+  "topic": null,
+  "state": {},
+  "annotations": null,
+  "features": null,
+  "created_time": "2024-02-29T21:56:27.418104",
+  "last_update": "2024-02-29T21:58:19.553370"
+}

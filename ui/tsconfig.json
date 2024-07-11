@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "node",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@components/*": ["./components/*"],
+      "@assets/*": ["./assets/*"],
+      "@services/*": ["./services/*"],
+      "@atoms/*": ["./atoms/*"],
+      "@icons/*": ["./assets/icons/*"]
+    },
+    "types": ["node"],
+    "forceConsistentCasingInFileNames": true
+  },
+
+  "ecmaVersion": "latest",
+  "sourceType": "module",
+
+  "project": ["./tsconfig.json", "./tsconfig.node.json"],
+  "tsconfigRootDir": "__dirname",
+  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*","./atoms/*"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
