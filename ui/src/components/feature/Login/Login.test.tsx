@@ -66,8 +66,8 @@ describe('Login Component', () => {
   it('handles input change', () => {
     renderWithProviders(<Login />)
 
-    const usernameInput = screen.getByLabelText('Username')
-    const passwordInput = screen.getByLabelText('Password')
+    const usernameInput = screen.getByTestId('username')
+    const passwordInput = screen.getByTestId('password')
 
     fireEvent.change(usernameInput, { target: { value: 'testuser' } })
     expect(usernameInput).toHaveValue('testuser')
@@ -86,8 +86,31 @@ describe('Login Component', () => {
     expect(adminSwitch).toBeChecked()
   })
 
+  it('disables login button when username or password is empty', () => {
+    renderWithProviders(<Login />)
+
+    const loginButton = screen.getByRole('button', { name: /login/i })
+    expect(loginButton).toBeDisabled()
+
+    const usernameInput = screen.getByTestId('username')
+    fireEvent.change(usernameInput, { target: { value: '' } })
+    expect(loginButton).toBeDisabled()
+
+    const passwordInput = screen.getByTestId('password')
+    fireEvent.change(passwordInput, { target: { value: 'password' } })
+    fireEvent.change(usernameInput, { target: { value: 'username' } })
+
+    expect(loginButton).toBeEnabled()
+  })
+
   it('navigates on submit', async () => {
     renderWithProviders(<Login />)
+
+    const usernameInput = screen.getByTestId('username')
+    fireEvent.change(usernameInput, { target: { value: 'testuser' } })
+
+    const passwordInput = screen.getByTestId('password')
+    fireEvent.change(passwordInput, { target: { value: 'testpassword' } })
 
     const loginButton = screen.getByRole('button', { name: /login/i })
     fireEvent.click(loginButton)

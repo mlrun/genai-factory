@@ -26,7 +26,7 @@ const Login = () => {
   const { colorMode } = useColorMode()
   const [username, setUsername] = useAtom(usernameAtom)
   const [admin, setAdmin] = useAtom(adminAtom)
-  const [password, setPassword] = useState('XxYaz12345')
+  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
   const [user, setUser] = useAtom(userAtom)
@@ -77,6 +77,7 @@ const Login = () => {
           <Box>
             <FormLabel>Username</FormLabel>
             <Input
+              data-testid="username"
               type="text"
               placeholder="Enter your username"
               value={username}
@@ -86,6 +87,7 @@ const Login = () => {
           <Box>
             <FormLabel>Password</FormLabel>
             <Input
+              data-testid="password"
               type="password"
               placeholder="Enter your password"
               value={password}
@@ -98,7 +100,7 @@ const Login = () => {
             </FormLabel>
             <Switch defaultChecked={!!admin} onChange={() => setAdmin(!admin)} id="admin-mode" />
           </Flex>
-          <Button isLoading={isLoading} onClick={submitFunc}>
+          <Button isDisabled={!username.length || !password.length} isLoading={isLoading} onClick={submitFunc}>
             Login
           </Button>
         </FormControl>
