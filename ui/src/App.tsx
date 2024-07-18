@@ -19,7 +19,7 @@ import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
 import { LoginPage } from 'pages/LoginPage'
 import { UsersTablePage } from 'pages/UsersTablePage'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
 function App() {
   const queryClient = new QueryClient()
@@ -37,8 +37,27 @@ function App() {
       path: '/admin/chat-histories',
       element: <ChatHistoriesTablePage />
     },
+
+    {
+      path: '/admin/datasets',
+      element: <UsersTablePage />
+    },
+    {
+      path: '/admin/documents',
+      element: <ChatHistoriesTablePage />
+    },
+
+    {
+      path: '/admin/pipelines',
+      element: <UsersTablePage />
+    },
+
     {
       path: '/chat',
+      element: <ChatPage />
+    },
+    {
+      path: '/chat/:sessionId',
       element: <ChatPage />
     }
   ])

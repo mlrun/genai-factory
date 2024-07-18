@@ -13,11 +13,12 @@
 // limitations under the License.
 import { ChevronDownIcon, DeleteIcon, EditIcon, ExternalLinkIcon, RepeatIcon } from '@chakra-ui/icons'
 import { Button, Flex, IconButton, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
+import { colors } from '@shared/theme'
 import { ChatHistory } from '@shared/types'
 import { selectFunc } from '@shared/utils'
 import { modalAtom, sessionIdAtom } from 'atoms'
 import { useAtom } from 'jotai'
-import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 type Props = {
   history: ChatHistory[]
@@ -29,6 +30,9 @@ const ChatHistoryList = (props: Props) => {
   const [modal, setModal] = useAtom(modalAtom)
   const histories = props.history
 
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
   const selectChat = (sid: string) => {
     console.log('MODAL: ', modal)
     console.log('selected chat:', sid, sessionId)
@@ -38,11 +42,8 @@ const ChatHistoryList = (props: Props) => {
     selectFunc(sid)
     props.setNew(false)
     setSessionId(sid)
+    navigate(`/chat/${sid}`)
   }
-
-  useEffect(() => {
-    selectFunc(sessionId)
-  })
 
   return (
     <Flex width={72} flexFlow={'column'} gap={4} alignItems={'flex-start'}>
@@ -51,6 +52,7 @@ const ChatHistoryList = (props: Props) => {
           <Flex gap={4} justifyContent={'space-between'} alignItems={'space-between'} key={index}>
             <Button
               width={'100%'}
+              bg={pathname.includes(history.name as string) ? colors.mint : colors.gray600}
               onClick={() => {
                 selectChat(history.name as string)
               }}

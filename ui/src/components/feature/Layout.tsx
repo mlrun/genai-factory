@@ -51,15 +51,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Flex justifyContent={'space-between'}>
           <Box display={{ base: 'none', md: 'flex' }}>
             <Sidebar>
-              {pathname === '/chat' ? (
+              {pathname.includes('chat/') ? (
                 <Chatbar />
               ) : (
                 <Menu>
                   <MenuItem onClick={() => navigate('/admin/users')}>Users</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/chat-histories')}>Chat Histories</MenuItem>
-                  <MenuItem>Data Sets</MenuItem>
-                  <MenuItem>Documents</MenuItem>
-                  <MenuItem>Pipelines</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/datasets')}>Datasets</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/documents')}>Documents</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/pipelines')}>Pipelines</MenuItem>
                 </Menu>
               )}
             </Sidebar>
