@@ -20,7 +20,7 @@ controller:
 	docker build -f controller/Dockerfile -t $(CONTROLLER_NAME):latest .
 
 	# Run controller locally in a container:
-	docker run -d -p 8001:80 --name $(CONTROLLER_NAME) $(CONTROLLER_NAME):latest
+	docker run -d --net host --name $(CONTROLLER_NAME) $(CONTROLLER_NAME):latest
 
 	# Announce the server is running:
 	@echo "GenAI Factory Controller is running in the background"

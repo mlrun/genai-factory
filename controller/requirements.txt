@@ -6,3 +6,5 @@ SQLAlchemy~=2.0.23
 uvicorn
 python-dotenv
 pyyaml
+requests
+tabulate

@@ -142,13 +142,16 @@ class SqlClient:
         self, collection: model.DocCollection, session: sqlalchemy.orm.Session = None
     ):
         logger.debug(f"Creating collection: {collection}")
-        collection = model.DocCollection.from_dict(collection)
+        if isinstance(collection, dict):
+            collection = model.DocCollection.from_dict(collection)
         return self._create(session, DocumentCollection, collection)
 
     def update_collection(
         self, collection: model.DocCollection, session: sqlalchemy.orm.Session = None
     ):
         logger.debug(f"Updating collection: {collection}")
+        if isinstance(collection, dict):
+            collection = model.DocCollection.from_dict(collection)
         return self._update(
             session, DocumentCollection, collection, name=collection.name
         )

@@ -33,9 +33,12 @@ COPY /controller/requirements.txt /controller/
 
 # Make the data directory:
 RUN mkdir -p ../data
+
 # Install requirements:
 RUN pip install -r /controller/requirements.txt
 
-EXPOSE 80
+# Initiate database:
+RUN python -m controller.src.main initdb
+
 # Run the controller's API server:
-CMD ["uvicorn", "controller.src.api:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "controller.src.api:app", "--port", "8001"]
