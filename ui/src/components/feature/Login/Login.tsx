@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Logo from '@assets/mlrun.png'
-import { adminAtom, userAtom, usernameAtom } from '@atoms/index'
+import { adminAtom, conversationsAtom, userAtom, usernameAtom } from '@atoms/index'
 import { Box, Button, Flex, FormControl, FormLabel, Image, Input, Switch, useColorMode } from '@chakra-ui/react'
 import useAuth from '@hooks/useAuth'
 import { colors } from '@shared/theme'
@@ -26,6 +26,7 @@ const Login = () => {
   const { colorMode } = useColorMode()
   const [username, setUsername] = useAtom(usernameAtom)
   const [admin, setAdmin] = useAtom(adminAtom)
+  const [chatHistory, setChatHistory] = useAtom(conversationsAtom)
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
@@ -37,7 +38,7 @@ const Login = () => {
     }
   }, [navigate])
 
-  const submitFunc = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const submitFunc = (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
     event.preventDefault()
     setIsLoading(true)
     setTimeout(() => {
@@ -46,7 +47,7 @@ const Login = () => {
       if (admin) {
         navigate('/admin/users')
       } else {
-        navigate('/chat')
+        navigate(`/chat/${chatHistory.length ? chatHistory[0].name : ''}`)
       }
     }, 1000)
   }
@@ -70,6 +71,7 @@ const Login = () => {
           borderRadius={'10px'}
           gap={4}
           padding={4}
+          onKeyDown={e => username.length && password.length && e.key === 'Enter' && submitFunc(e)}
         >
           <Flex justifyContent={'center'}>
             <Image width={'180px'} filter={colorMode === 'dark' ? '' : 'invert(100%)'} src={Logo} />
