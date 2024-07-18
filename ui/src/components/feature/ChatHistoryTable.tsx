@@ -12,15 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Flex } from '@chakra-ui/react'
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
+import { Button, Flex } from '@chakra-ui/react'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
+import { colors } from '@shared/theme'
 import { DataRow } from '@shared/types'
+import { useMemo, useState } from 'react'
 
+type ChatHistory = {
+  user: string
+}
 const ChatHistoryTable = () => {
-  type ChatHistory = {
-    user: string
-  }
+  const [selectedRows, setSelectedRows] = useState<ChatHistory[]>([])
+
   const data: DataRow<Partial<ChatHistory>>[] = [
     { id: 1, data: { user: 'John Doe' } },
     { id: 2, data: { user: 'Jane Smith' } },
@@ -47,6 +52,21 @@ const ChatHistoryTable = () => {
     }
   ]
 
+  const contextActions = useMemo(() => {
+    return (
+      <Flex gap={4}>
+        {selectedRows.length === 1 && (
+          <Button key="edit" style={{ backgroundColor: colors.primary }} leftIcon={<EditIcon />}>
+            Edit
+          </Button>
+        )}
+        <Button key="delete" style={{ backgroundColor: colors.danger }} leftIcon={<DeleteIcon />}>
+          Delete
+        </Button>
+      </Flex>
+    )
+  }, [selectedRows])
+
   return (
     <Flex p={4} flexDirection={'column'} flexGrow={'grow'} width={'100%'}>
       <Breadcrumbs
@@ -62,7 +82,14 @@ const ChatHistoryTable = () => {
         ]}
       />
 
-      <DataTableComponent expandableRows title={'Chat Histories'} data={data} columns={columns} />
+      <DataTableComponent
+        expandableRows
+        title={'Chat Histories'}
+        data={data}
+        columns={columns}
+        contextActions={contextActions}
+        onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
+      />
     </Flex>
   )
 }

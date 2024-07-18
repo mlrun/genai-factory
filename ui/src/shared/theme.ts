@@ -52,6 +52,9 @@ export const colors = {
   gray700: '#4A5568',
   gray800: '#2D3748',
   gray900: '#1A202C',
+
+  mint: '#4CD5B1',
+  mintDark: '#177D7C'
 }
 
 

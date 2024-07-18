@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useColorMode } from '@chakra-ui/react'
+import { AddIcon } from '@chakra-ui/icons'
+import { Box, Button, Flex, useColorMode } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
 import { DataRow } from '@shared/types'
 import { useMemo, useState } from 'react'
@@ -37,6 +38,9 @@ createTheme(
       button: 'rgba(0,0,0,.54)',
       hover: 'rgba(0,0,0,.08)',
       disabled: 'rgba(0,0,0,.12)'
+    },
+    context: {
+      background: colors.gray800
     }
   },
   'light'
@@ -48,11 +52,17 @@ type Props = {
   columns: TableColumn<DataRow<Partial<any>>>[]
   title: string
   expandableRows?: boolean
+  contextActions: JSX.Element
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSelectedRowChange?: (e: any) => void
 }
 
-const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => {
+const DataTableComponent = ({ data, columns, title, expandableRows, contextActions, onSelectedRowChange }: Props) => {
   const [filterText, setFilterText] = useState('')
   const [resetPaginationToggle, setResetPaginationToggle] = useState(false)
+
+  const { colorMode } = useColorMode()
+
   const filteredItems = data.filter(
     item =>
       (item.data.name && item.data.name.toLowerCase().includes(filterText.toLowerCase())) ||
@@ -62,22 +72,18 @@ const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => 
   )
 
   const subHeaderComponentMemo = useMemo(() => {
-    const handleClear = () => {
-      if (filterText) {
-        setResetPaginationToggle(!resetPaginationToggle)
-        setFilterText('')
-      }
-    }
-
     return (
-      <FilterComponent
-        onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
-        onClear={handleClear}
-        filterText={filterText}
-      />
+      <Flex gap={4}>
+        <FilterComponent
+          onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
+          filterText={filterText}
+        />
+        <Button bg={colors.mintDark} _hover={{ backgroundColor: colors.mint }} leftIcon={<AddIcon />}>
+          Add New
+        </Button>
+      </Flex>
     )
-  }, [filterText, resetPaginationToggle])
-  const { colorMode } = useColorMode()
+  }, [filterText])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ExpandedComponent = ({ data }: any) => <pre>{JSON.stringify(data, null, 2)}</pre>
   return (
@@ -94,9 +100,10 @@ const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => 
         subHeader
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
-        subHeaderAlign={Alignment.LEFT}
+        subHeaderAlign={Alignment.RIGHT}
         selectableRows
-        onSelectedRowsChange={e => console.log(e.selectedRows)}
+        onSelectedRowsChange={onSelectedRowChange}
+        contextActions={contextActions}
       />
     </Box>
   )

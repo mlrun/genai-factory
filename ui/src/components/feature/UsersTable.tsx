@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Flex } from '@chakra-ui/react'
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
+import { Button, Flex } from '@chakra-ui/react'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
+import { colors } from '@shared/theme'
 import { DataRow, User } from '@shared/types'
+import { useMemo, useState } from 'react'
 
 const UsersTable = () => {
+  const [selectedRows, setSelectedRows] = useState<User[]>([])
   const data: DataRow<Partial<User>>[] = [
     { id: 1, data: { name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', registered: '2021-01-10' } },
     { id: 2, data: { name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User', registered: '2021-02-14' } },
@@ -86,6 +90,21 @@ const UsersTable = () => {
     }
   ]
 
+  const contextActions = useMemo(() => {
+    return (
+      <Flex gap={4}>
+        {selectedRows.length === 1 && (
+          <Button key="edit" style={{ backgroundColor: colors.primary }} leftIcon={<EditIcon />}>
+            Edit
+          </Button>
+        )}
+        <Button key="delete" style={{ backgroundColor: colors.danger }} leftIcon={<DeleteIcon />}>
+          Delete
+        </Button>
+      </Flex>
+    )
+  }, [selectedRows])
+
   return (
     <Flex p={4} flexDirection={'column'} flexGrow={'grow'} width={'100%'}>
       <Breadcrumbs
@@ -101,7 +120,13 @@ const UsersTable = () => {
         ]}
       />
 
-      <DataTableComponent title={'Users'} data={data} columns={columns} />
+      <DataTableComponent
+        title={'Users'}
+        data={data}
+        columns={columns}
+        contextActions={contextActions}
+        onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
+      />
     </Flex>
   )
 }
