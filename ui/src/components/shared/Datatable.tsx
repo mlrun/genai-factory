@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AddIcon } from '@chakra-ui/icons'
-import { Box, Button, Flex, useColorMode } from '@chakra-ui/react'
+import { Box, useColorMode } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
 import { DataRow } from '@shared/types'
-import { useMemo, useState } from 'react'
 import DataTable, { Alignment, TableColumn, createTheme } from 'react-data-table-component'
-import FilterComponent from './Filter'
 
 createTheme(
   'dark',
@@ -55,12 +52,20 @@ type Props = {
   contextActions: JSX.Element
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSelectedRowChange?: (e: any) => void
+  subheaderComponent?: React.ReactNode
+  filterText: string
 }
 
-const DataTableComponent = ({ data, columns, title, expandableRows, contextActions, onSelectedRowChange }: Props) => {
-  const [filterText, setFilterText] = useState('')
-  const [resetPaginationToggle, setResetPaginationToggle] = useState(false)
-
+const DataTableComponent = ({
+  data,
+  columns,
+  title,
+  expandableRows,
+  contextActions,
+  onSelectedRowChange,
+  subheaderComponent,
+  filterText
+}: Props) => {
   const { colorMode } = useColorMode()
 
   const filteredItems = data.filter(
@@ -71,19 +76,6 @@ const DataTableComponent = ({ data, columns, title, expandableRows, contextActio
       (item.data.user && item.data.user.toLowerCase().includes(filterText.toLowerCase()))
   )
 
-  const subHeaderComponentMemo = useMemo(() => {
-    return (
-      <Flex gap={4}>
-        <FilterComponent
-          onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
-          filterText={filterText}
-        />
-        <Button bg={colors.mintDark} _hover={{ backgroundColor: colors.mint }} leftIcon={<AddIcon />}>
-          Add New
-        </Button>
-      </Flex>
-    )
-  }, [filterText])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ExpandedComponent = ({ data }: any) => <pre>{JSON.stringify(data, null, 2)}</pre>
   return (
@@ -96,9 +88,8 @@ const DataTableComponent = ({ data, columns, title, expandableRows, contextActio
         columns={columns}
         data={filteredItems}
         pagination
-        paginationResetDefaultPage={resetPaginationToggle}
         subHeader
-        subHeaderComponent={subHeaderComponentMemo}
+        subHeaderComponent={subheaderComponent}
         persistTableHead
         subHeaderAlign={Alignment.RIGHT}
         selectableRows

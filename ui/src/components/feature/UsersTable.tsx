@@ -1,28 +1,16 @@
-// Copyright 2024 Iguazio
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
-import { Button, Flex } from '@chakra-ui/react'
+import { AddIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons'
+import { Button, Flex, useDisclosure, useToast } from '@chakra-ui/react'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
+import FilterComponent from '@components/shared/Filter'
 import { colors } from '@shared/theme'
 import { DataRow, User } from '@shared/types'
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import AddEditUserModal from './AddEditUserModal'
 
-const UsersTable = () => {
-  const [selectedRows, setSelectedRows] = useState<User[]>([])
-  const data: DataRow<Partial<User>>[] = [
+const UsersTable: React.FC = () => {
+  const [selectedRows, setSelectedRows] = useState<DataRow<Partial<User>>[]>([])
+  const [data, setData] = useState<DataRow<Partial<User>>[]>([
     { id: 1, data: { name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', registered: '2021-01-10' } },
     { id: 2, data: { name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User', registered: '2021-02-14' } },
     {
@@ -44,28 +32,13 @@ const UsersTable = () => {
     {
       id: 10,
       data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
-    },
-    {
-      id: 11,
-      data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
-    },
-    {
-      id: 12,
-      data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
-    },
-    {
-      id: 13,
-      data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
-    },
-    {
-      id: 14,
-      data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
-    },
-    {
-      id: 15,
-      data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
     }
-  ]
+  ])
+  const [editRow, setEditRow] = useState<User>()
+  const [filterText, setFilterText] = useState('')
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const toast = useToast()
 
   const columns = [
     {
@@ -90,20 +63,91 @@ const UsersTable = () => {
     }
   ]
 
+  const handleSave = (user: Partial<User>) => {
+    if (user.id) {
+      setData(data.map(item => (item.data.id === user.id ? { id: item.id, data: user } : item)))
+      toast({
+        title: 'User updated.',
+        description: 'The user has been updated successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true
+      })
+    } else {
+      const newId = data.length ? Math.max(...data.map(item => item.id)) + 1 : 1
+      const newUser = { id: newId, data: user }
+      setData([...data, newUser])
+      toast({
+        title: 'User added.',
+        description: 'A new user has been added successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true
+      })
+    }
+  }
+
+  const handleDelete = () => {
+    // setData(data.filter(item => !selectedRows.includes(item.data as User)))
+    setSelectedRows([])
+    toast({
+      title: 'Users deleted.',
+      description: 'The selected users have been deleted successfully.',
+      status: 'success',
+      duration: 3000,
+      isClosable: true
+    })
+  }
+
   const contextActions = useMemo(() => {
     return (
       <Flex gap={4}>
         {selectedRows.length === 1 && (
-          <Button key="edit" style={{ backgroundColor: colors.primary }} leftIcon={<EditIcon />}>
+          <Button
+            key="edit"
+            style={{ backgroundColor: colors.gray700 }}
+            leftIcon={<EditIcon />}
+            onClick={() => {
+              setEditRow(selectedRows[0].data as User)
+              onOpen()
+            }}
+          >
             Edit
           </Button>
         )}
-        <Button key="delete" style={{ backgroundColor: colors.danger }} leftIcon={<DeleteIcon />}>
+        <Button
+          key="delete"
+          style={{ backgroundColor: colors.danger }}
+          leftIcon={<DeleteIcon />}
+          onClick={handleDelete}
+        >
           Delete
         </Button>
       </Flex>
     )
   }, [selectedRows])
+
+  const subHeaderComponentMemo = useMemo(() => {
+    return (
+      <Flex gap={4}>
+        <FilterComponent
+          onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
+          filterText={filterText}
+        />
+        <Button
+          bg={colors.mintDark}
+          _hover={{ backgroundColor: colors.mint }}
+          leftIcon={<AddIcon />}
+          onClick={() => {
+            setEditRow({ id: '', name: '', email: '', role: '', registered: '', username: '' })
+            onOpen()
+          }}
+        >
+          Add New
+        </Button>
+      </Flex>
+    )
+  }, [filterText])
 
   return (
     <Flex p={4} flexDirection={'column'} flexGrow={'grow'} width={'100%'}>
@@ -126,7 +170,10 @@ const UsersTable = () => {
         columns={columns}
         contextActions={contextActions}
         onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
+        subheaderComponent={subHeaderComponentMemo}
+        filterText={filterText}
       />
+      <AddEditUserModal isOpen={isOpen} onClose={onClose} onSave={handleSave} user={editRow as User} />
     </Flex>
   )
 }
