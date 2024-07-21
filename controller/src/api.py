@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from controller.src.config import config
-from controller.src.model import ChatSession, DocCollection, OutputMode, User
+from controller.src.model import ChatSession, DocCollection, OutputMode, User, QueryItem
 from controller.src.sqlclient import client
 
 app = FastAPI()
@@ -110,7 +110,7 @@ def create_tables(drop_old: bool = False, names: list[str] = None):
 
 @router.post("/pipeline/{name}/run")
 def run_pipeline(
-    request: Request, name: str, auth=Depends(get_auth_user)
+    request: Request, item: QueryItem, name: str, auth=Depends(get_auth_user)
 ):
     """This is the query command"""
     return _send_to_application(
