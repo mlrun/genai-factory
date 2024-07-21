@@ -36,6 +36,7 @@ class CtrlConfig(BaseModel):
     log_level: str = "DEBUG"
     # SQL Database
     sql_connection_str: str = default_db_path
+    application_url: str = "http://localhost:8000"
 
     def print(self):
         print(yaml.dump(self.dict()))

@@ -11,17 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import json
 from typing import List, Optional, Tuple, Union
 
+import requests
 from fastapi import (APIRouter, Depends, FastAPI, File, Header, Request,
                      UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .config import logger
-from .model import ChatSession, DocCollection, OutputMode, QueryItem, User
-from .sqlclient import client
+from controller.src.config import config
+from controller.src.model import ChatSession, DocCollection, OutputMode, User
+from controller.src.sqlclient import client
 
 app = FastAPI()
 
@@ -56,7 +57,7 @@ class AuthInfo(BaseModel):
 
 
 # placeholder for extracting the Auth info from the request
-async def get_auth_user(
+def get_auth_user(
     request: Request, x_username: Union[str, None] = Header(None)
 ) -> AuthInfo:
     """Get the user from the database"""
@@ -64,36 +65,85 @@ async def get_auth_user(
     if x_username:
         return AuthInfo(username=x_username, token=token)
     else:
-        return AuthInfo(username="yhaviv@gmail.com", token=token)
+        return AuthInfo(username="guest@example.com", token=token)
+
+
+def _send_to_application(path: str, method: str = "POST", request=None, auth=None, **kwargs):
+    """
+    Send a request to the application's API.
+
+    :param path:    The API path to send the request to.
+    :param method:  The HTTP method to use: GET, POST, PUT, DELETE, etc.
+    :param request: The FastAPI request object. If provided, the data will be taken from the body of the request.
+    :param auth:    The authentication information to use. If provided, the username will be added to the headers.
+    :param kwargs:  Additional keyword arguments to pass in the request function. For example, headers, params, etc.
+
+    :return:        The JSON response from the application.
+    """
+    url = f"{config.application_url}/api/{path}"
+
+    if isinstance(request, Request):
+        # If the request is a FastAPI request, get the data from the body
+        kwargs["data"] = request._body.decode("utf-8")
+    if auth is not None:
+        kwargs["headers"] = {"x_username": auth.username}
+
+    response = requests.request(
+        method=method,
+        url=url,
+        **kwargs,
+    )
+
+    # Check the response
+    if response.status_code == 200:
+        # If the request was successful, return the JSON response
+        return response.json()
+    else:
+        # If the request failed, raise an exception
+        response.raise_for_status()
 
 
 @router.post("/tables")
-async def create_tables(drop_old: bool = False, names: list[str] = None):
+def create_tables(drop_old: bool = False, names: list[str] = None):
     return client.create_tables(drop_old=drop_old, names=names)
 
 
 @router.post("/pipeline/{name}/run")
-async def run_pipeline(
-    request: Request, name: str, item: QueryItem, auth=Depends(get_auth_user)
+def run_pipeline(
+    request: Request, name: str, auth=Depends(get_auth_user)
 ):
     """This is the query command"""
-    app_server = request.app.extra.get("app_server")
-    if not app_server:
-        raise ValueError("app_server not found in app")
-    event = {
-        "username": auth.username,
-        "session_id": item.session_id,
-        "query": item.question,
-        "collection_name": item.collection,
+    return _send_to_application(
+        path=f"pipeline/{name}/run",
+        method="POST",
+        request=request,
+        auth=auth,
+    )
+
+
+@router.post("/collections/{collection}/{loader}/ingest")
+def ingest(
+    collection, path, loader, metadata, version, from_file, auth=Depends(get_auth_user)
+):
+    """Ingest documents into the vector database"""
+    params = {
+        "path": path,
+        "from_file": from_file,
+        "version": version,
     }
-    logger.debug(f"running pipeline {name}: {event}")
-    resp = app_server.run_pipeline(name, event)
-    print(f"resp: {resp}")
-    return resp
+    if metadata is not None:
+        params["metadata"] = json.dumps(metadata)
+
+    return _send_to_application(
+        path=f"collections/{collection}/{loader}/ingest",
+        method="POST",
+        params=params,
+        auth=auth,
+    )
 
 
 @router.get("/collections")
-async def list_collections(
+def list_collections(
     owner: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.Details,
@@ -105,12 +155,12 @@ async def list_collections(
 
 
 @router.get("/collection/{name}")
-async def get_collection(name: str, session=Depends(get_db)):
+def get_collection(name: str, session=Depends(get_db)):
     return client.get_collection(name, session=session)
 
 
 @router.post("/collection/{name}")
-async def create_collection(
+def create_collection(
     request: Request,
     name: str,
     collection: DocCollection,
@@ -122,7 +172,7 @@ async def create_collection(
 
 
 @router.get("/users")
-async def list_users(
+def list_users(
     email: str = None,
     username: str = None,
     mode: OutputMode = OutputMode.Details,
@@ -134,12 +184,12 @@ async def list_users(
 
 
 @router.get("/user/{username}")
-async def get_user(username: str, session=Depends(get_db)):
+def get_user(username: str, session=Depends(get_db)):
     return client.get_user(username, session=session)
 
 
 @router.post("/user/{username}")
-async def create_user(
+def create_user(
     user: User,
     username: str,
     session=Depends(get_db),
@@ -149,13 +199,13 @@ async def create_user(
 
 
 @router.delete("/user/{username}")
-async def delete_user(username: str, session=Depends(get_db)):
+def delete_user(username: str, session=Depends(get_db)):
     return client.delete_user(username, session=session)
 
 
 # get last user sessions, specify user and last
 @router.get("/user/{username}/sessions")
-async def list_user_sessions(
+def list_user_sessions(
     username: str,
     last: int = 0,
     created: str = None,
@@ -168,7 +218,7 @@ async def list_user_sessions(
 
 
 @router.put("/user/{username}")
-async def update_user(
+def update_user(
     user: User,
     username: str,
     session=Depends(get_db),
@@ -178,7 +228,7 @@ async def update_user(
 
 # add routs for chat sessions, list_sessions, get_session
 @router.post("/session")
-async def create_session(chat_session: ChatSession, session=Depends(get_db)):
+def create_session(chat_session: ChatSession, session=Depends(get_db)):
     return client.create_session(chat_session, session=session)
 
 

@@ -18,11 +18,11 @@ from typing import Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from server.src import model
-from server.src.model import ApiResponse
+from controller.src import model
+from controller.src.model import ApiResponse
 
-from .config import config, logger
-from .sqldb import Base, ChatSessionContext, DocumentCollection, User
+from controller.src.config import config, logger
+from controller.src.sqldb import Base, ChatSessionContext, DocumentCollection, User
 
 
 class SqlClient:
@@ -142,13 +142,16 @@ class SqlClient:
         self, collection: model.DocCollection, session: sqlalchemy.orm.Session = None
     ):
         logger.debug(f"Creating collection: {collection}")
-        collection = model.DocCollection.from_dict(collection)
+        if isinstance(collection, dict):
+            collection = model.DocCollection.from_dict(collection)
         return self._create(session, DocumentCollection, collection)
 
     def update_collection(
         self, collection: model.DocCollection, session: sqlalchemy.orm.Session = None
     ):
         logger.debug(f"Updating collection: {collection}")
+        if isinstance(collection, dict):
+            collection = model.DocCollection.from_dict(collection)
         return self._update(
             session, DocumentCollection, collection, name=collection.name
         )
