@@ -9,6 +9,9 @@ environment variables and credentials can be loaded from a `.env` file in the ro
 data can be stored in local files or remote SQL and Vector databases. the local file storage path can be set by the `AGENT_DATA_PATH` environment variable (defaults to `./data/`).
 
 # Getting it to work
+In order to deploy the GenAI Factory locally, we need to update the docker desktop software and to enable host networking.
+For more information, please refer to the following link:
+https://docs.docker.com/network/drivers/host/#docker-desktop
 
 ## Deploy the controller
 This command will start the API controller server into a local docker container.
