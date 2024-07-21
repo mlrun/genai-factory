@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.9.19
+ARG PYTHON_VERSION=3.9.19
+FROM python:${PYTHON_VERSION}
 
 # Update OS packages:
 RUN apt-get update && \

@@ -23,7 +23,6 @@ from tabulate import tabulate
 from controller.src.sqlclient import client
 from controller.src.model import User, DocCollection, QueryItem
 from controller.src.config import config
-from controller.src.utils import fill_params, sources_to_text
 import controller.src.api as api
 
 
@@ -83,12 +82,15 @@ def ingest(path, loader, metadata, version, collection, from_file):
     params = {
         "path": path,
         "from_file": from_file,
-        "metadata": metadata,
         "version": version,
     }
+    if metadata:
+        print(metadata)
+        params["metadata"] = json.dumps({metadata[0]: metadata[1]})
+
     collection = collection or "default"
     click.echo(f"Running Data Ingestion from: {path} with loader: {loader}")
-    response = api.send_to_application(
+    response = api._send_to_application(
         path=f"collections/{collection}/{loader}/ingest",
         method="POST",
         params=params,
@@ -127,7 +129,7 @@ def query(question, filter, collection, user, session, pipeline_name):
     data = json.dumps(query_item.dict())
 
     headers = {"x_username": user} if user else {}
-    response = api.send_to_application(
+    response = api._send_to_application(
         path=f"pipeline/{pipeline_name}/run",
         method="POST",
         data=data,
@@ -225,6 +227,51 @@ def list_sessions(user, last, created):
     data = client.list_sessions(user, created, last, output_mode="short")
     table = format_table_results(data["data"])
     click.echo(table)
+
+
+def sources_to_text(sources):
+    """Convert a list of sources to a string."""
+    if not sources:
+        return ""
+    return "\nSource documents:\n" + "\n".join(
+        f"- {get_title(source)} ({source['source']})" for source in sources
+    )
+
+
+def sources_to_md(sources):
+    """Convert a list of sources to a Markdown string."""
+    if not sources:
+        return ""
+    sources = {
+        source.metadata["source"]: get_title(source.metadata) for source in sources
+    }
+    return "\n**Source documents:**\n" + "\n".join(
+        f"- [{title}]({url})" for url, title in sources.items()
+    )
+
+
+def get_title(metadata):
+    """Get title from metadata."""
+    if "chunk" in metadata:
+        return f"{metadata.get('title', '')}-{metadata['chunk']}"
+    if "page" in metadata:
+        return f"{metadata.get('title', '')} - page {metadata['page']}"
+    return metadata.get("title", "")
+
+
+def fill_params(params, params_dict=None):
+    params_dict = params_dict or {}
+    for param in params:
+        i = param.find("=")
+        if i == -1:
+            continue
+        key, value = param[:i].strip(), param[i + 1 :].strip()
+        if key is None:
+            raise ValueError(f"cannot find param key in line ({param})")
+        params_dict[key] = value
+    if not params_dict:
+        return None
+    return params_dict
 
 
 def format_table_results(table_results):
