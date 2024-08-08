@@ -52,11 +52,10 @@ class ChatRole(str, Enum):
 
 class Message(BaseModel):
     role: ChatRole
-    content: str
-    html: Optional[str] = None
+    body: str
+    extra_data: Optional[dict] = None
     sources: Optional[List[dict]] = None
-    rating: Optional[int] = None
-    suggestion: Optional[str] = None
+    human_feedback: Optional[str] = None
 
 
 class Conversation(BaseModel):
@@ -64,10 +63,10 @@ class Conversation(BaseModel):
     saved_index: int = 0
 
     def __str__(self):
-        return "\n".join([f"{m.role}: {m.content}" for m in self.messages])
+        return "\n".join([f"{m.role}: {m.body}" for m in self.messages])
 
-    def add_message(self, role, content, sources=None):
-        self.messages.append(Message(role=role, content=content, sources=sources))
+    def add_message(self, role, body, sources=None):
+        self.messages.append(Message(role=role, body=body, sources=sources))
 
     def to_list(self):
         return self.dict()["messages"]
@@ -90,17 +89,49 @@ class QueryItem(BaseModel):
     collection: Optional[str] = None
 
 
+class OutputMode(str, Enum):
+    Names = "names"
+    Short = "short"
+    Dict = "dict"
+    Details = "details"
+
+
+class DataSourceType(str, Enum):
+    relational = "relational"
+    vector = "vector"
+    graph = "graph"
+    key_value = "key-value"
+    column_family = "column-family"
+    storage = "storage"
+    other = "other"
+
+
+class ModelType(str, Enum):
+    model = "model"
+    adapter = "adapter"
+
+
+class WorkflowType(str, Enum):
+    ingestion = "ingestion"
+    application = "application"
+    data_processing = "data-processing"
+    training = "training"
+    evaluation = "evaluation"
+
+
 # ========================================================================================
 
 
 metadata_fields = [
+    "id",
     "name",
     "description",
     "labels",
-    "owner_name",
+    "owner_id",
     "created",
     "updated",
     "version",
+    "project_id",
 ]
 
 
@@ -222,7 +253,11 @@ class BaseWithMetadata(Base):
     updated: Optional[Union[str, datetime]] = None
 
 
-class BaseWithVerMetadata(BaseWithMetadata):
+class BaseWithOwner(BaseWithMetadata):
+    owner_id: Optional[str] = None
+
+
+class BaseWithVerMetadata(BaseWithOwner):
     version: Optional[str] = ""
 
 
@@ -234,39 +269,79 @@ class User(BaseWithMetadata):
     full_name: Optional[str] = None
     features: Optional[dict[str, str]] = None
     policy: Optional[dict[str, str]] = None
+    is_admin: Optional[bool] = False
 
 
-class DocCollection(BaseWithMetadata):
-    _top_level_fields = ["owner_name"]
+class Project(BaseWithVerMetadata):
+    pass
 
-    owner_name: Optional[str] = None
+
+class DataSource(BaseWithVerMetadata):
+    _top_level_fields = ["data_source_type"]
+
+    project_id: str
+    data_source_type: DataSourceType
     category: Optional[str] = None
-    db_args: Optional[dict[str, str]] = None
+    database_kwargs: Optional[dict[str, str]] = None
+
+
+class Dataset(BaseWithVerMetadata):
+    _top_level_fields = ["task"]
+
+    project_id: str
+    task: str
+    sources: Optional[List[str]] = None
+    path: str
+    producer: Optional[str] = None
+
+
+class Model(BaseWithVerMetadata):
+    _extra_fields = ["path", "producer", "deployment"]
+    _top_level_fields = ["model_type", "task"]
+
+    project_id: str
+    model_type: ModelType
+    base_model: str
+    task: Optional[str] = None
+    path: Optional[str] = None
+    producer: Optional[str] = None
+    deployment: Optional[str] = None
+
+
+class PromptTemplate(BaseWithVerMetadata):
+    _extra_fields = ["arguments"]
+    _top_level_fields = ["text"]
+
+    project_id: str
+    text: str
+    arguments: Optional[List[str]] = None
+
+
+class Document(BaseWithVerMetadata):
+    _top_level_fields = ["path", "origin"]
+    project_id: str
+    path: str
+    origin: Optional[str] = None
+
+
+class Workflow(BaseWithVerMetadata):
+    _top_level_fields = ["workflow_type"]
+
+    project_id: str
+    workflow_type: WorkflowType
+    workflow_function: Optional[str] = None
+    configuration: Optional[dict] = None
+    graph: Optional[dict] = None
+    deployment: Optional[str] = None
 
 
 class ChatSession(BaseWithMetadata):
     _extra_fields = ["history", "features", "state", "agent_name"]
     _top_level_fields = ["username"]
 
-    username: Optional[str] = None
-    agent_name: Optional[str] = None
+    workflow_id: str
+    user_id: str
     history: Optional[List[Message]] = []
-    features: Optional[dict[str, str]] = None
-    state: Optional[dict[str, str]] = None
 
     def to_conversation(self):
         return Conversation.from_list(self.history)
-
-
-class Document(BaseWithVerMetadata):
-    collection: str
-    source: str
-    origin: Optional[str] = None
-    num_chunks: Optional[int] = None
-
-
-class OutputMode(str, Enum):
-    Names = "names"
-    Short = "short"
-    Dict = "dict"
-    Details = "details"
