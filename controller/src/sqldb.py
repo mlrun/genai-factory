@@ -13,12 +13,30 @@
 # limitations under the License.
 
 import datetime
+import re
+from typing import List, Optional
 
-import sqlalchemy
-from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Index, Integer,
-                        String, UniqueConstraint)
+from sqlalchemy import (
+    JSON,
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Table,
+    UniqueConstraint,
+)
 from sqlalchemy.ext.mutable import MutableDict
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    declarative_base,
+    declared_attr,
+    mapped_column,
+    relationship,
+)
+
+ID_LENGTH = 64
+TEXT_LENGTH = 1024
 
 # Create a base class for declarative class definitions
 Base = declarative_base()
@@ -51,146 +69,329 @@ def update_labels(obj, labels: dict):
             obj.labels.append(obj.Label(name=name, value=value, parent=obj.name))
 
 
-class User(Base):
-    __tablename__ = "users"
+class BaseSchema(Base):
+    """
+    Base class for all tables.
+    We use this class to define common columns and methods for all tables.
 
-    name = Column(String(255), primary_key=True, nullable=False)
-    email = Column(String(255), nullable=False, unique=True)
-    description = Column(String(255), nullable=True, default="")
-    full_name = Column(String(255), nullable=False)
-    created = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    updated = Column(
-        DateTime,
+    :arg  id: unique identifier for each entry.
+    :arg  name: entry's name.
+    :arg  description: The entry's description.
+    :arg  owner_id: The entry's owner's id.
+
+    The following columns are automatically added to each table:
+    - date_created: The entry's creation date.
+    - date_updated: The entry's last update date.
+    - spec: A dictionary to store additional information.
+    """
+
+    __abstract__ = True
+
+    @declared_attr
+    def __tablename__(cls) -> str:
+        # Convert CamelCase class name to snake_case table name
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
+
+    @declared_attr
+    def Label(cls):
+        return make_label(cls.__tablename__)
+
+    @declared_attr
+    def labels(cls):
+        return relationship(cls.Label, cascade="all, delete-orphan")
+
+    # Columns:
+    id: Mapped[str] = mapped_column(String(ID_LENGTH), primary_key=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
+    date_created: Mapped[datetime.datetime] = mapped_column(
+        default=datetime.datetime.utcnow
+    )
+    date_updated: Mapped[Optional[datetime.datetime]] = mapped_column(
         default=datetime.datetime.utcnow,
         onupdate=datetime.datetime.utcnow,
-        nullable=False,
     )
     spec = Column(MutableDict.as_mutable(JSON), nullable=True)
-    Label = make_label(__tablename__)
-    labels = relationship(Label, cascade="all, delete-orphan")
 
-
-class ChatSessionContext(Base):
-    """Chat session context table CRUD"""
-
-    __tablename__ = "session_context"
-
-    name = Column(String(255), primary_key=True, nullable=False)
-    description = Column(String(255), nullable=True, default="")
-    username = Column(String(255), sqlalchemy.ForeignKey("users.name"), nullable=False)
-    created = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    updated = Column(
-        DateTime,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow,
-        nullable=False,
-    )
-    spec = Column(MutableDict.as_mutable(JSON), nullable=True)
-    Label = make_label(__tablename__)
-    labels = relationship(Label, cascade="all, delete-orphan")
-
-    # Define the relationship with the 'Users' table
-    user = relationship(User)
-
-
-class DocumentCollection(Base):
-    __tablename__ = "document_collections"
-
-    name = Column(String(255), primary_key=True, nullable=False)
-    description = Column(String(255), nullable=True, default="")
-    created = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    updated = Column(
-        DateTime,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow,
-        nullable=False,
-    )
-    spec = Column(MutableDict.as_mutable(JSON), nullable=True)
-    Label = make_label(__tablename__)
-    labels = relationship(Label, cascade="all, delete-orphan")
-    owner_name = Column(String(255), sqlalchemy.ForeignKey("users.name"), nullable=True)
-
-    owner = relationship(User)
-
-
-class Document(Base):
-    __tablename__ = "documents"
-    _details_fields = ["doc_origin", "meta"]
-
-    doc_uid = Column(String(255), primary_key=True, nullable=False)
-    version = Column(String(255), primary_key=True, nullable=False)
-    collection_name = Column(
-        String(255), sqlalchemy.ForeignKey("document_collections.name"), nullable=False
-    )
-    title = Column(String(255), nullable=True)
-    source = Column(String(255), nullable=True)
-    doc_origin = Column(String(255), nullable=True)
-    num_chunks = Column(Integer, nullable=True)
-    created_time = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    last_update = Column(
-        DateTime,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow,
-        nullable=False,
-    )
-    meta = Column(JSON, nullable=True)
-
-    collection = relationship(DocumentCollection)
-
-    def __init__(
-        self,
-        doc_uid,
-        version,
-        collection_name,
-        title,
-        source,
-        doc_origin=None,
-        num_chunks=None,
-        meta=None,
-    ):
-        self.doc_uid = doc_uid
-        self.version = version
-        self.collection_name = collection_name
-        self.title = title
-        self.source = source
-        self.doc_origin = doc_origin
-        self.num_chunks = num_chunks
-        self.meta = meta
-
-
-class Prompt(Base):
-    __tablename__ = "prompts"
-    _details_fields = ["arguments", "meta"]
-
-    name = Column(String(255), primary_key=True, nullable=False)
-    version = Column(String(255), primary_key=True, nullable=False)
-    description = Column(String(255), nullable=True)
-    text = Column(String(255), nullable=True)
-    arguments = Column(JSON, nullable=True)
-    meta = Column(JSON, nullable=True)
-    created_time = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    last_update = Column(
-        DateTime,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow,
-        nullable=False,
-    )
-    usage = Column(JSON, nullable=True)
-
-    def __init__(
-        self,
-        name,
-        version,
-        description=None,
-        text=None,
-        arguments=None,
-        meta=None,
-        usage=None,
-    ):
+    def __init__(self, id, name, description=None, owner_id=None, labels=None):
+        self.id = id
         self.name = name
-        self.version = version
         self.description = description
-        self.text = text
-        self.arguments = arguments
-        self.meta = meta
-        self.usage = usage
+        self.owner_id = owner_id
+        self.labels = labels or []
+
+
+class OwnerBaseSchema(BaseSchema):
+    """
+    Base class for all tables with owner.
+    We use this class to define common columns and methods for all tables with owner.
+
+    :arg  owner_id: The entry's owner's id.
+    """
+
+    __abstract__ = True
+    owner_id: Mapped[Optional[str]] = mapped_column(
+        String(ID_LENGTH), ForeignKey("user.id")
+    )
+
+
+class VersionedBaseSchema(OwnerBaseSchema):
+    """
+    Base class for all versioned tables.
+    We use this class to define common columns and methods for all versioned tables.
+
+    :arg  version: The entry's version. This is the primary key for the table with id.
+    """
+
+    __abstract__ = True
+    version: Mapped[str] = mapped_column(String(255), primary_key=True)
+
+    def __init__(self, id, name, version, description=None, owner_id=None, labels=None):
+        super().__init__(id, name, description, owner_id, labels)
+        self.version = version
+
+
+# Association table between users and projects for many-to-many relationship
+user_project = Table(
+    "user_project",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id")),
+    Column("project_id", ForeignKey("project.id")),
+    Column("project_version", ForeignKey("project.version")),
+)
+
+# Association table between models and prompt templates for many-to-many relationship
+model_prompt_template = Table(
+    "model_prompt_template",
+    Base.metadata,
+    Column("prompt_id", String(ID_LENGTH), ForeignKey("prompt_template.id")),
+    Column(
+        "prompt_version", String(TEXT_LENGTH), ForeignKey("prompt_template.version")
+    ),
+    Column("model_id", String(ID_LENGTH), ForeignKey("model.id")),
+    Column("model_version", String(TEXT_LENGTH), ForeignKey("model.version")),
+    Column("generation_config", JSON),
+)
+
+# Association table between documents and data sources (ingestions) for many-to-many relationship
+ingestions = Table(
+    "ingestions",
+    Base.metadata,
+    Column("document_id", String(ID_LENGTH), ForeignKey("document.id")),
+    Column("document_version", String(TEXT_LENGTH), ForeignKey("document.version")),
+    Column("data_source_id", String(ID_LENGTH), ForeignKey("data_source.id")),
+    Column(
+        "data_source_version", String(TEXT_LENGTH), ForeignKey("data_source.version")
+    ),
+    Column("extra_data", JSON),
+)
+
+
+class User(BaseSchema):
+    """
+    The User table which is used to define users.
+
+    :arg    full_name:  The user's full name.
+    :arg    email:      The user's email.
+    """
+
+    # Columns:
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    # Relationships:
+
+    # many-to-many relationship with projects:
+    projects: Mapped[List["Project"]] = relationship(
+        back_populates="users", secondary=user_project
+    )
+    # one-to-many relationship with sessions:
+    sessions: Mapped[List["Session"]] = relationship(back_populates="user")
+
+
+class Project(VersionedBaseSchema):
+    """
+    The Project table which is used as a workspace. The other tables are associated with a project.
+    """
+
+    # Relationships:
+
+    # many-to-many relationship with user:
+    users: Mapped[List["User"]] = relationship(
+        back_populates="projects", secondary=user_project
+    )
+
+    # one-to-many relationships:
+    relationship_args = {"back_populates": "project", "cascade": "all, delete-orphan"}
+    data_sources: Mapped[List["DataSource"]] = relationship(**relationship_args)
+    datasets: Mapped[List["Dataset"]] = relationship(**relationship_args)
+    models: Mapped[List["Model"]] = relationship(**relationship_args)
+    prompt_templates: Mapped[List["PromptTemplate"]] = relationship(**relationship_args)
+    documents: Mapped[List["Document"]] = relationship(**relationship_args)
+    workflows: Mapped[List["Workflow"]] = relationship(**relationship_args)
+
+    def __init__(
+        self,
+        id,
+        name,
+        version=None,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(id, name, version, description, owner_id, labels)
+        update_labels(self, {"_GENAI_FACTORY": True})
+
+
+class DataSource(VersionedBaseSchema):
+    """
+    The DataSource table which is used to define data sources for the project.
+
+    :arg  project_id:       The project's id.
+    :arg  data_source_type: The type of the data source.
+                            Can be one of the values in controller.src.schemas.data_source.DataSourceType.
+    """
+
+    # Columns:
+    project_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("project.id"))
+    data_source_type: Mapped[str]
+
+    # Relationships:
+
+    # many-to-one relationship with projects:
+    project: Mapped["Project"] = relationship(back_populates="data_sources")
+    # many-to-many relationship with documents:
+    documents: Mapped[List["Document"]] = relationship(
+        back_populates="data_sources", secondary=ingestions
+    )
+
+
+class Dataset(VersionedBaseSchema):
+    """
+    The Dataset table which is used to define datasets for the project.
+
+    :arg  project_id:       The project's id.
+    :arg  task:             The task of the dataset.
+    """
+
+    # Columns:
+    project_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("project.id"))
+    task: Mapped[Optional[str]]
+
+    # Relationships:
+
+    # Many-to-one relationship with projects:
+    project: Mapped["Project"] = relationship(back_populates="datasets")
+
+
+class Model(VersionedBaseSchema):
+    """
+    The Model table which is used to define models for the project.
+
+    :arg  project_id:       The project's id.
+    :arg  model_type:       The type of the model. Can be one of the values in controller.src.schemas.model.ModelType.
+    :arg  task:             The task of the model. For example, "classification", "text-generation", etc.
+    """
+
+    # Columns:
+    project_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("project.id"))
+    model_type: Mapped[str]
+    task: Mapped[Optional[str]]
+
+    # Relationships:
+
+    # many-to-one relationship with projects:
+    project: Mapped["Project"] = relationship(back_populates="models")
+    # many-to-many relationship with prompt_templates:
+    prompt_templates: Mapped[List["PromptTemplate"]] = relationship(
+        back_populates="models", secondary=model_prompt_template
+    )
+
+
+class PromptTemplate(VersionedBaseSchema):
+    """
+    The PromptTemplate table which is used to define prompt templates for the project.
+    Each prompt template is associated with a model.
+
+    :arg    project_id:         The project's id.
+    """
+
+    # Columns:
+    project_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("project.id"))
+
+    # Relationships:
+
+    # many-to-one relationship with the 'Project' table
+    project: Mapped["Project"] = relationship(back_populates="prompt_templates")
+    # many-to-many relationship with the 'Model' table
+    models: Mapped[List["Model"]] = relationship(
+        back_populates="prompt_templates", secondary=model_prompt_template
+    )
+
+
+class Document(VersionedBaseSchema):
+    """
+    The Document table which is used to define documents for the project. The documents are ingested into data sources.
+
+    :arg    project_id:     The project's id.
+    :arg    path:           The path to the document. Can be a remote file or a web page.
+    :arg    origin:         The origin location of the document.
+    """
+
+    # Columns:
+    project_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("project.id"))
+    path: Mapped[str]
+    origin: Mapped[Optional[str]]
+
+    # Relationships:
+
+    # many-to-one relationship with projects:
+    project: Mapped["Project"] = relationship(back_populates="documents")
+    # many-to-many relationship with ingestion:
+    data_sources: Mapped[List["DataSource"]] = relationship(
+        back_populates="documents", secondary=ingestions
+    )
+
+
+class Workflow(VersionedBaseSchema):
+    """
+    The Workflow table which is used to define workflows for the project.
+    All workflows are a DAG of steps, each with its dedicated task.
+
+    :arg    project_id:     The project's id.
+    :arg    workflow_type:  The type of the workflow.
+                            Can be one of the values in controller.src.schemas.workflow.WorkflowType.
+    """
+
+    # Columns:
+    project_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("project.id"))
+    workflow_type: Mapped[str]
+
+    # Relationships:
+
+    # many-to-one relationship with projects:
+    project: Mapped["Project"] = relationship(back_populates="workflows")
+    # one-to-many relationship with sessions:
+    sessions: Mapped[List["Session"]] = relationship(back_populates="workflow")
+
+
+class Session(OwnerBaseSchema):
+    """
+    The Chat Session table which is used to define chat sessions of an application workflow per user.
+
+    :arg    workflow_id:    The workflow's id.
+    :arg    user_id:        The user's id.
+    """
+
+    # Columns:
+    workflow_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH), ForeignKey("workflow.id")
+    )
+    user_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("user.id"))
+
+    # Relationships:
+
+    # Many-to-one relationship with workflows:
+    workflow: Mapped["Workflow"] = relationship(back_populates="sessions")
+    # Many-to-one relationship with users:
+    user: Mapped["User"] = relationship(back_populates="sessions")
