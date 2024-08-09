@@ -211,7 +211,7 @@ class Base(BaseModel):
 
         return orm_object
 
-    def to_orm_object(self, obj_class):
+    def to_orm_object(self, obj_class, uid=None):
         struct = self.to_dict(drop_none=False, short=False)
         obj_dict = {
             k: v
@@ -225,6 +225,8 @@ class Base(BaseModel):
             if k not in metadata_fields + self._top_level_fields
         }
         labels = obj_dict.pop("labels", None)
+        if uid:
+            obj_dict["id"] = uid
         obj = obj_class(**obj_dict)
         if labels:
             obj.labels.clear()
@@ -246,6 +248,7 @@ class Base(BaseModel):
 
 
 class BaseWithMetadata(Base):
+    id: str
     name: str
     description: Optional[str] = None
     labels: Optional[Dict[str, Union[str, None]]] = None
