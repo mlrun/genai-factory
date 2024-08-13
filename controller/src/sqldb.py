@@ -77,11 +77,10 @@ class BaseSchema(Base):
     :arg  id: unique identifier for each entry.
     :arg  name: entry's name.
     :arg  description: The entry's description.
-    :arg  owner_id: The entry's owner's id.
 
     The following columns are automatically added to each table:
-    - date_created: The entry's creation date.
-    - date_updated: The entry's last update date.
+    - created: The entry's creation date.
+    - updated: The entry's last update date.
     - spec: A dictionary to store additional information.
     """
 
@@ -102,22 +101,20 @@ class BaseSchema(Base):
 
     # Columns:
     id: Mapped[str] = mapped_column(String(ID_LENGTH), primary_key=True)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(String(255), unique=True)
     description: Mapped[Optional[str]]
-    date_created: Mapped[datetime.datetime] = mapped_column(
-        default=datetime.datetime.utcnow
-    )
-    date_updated: Mapped[Optional[datetime.datetime]] = mapped_column(
+    created: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
+    updated: Mapped[Optional[datetime.datetime]] = mapped_column(
         default=datetime.datetime.utcnow,
         onupdate=datetime.datetime.utcnow,
     )
     spec = Column(MutableDict.as_mutable(JSON), nullable=True)
 
-    def __init__(self, id, name, description=None, owner_id=None, labels=None):
+    def __init__(self, id, name, spec, description=None, labels=None):
         self.id = id
         self.name = name
+        self.spec = spec
         self.description = description
-        self.owner_id = owner_id
         self.labels = labels or []
 
 
@@ -134,6 +131,10 @@ class OwnerBaseSchema(BaseSchema):
         String(ID_LENGTH), ForeignKey("user.id")
     )
 
+    def __init__(self, id, name, spec, description=None, owner_id=None, labels=None):
+        super().__init__(id, name, spec, description, labels)
+        self.owner_id = owner_id
+
 
 class VersionedBaseSchema(OwnerBaseSchema):
     """
@@ -144,10 +145,12 @@ class VersionedBaseSchema(OwnerBaseSchema):
     """
 
     __abstract__ = True
-    version: Mapped[str] = mapped_column(String(255), primary_key=True)
+    version: Mapped[str] = mapped_column(String(255), primary_key=True, default="")
 
-    def __init__(self, id, name, version, description=None, owner_id=None, labels=None):
-        super().__init__(id, name, description, owner_id, labels)
+    def __init__(
+        self, id, name, spec, version, description=None, owner_id=None, labels=None
+    ):
+        super().__init__(id, name, spec, description, owner_id, labels)
         self.version = version
 
 
@@ -203,10 +206,28 @@ class User(BaseSchema):
 
     # many-to-many relationship with projects:
     projects: Mapped[List["Project"]] = relationship(
-        back_populates="users", secondary=user_project
+        back_populates="users",
+        secondary=user_project,
+        primaryjoin="User.id == user_project.c.user_id",
+        secondaryjoin="and_(Project.id == user_project.c.project_id,"
+        " Project.version == user_project.c.project_version)",
+        foreign_keys=[
+            user_project.c.user_id,
+            user_project.c.project_id,
+            user_project.c.project_version,
+        ],
     )
     # one-to-many relationship with sessions:
-    sessions: Mapped[List["Session"]] = relationship(back_populates="user")
+    sessions: Mapped[List["Session"]] = relationship(
+        back_populates="user", foreign_keys="Session.owner_id"
+    )
+
+    def __init__(self, id, name, email, full_name, spec, description=None, labels=None):
+        super().__init__(
+            id=id, name=name, description=description, spec=spec, labels=labels
+        )
+        self.email = email
+        self.full_name = full_name
 
 
 class Project(VersionedBaseSchema):
@@ -218,7 +239,15 @@ class Project(VersionedBaseSchema):
 
     # many-to-many relationship with user:
     users: Mapped[List["User"]] = relationship(
-        back_populates="projects", secondary=user_project
+        back_populates="projects",
+        secondary=user_project,
+        primaryjoin="and_(Project.id == user_project.c.project_id, Project.version == user_project.c.project_version)",
+        secondaryjoin="User.id == user_project.c.user_id",
+        foreign_keys=[
+            user_project.c.user_id,
+            user_project.c.project_id,
+            user_project.c.project_version,
+        ],
     )
 
     # one-to-many relationships:
@@ -231,15 +260,17 @@ class Project(VersionedBaseSchema):
     workflows: Mapped[List["Workflow"]] = relationship(**relationship_args)
 
     def __init__(
-        self,
-        id,
-        name,
-        version=None,
-        description=None,
-        owner_id=None,
-        labels=None,
+        self, id, name, spec, version, description=None, owner_id=None, labels=None
     ):
-        super().__init__(id, name, version, description, owner_id, labels)
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
         update_labels(self, {"_GENAI_FACTORY": True})
 
 
@@ -262,8 +293,43 @@ class DataSource(VersionedBaseSchema):
     project: Mapped["Project"] = relationship(back_populates="data_sources")
     # many-to-many relationship with documents:
     documents: Mapped[List["Document"]] = relationship(
-        back_populates="data_sources", secondary=ingestions
+        back_populates="data_sources",
+        secondary=ingestions,
+        primaryjoin="and_(DataSource.id == ingestions.c.data_source_id,"
+        " DataSource.version == ingestions.c.data_source_version)",
+        secondaryjoin="and_(Document.id == ingestions.c.document_id,"
+        " Document.version == ingestions.c.document_version)",
+        foreign_keys=[
+            ingestions.c.data_source_id,
+            ingestions.c.data_source_version,
+            ingestions.c.document_id,
+            ingestions.c.document_version,
+        ],
     )
+
+    def __init__(
+        self,
+        id,
+        name,
+        spec,
+        version,
+        project_id,
+        data_source_type,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.project_id = project_id
+        self.data_source_type = data_source_type
 
 
 class Dataset(VersionedBaseSchema):
@@ -282,6 +348,30 @@ class Dataset(VersionedBaseSchema):
 
     # Many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="datasets")
+
+    def __init__(
+        self,
+        id,
+        name,
+        spec,
+        version,
+        project_id,
+        task,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.project_id = project_id
+        self.task = task
 
 
 class Model(VersionedBaseSchema):
@@ -304,8 +394,45 @@ class Model(VersionedBaseSchema):
     project: Mapped["Project"] = relationship(back_populates="models")
     # many-to-many relationship with prompt_templates:
     prompt_templates: Mapped[List["PromptTemplate"]] = relationship(
-        back_populates="models", secondary=model_prompt_template
+        back_populates="models",
+        secondary=model_prompt_template,
+        primaryjoin="and_(Model.id == model_prompt_template.c.model_id,"
+        " Model.version == model_prompt_template.c.model_version)",
+        secondaryjoin="and_(PromptTemplate.id == model_prompt_template.c.prompt_id,"
+        " PromptTemplate.version == model_prompt_template.c.prompt_version)",
+        foreign_keys=[
+            model_prompt_template.c.model_id,
+            model_prompt_template.c.model_version,
+            model_prompt_template.c.prompt_id,
+            model_prompt_template.c.prompt_version,
+        ],
     )
+
+    def __init__(
+        self,
+        id,
+        name,
+        spec,
+        version,
+        project_id,
+        model_type,
+        task,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.project_id = project_id
+        self.model_type = model_type
+        self.task = task
 
 
 class PromptTemplate(VersionedBaseSchema):
@@ -325,8 +452,41 @@ class PromptTemplate(VersionedBaseSchema):
     project: Mapped["Project"] = relationship(back_populates="prompt_templates")
     # many-to-many relationship with the 'Model' table
     models: Mapped[List["Model"]] = relationship(
-        back_populates="prompt_templates", secondary=model_prompt_template
+        back_populates="prompt_templates",
+        secondary=model_prompt_template,
+        primaryjoin="and_(PromptTemplate.id == model_prompt_template.c.prompt_id,"
+        " PromptTemplate.version == model_prompt_template.c.prompt_version)",
+        secondaryjoin="and_(Model.id == model_prompt_template.c.model_id,"
+        " Model.version == model_prompt_template.c.model_version)",
+        foreign_keys=[
+            model_prompt_template.c.prompt_id,
+            model_prompt_template.c.prompt_version,
+            model_prompt_template.c.model_id,
+            model_prompt_template.c.model_version,
+        ],
     )
+
+    def __init__(
+        self,
+        id,
+        name,
+        spec,
+        version,
+        project_id,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.project_id = project_id
 
 
 class Document(VersionedBaseSchema):
@@ -349,8 +509,44 @@ class Document(VersionedBaseSchema):
     project: Mapped["Project"] = relationship(back_populates="documents")
     # many-to-many relationship with ingestion:
     data_sources: Mapped[List["DataSource"]] = relationship(
-        back_populates="documents", secondary=ingestions
+        back_populates="documents",
+        secondary=ingestions,
+        primaryjoin="and_(Document.id == ingestions.c.document_id, Document.version == ingestions.c.document_version)",
+        secondaryjoin="and_(DataSource.id == ingestions.c.data_source_id,"
+        " DataSource.version == ingestions.c.data_source_version)",
+        foreign_keys=[
+            ingestions.c.document_id,
+            ingestions.c.document_version,
+            ingestions.c.data_source_id,
+            ingestions.c.data_source_version,
+        ],
     )
+
+    def __init__(
+        self,
+        id,
+        name,
+        spec,
+        version,
+        project_id,
+        path,
+        origin,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.project_id = project_id
+        self.path = path
+        self.origin = origin
 
 
 class Workflow(VersionedBaseSchema):
@@ -374,24 +570,61 @@ class Workflow(VersionedBaseSchema):
     # one-to-many relationship with sessions:
     sessions: Mapped[List["Session"]] = relationship(back_populates="workflow")
 
+    def __init__(
+        self,
+        id,
+        name,
+        spec,
+        version,
+        project_id,
+        workflow_type,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.project_id = project_id
+        self.workflow_type = workflow_type
+
 
 class Session(OwnerBaseSchema):
     """
     The Chat Session table which is used to define chat sessions of an application workflow per user.
 
     :arg    workflow_id:    The workflow's id.
-    :arg    user_id:        The user's id.
     """
 
     # Columns:
     workflow_id: Mapped[str] = mapped_column(
         String(ID_LENGTH), ForeignKey("workflow.id")
     )
-    user_id: Mapped[str] = mapped_column(String(ID_LENGTH), ForeignKey("user.id"))
 
     # Relationships:
 
     # Many-to-one relationship with workflows:
     workflow: Mapped["Workflow"] = relationship(back_populates="sessions")
     # Many-to-one relationship with users:
-    user: Mapped["User"] = relationship(back_populates="sessions")
+    user: Mapped["User"] = relationship(
+        back_populates="sessions", foreign_keys="Session.owner_id"
+    )
+
+    def __init__(
+        self, id, name, spec, workflow_id, description=None, owner_id=None, labels=None
+    ):
+        super().__init__(
+            id=id,
+            name=name,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.workflow_id = workflow_id

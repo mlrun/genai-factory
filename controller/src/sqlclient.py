@@ -122,6 +122,22 @@ class SqlClient:
             )
         return ApiResponse(success=True, data=api_class.from_orm_object(obj))
 
+    # def _get_by_name(self, session: sqlalchemy.orm.Session, db_class, api_class, name: str) -> ApiResponse:
+    #     """
+    #     Get an object from the database by name.
+    #
+    #     :param session:     The session to use.
+    #     :param db_class:    The DB class of the object.
+    #     :param api_class:   The API class of the object.
+    #
+    #     :return:    A response object with the success status and the object when successful.
+    #     """
+    #     session = self.get_db_session(session)
+    #     obj = session.query(db_class).filter_by(name=name).one_or_none()
+    #     if obj is None:
+    #         return ApiResponse(success=False, error=f"{db_class} object ({name}) not found")
+    #     return ApiResponse(success=True, data=api_class.from_orm_object(obj))
+
     def _update(
         self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs
     ) -> ApiResponse:
@@ -222,18 +238,36 @@ class SqlClient:
         return self._create(session, db.User, user)
 
     def get_user(
-        self, user_id: str, session: sqlalchemy.orm.Session = None
+        self,
+        user_id: str = None,
+        user_name: str = None,
+        email: str = None,
+        session: sqlalchemy.orm.Session = None,
     ) -> ApiResponse:
         """
         Get a user from the database.
+        Either user_id or user_name or email must be provided.
 
-        :param user_id: The ID of the user to get.
-        :param session: The session to use.
+        :param user_id:     The ID of the user to get.
+        :param user_name:   The name of the user to get.
+        :param email:       The email of the user to get.
+        :param session:     The session to use.
 
         :return:    A response object with the success status and the user when successful.
         """
-        logger.debug(f"Getting user: user_id={user_id}")
-        return self._get(session, db.User, api_models.User, id=user_id)
+        args = {}
+        if email:
+            args["email"] = email
+        elif user_name:
+            args["name"] = user_name
+        elif user_id:
+            args["id"] = user_id
+        else:
+            return ApiResponse(
+                success=False, error="user_id or user_name or email must be provided"
+            )
+        logger.debug(f"Getting user: user_id={user_id}, user_name={user_name}")
+        return self._get(session, db.User, api_models.User, **args)
 
     def update_user(
         self, user: Union[api_models.User, dict], session: sqlalchemy.orm.Session = None
@@ -252,17 +286,17 @@ class SqlClient:
         return self._update(session, db.User, user, name=user.name)
 
     def delete_user(
-        self, user_id: str, session: sqlalchemy.orm.Session = None
+        self, user_name: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Delete a user from the database.
 
-        :param user_id: The ID of the user to delete.
+        :param user_name: The name of the user to delete.
         :param session:
         :return:
         """
-        logger.debug(f"Deleting user: user_id={user_id}")
-        return self._delete(session, db.User, id=user_id)
+        logger.debug(f"Deleting user: user_name={user_name}")
+        return self._delete(session, db.User, name=user_name)
 
     def list_users(
         self,
@@ -319,18 +353,18 @@ class SqlClient:
         return self._create(session, db.Project, project)
 
     def get_project(
-        self, project_id: str, session: sqlalchemy.orm.Session = None
+        self, project_name: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Get a project from the database.
 
-        :param project_id: The ID of the project to get.
-        :param session: The session to use.
+        :param project_name:    The name of the project to get.
+        :param session:         The session to use.
 
         :return:    A response object with the success status and the project when successful.
         """
-        logger.debug(f"Getting project: project_id={project_id}")
-        return self._get(session, db.Project, api_models.Project, id=project_id)
+        logger.debug(f"Getting project: project_name={project_name}")
+        return self._get(session, db.Project, api_models.Project, name=project_name)
 
     def update_project(
         self,
@@ -348,21 +382,21 @@ class SqlClient:
         logger.debug(f"Updating project: {project}")
         if isinstance(project, dict):
             project = api_models.Project.from_dict(project)
-        return self._update(session, db.Project, project, id=project.id)
+        return self._update(session, db.Project, project, name=project.name)
 
     def delete_project(
-        self, project_id: str, session: sqlalchemy.orm.Session = None
+        self, project_name: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Delete a project from the database.
 
-        :param project_id: The ID of the project to delete.
-        :param session: The session to use.
+        :param project_name:    The name of the project to delete.
+        :param session:         The session to use.
 
         :return:    A response object with the success status.
         """
-        logger.debug(f"Deleting project: project_id={project_id}")
-        return self._delete(session, db.Project, id=project_id)
+        logger.debug(f"Deleting project: project_name={project_name}")
+        return self._delete(session, db.Project, name=project_name)
 
     def list_projects(
         self,
@@ -411,7 +445,7 @@ class SqlClient:
         :param data_source: The data source object to create.
         :param session:     The session to use.
 
-        :return:        A response object with the success status and the created data source when successful.
+        :return:    A response object with the success status and the created data source when successful.
         """
         logger.debug(f"Creating data source: {data_source}")
         if isinstance(data_source, dict):
@@ -419,19 +453,27 @@ class SqlClient:
         return self._create(session, db.DataSource, data_source)
 
     def get_data_source(
-        self, data_source_id: str, session: sqlalchemy.orm.Session = None
+        self,
+        project_id: str,
+        data_source_name: str,
+        session: sqlalchemy.orm.Session = None,
     ) -> ApiResponse:
         """
         Get a data source from the database.
 
-        :param data_source_id:  The ID of the data source to get.
-        :param session:         The session to use.
+        :param project_id:          The ID of the project to get the data source from.
+        :param data_source_name:    The ID of the data source to get.
+        :param session:             The session to use.
 
-        :return:            A response object with the success status and the data source when successful.
+        :return:    A response object with the success status and the data source when successful.
         """
-        logger.debug(f"Getting data source: data_source_id={data_source_id}")
+        logger.debug(f"Getting data source: data_source_name={data_source_name}")
         return self._get(
-            session, db.DataSource, api_models.DataSource, id=data_source_id
+            session,
+            db.DataSource,
+            api_models.DataSource,
+            name=data_source_name,
+            project_id=project_id,
         )
 
     def update_data_source(
@@ -450,21 +492,27 @@ class SqlClient:
         logger.debug(f"Updating data source: {data_source}")
         if isinstance(data_source, dict):
             data_source = api_models.DataSource.from_dict(data_source)
-        return self._update(session, db.DataSource, data_source, id=data_source.id)
+        return self._update(session, db.DataSource, data_source)
 
     def delete_data_source(
-        self, data_source_id: str, session: sqlalchemy.orm.Session = None
+        self,
+        project_id: str,
+        data_source_id: str,
+        session: sqlalchemy.orm.Session = None,
     ) -> ApiResponse:
         """
         Delete a data source from the database.
 
+        :param project_id:      The ID of the project to delete the data source from.
         :param data_source_id:  The ID of the data source to delete.
         :param session:         The session to use.
 
         :return:    A response object with the success status.
         """
         logger.debug(f"Deleting data source: data_source_id={data_source_id}")
-        return self._delete(session, db.DataSource, id=data_source_id)
+        return self._delete(
+            session, db.DataSource, project_id=project_id, id=data_source_id
+        )
 
     def list_data_sources(
         self,
@@ -504,8 +552,8 @@ class SqlClient:
             filters.append(db.DataSource.data_source_type == data_source_type)
         return self._list(
             session=session,
-            db_class=db.User,
-            api_class=api_models.User,
+            db_class=db.DataSource,
+            api_class=api_models.DataSource,
             output_mode=output_mode,
             labels_match=labels_match,
             filters=filters,
@@ -530,18 +578,25 @@ class SqlClient:
         return self._create(session, db.Dataset, dataset)
 
     def get_dataset(
-        self, dataset_id: str, session: sqlalchemy.orm.Session = None
+        self, project_id: str, dataset_id: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Get a dataset from the database.
 
-        :param dataset_id: The ID of the dataset to get.
-        :param session: The session to use.
+        :param project_id:  The ID of the project to get the dataset from.
+        :param dataset_id:  The ID of the dataset to get.
+        :param session:     The session to use.
 
         :return:    A response object with the success status and the dataset when successful.
         """
         logger.debug(f"Getting dataset: dataset_id={dataset_id}")
-        return self._get(session, db.Dataset, api_models.Dataset, id=dataset_id)
+        return self._get(
+            session,
+            db.Dataset,
+            api_models.Dataset,
+            id=dataset_id,
+            project_id=project_id,
+        )
 
     def update_dataset(
         self,
@@ -562,18 +617,19 @@ class SqlClient:
         return self._update(session, db.Dataset, dataset, id=dataset.id)
 
     def delete_dataset(
-        self, dataset_id: str, session: sqlalchemy.orm.Session = None
+        self, project_id: str, dataset_id: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Delete a dataset from the database.
 
-        :param dataset_id: The ID of the dataset to delete.
-        :param session: The session to use.
+        :param project_id:  The ID of the project to delete the dataset from.
+        :param dataset_id:  The ID of the dataset to delete.
+        :param session:     The session to use.
 
         :return:    A response object with the success status.
         """
         logger.debug(f"Deleting dataset: dataset_id={dataset_id}")
-        return self._delete(session, db.Dataset, id=dataset_id)
+        return self._delete(session, db.Dataset, project_id=project_id, id=dataset_id)
 
     def list_datasets(
         self,
@@ -628,7 +684,7 @@ class SqlClient:
         """
         Create a new model in the database.
 
-        :param model: The model object to create.
+        :param model:   The model object to create.
         :param session: The session to use.
 
         :return:    A response object with the success status and the created model when successful.
@@ -639,18 +695,21 @@ class SqlClient:
         return self._create(session, db.Model, model)
 
     def get_model(
-        self, model_id: str, session: sqlalchemy.orm.Session = None
+        self, project_id: str, model_id: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Get a model from the database.
 
-        :param model_id: The ID of the model to get.
-        :param session: The session to use.
+        :param project_id:  The ID of the project to get the model from.
+        :param model_id:    The ID of the model to get.
+        :param session:     The session to use.
 
         :return:    A response object with the success status and the model when successful.
         """
         logger.debug(f"Getting model: model_id={model_id}")
-        return self._get(session, db.Model, api_models.Model, id=model_id)
+        return self._get(
+            session, db.Model, api_models.Model, project_id=project_id, id=model_id
+        )
 
     def update_model(
         self,
@@ -660,7 +719,7 @@ class SqlClient:
         """
         Update an existing model in the database.
 
-        :param model: The model object with the new data.
+        :param model:   The model object with the new data.
         :param session: The session to use.
 
         :return:    A response object with the success status and the updated model when successful.
@@ -671,18 +730,19 @@ class SqlClient:
         return self._update(session, db.Model, model, id=model.id)
 
     def delete_model(
-        self, model_id: str, session: sqlalchemy.orm.Session = None
+        self, project_id: str, model_id: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Delete a model from the database.
 
-        :param model_id: The ID of the model to delete.
-        :param session: The session to use.
+        :param project_id:  The ID of the project to delete the model from.
+        :param model_id:    The ID of the model to delete.
+        :param session:     The session to use.
 
         :return:    A response object with the success status.
         """
         logger.debug(f"Deleting model: model_id={model_id}")
-        return self._delete(session, db.Model, id=model_id)
+        return self._delete(session, db.Model, project_id=project_id, id=model_id)
 
     def list_models(
         self,
@@ -742,7 +802,7 @@ class SqlClient:
         Create a new prompt template in the database.
 
         :param prompt_template: The prompt template object to create.
-        :param session: The session to use.
+        :param session:         The session to use.
 
         :return:    A response object with the success status and the created prompt template when successful.
         """
@@ -752,13 +812,17 @@ class SqlClient:
         return self._create(session, db.PromptTemplate, prompt_template)
 
     def get_prompt_template(
-        self, prompt_template_id: str, session: sqlalchemy.orm.Session = None
+        self,
+        project_id: str,
+        prompt_template_id: str,
+        session: sqlalchemy.orm.Session = None,
     ) -> ApiResponse:
         """
         Get a prompt template from the database.
 
-        :param prompt_template_id: The ID of the prompt template to get.
-        :param session: The session to use.
+        :param project_id:          The ID of the project to get the prompt template from.
+        :param prompt_template_id:  The ID of the prompt template to get.
+        :param session:             The session to use.
 
         :return:    A response object with the success status and the prompt template when successful.
         """
@@ -766,7 +830,11 @@ class SqlClient:
             f"Getting prompt template: prompt_template_id={prompt_template_id}"
         )
         return self._get(
-            session, db.PromptTemplate, api_models.PromptTemplate, id=prompt_template_id
+            session,
+            db.PromptTemplate,
+            api_models.PromptTemplate,
+            project_id=project_id,
+            id=prompt_template_id,
         )
 
     def update_prompt_template(
@@ -778,7 +846,7 @@ class SqlClient:
         Update an existing prompt template in the database.
 
         :param prompt_template: The prompt template object with the new data.
-        :param session: The session to use.
+        :param session:         The session to use.
 
         :return:    A response object with the success status and the updated prompt template when successful.
         """
@@ -790,20 +858,26 @@ class SqlClient:
         )
 
     def delete_prompt_template(
-        self, prompt_template_id: str, session: sqlalchemy.orm.Session = None
+        self,
+        project_id: str,
+        prompt_template_id: str,
+        session: sqlalchemy.orm.Session = None,
     ) -> ApiResponse:
         """
         Delete a prompt template from the database.
 
-        :param prompt_template_id: The ID of the prompt template to delete.
-        :param session: The session to use.
+        :param project_id:          The ID of the project to delete the prompt template from.
+        :param prompt_template_id:  The ID of the prompt template to delete.
+        :param session:             The session to use.
 
         :return:    A response object with the success status.
         """
         logger.debug(
             f"Deleting prompt template: prompt_template_id={prompt_template_id}"
         )
-        return self._delete(session, db.PromptTemplate, id=prompt_template_id)
+        return self._delete(
+            session, db.PromptTemplate, project_id=project_id, id=prompt_template_id
+        )
 
     def list_prompt_templates(
         self,
@@ -865,18 +939,25 @@ class SqlClient:
         return self._create(session, db.Document, document)
 
     def get_document(
-        self, document_id: str, session: sqlalchemy.orm.Session = None
+        self, project_id: str, document_id: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Get a document from the database.
 
+        :param project_id: The ID of the project to get the document from.
         :param document_id: The ID of the document to get.
         :param session: The session to use.
 
         :return:    A response object with the success status and the document when successful.
         """
         logger.debug(f"Getting document: document_id={document_id}")
-        return self._get(session, db.Document, api_models.Document, id=document_id)
+        return self._get(
+            session,
+            db.Document,
+            api_models.Document,
+            project_id=project_id,
+            id=document_id,
+        )
 
     def update_document(
         self,
@@ -897,18 +978,19 @@ class SqlClient:
         return self._update(session, db.Document, document, id=document.id)
 
     def delete_document(
-        self, document_id: str, session: sqlalchemy.orm.Session = None
+        self, project_id: str, document_id: str, session: sqlalchemy.orm.Session = None
     ) -> ApiResponse:
         """
         Delete a document from the database.
 
+        :param project_id:  The ID of the project to delete the document from.
         :param document_id: The ID of the document to delete.
-        :param session: The session to use.
+        :param session:     The session to use.
 
         :return:    A response object with the success status.
         """
         logger.debug(f"Deleting document: document_id={document_id}")
-        return self._delete(session, db.Document, id=document_id)
+        return self._delete(session, db.Document, project_id=project_id, id=document_id)
 
     def list_documents(
         self,
@@ -951,6 +1033,125 @@ class SqlClient:
             filters=filters,
         )
 
+    def create_workflow(
+        self,
+        workflow: Union[api_models.Workflow, dict],
+        session: sqlalchemy.orm.Session = None,
+    ) -> ApiResponse:
+        """
+        Create a new workflow in the database.
+
+        :param workflow:    The workflow object to create.
+        :param session:     The session to use.
+
+        :return:    A response object with the success status and the created workflow when successful.
+        """
+        logger.debug(f"Creating workflow: {workflow}")
+        if isinstance(workflow, dict):
+            workflow = api_models.Workflow.from_dict(workflow)
+        return self._create(session, db.Workflow, workflow)
+
+    def get_workflow(
+        self,
+        project_id: str,
+        workflow_name: str,
+        session: sqlalchemy.orm.Session = None,
+    ) -> ApiResponse:
+        """
+        Get a workflow from the database.
+
+        :param project_id:      The ID of the project to get the workflow from.
+        :param workflow_name:   The name of the workflow to get.
+        :param session:         The session to use.
+
+        :return:    A response object with the success status and the workflow when successful.
+        """
+        logger.debug(f"Getting workflow: workflow_name={workflow_name}")
+        return self._get(
+            session,
+            db.Workflow,
+            api_models.Workflow,
+            project_id=project_id,
+            name=workflow_name,
+        )
+
+    def update_workflow(
+        self,
+        workflow: Union[api_models.Workflow, dict],
+        session: sqlalchemy.orm.Session = None,
+    ) -> ApiResponse:
+        """
+        Update an existing workflow in the database.
+
+        :param workflow:    The workflow object with the new data.
+        :param session:     The session to use.
+
+        :return:    A response object with the success status and the updated workflow when successful.
+        """
+        logger.debug(f"Updating workflow: {workflow}")
+        if isinstance(workflow, dict):
+            workflow = api_models.Workflow.from_dict(workflow)
+        return self._update(session, db.Workflow, workflow, id=workflow.id)
+
+    def delete_workflow(
+        self, workflow_id: str, session: sqlalchemy.orm.Session = None
+    ) -> ApiResponse:
+        """
+        Delete a workflow from the database.
+
+        :param workflow_id: The ID of the workflow to delete.
+        :param session:     The session to use.
+
+        :return:    A response object with the success status.
+        """
+        logger.debug(f"Deleting workflow: workflow_id={workflow_id}")
+        return self._delete(session, db.Workflow, id=workflow_id)
+
+    def list_workflows(
+        self,
+        owner_id: str = None,
+        version: str = None,
+        project_id: str = None,
+        workflow_type: Union[api_models.WorkflowType, str] = None,
+        labels_match: Union[list, str] = None,
+        output_mode: api_models.OutputMode = api_models.OutputMode.Details,
+        session: sqlalchemy.orm.Session = None,
+    ) -> ApiResponse:
+        """
+        List workflows from the database.
+
+        :param owner_id:        The owner to filter the workflows by.
+        :param version:         The version to filter the workflows by.
+        :param project_id:      The project to filter the workflows by.
+        :param workflow_type:   The workflow type to filter the workflows by.
+        :param labels_match:    The labels to match, filter the workflows by labels.
+        :param output_mode:     The output mode.
+        :param session:         The session to use.
+
+        :return:    A response object with the success status and the list of workflows when successful.
+        """
+        logger.debug(
+            f"Getting workflows: owner_id={owner_id}, version={version}, project_id={project_id},"
+            f" workflow_type={workflow_type}, labels_match={labels_match}, mode={output_mode}"
+        )
+        filters = []
+        if owner_id:
+            filters.append(db.Workflow.owner_id == owner_id)
+        if version:
+            filters.append(db.Workflow.version == version)
+        if project_id:
+            filters.append(db.Workflow.project_id == project_id)
+        if workflow_type:
+            filters.append(db.Workflow.workflow_type == workflow_type)
+        return self._list(
+            session=session,
+            db_class=db.Workflow,
+            api_class=api_models.Workflow,
+            output_mode=output_mode,
+            labels_match=labels_match,
+            filters=filters,
+        )
+
     def create_chat_session(
         self,
         chat_session: Union[api_models.ChatSession, dict],
@@ -971,25 +1172,25 @@ class SqlClient:
 
     def get_chat_session(
         self,
-        session_id: str,
+        session_name: str = None,
         user_id: str = None,
         session: sqlalchemy.orm.Session = None,
     ) -> ApiResponse:
         """
         Get a chat session from the database.
 
-        :param session_id:  The ID of the chat session to get.
-        :param user_id:     The ID of the user to get the last session for.
-        :param session:     The DB session to use.
+        :param session_name:    The ID of the chat session to get.
+        :param user_id:         The ID of the user to get the last session for.
+        :param session:         The DB session to use.
 
         :return:    A response object with the success status and the chat session when successful.
         """
         logger.debug(
-            f"Getting chat session: session_id={session_id}, user_id={user_id}"
+            f"Getting chat session: session_name={session_name}, user_id={user_id}"
         )
-        if session_id:
+        if session_name:
             return self._get(
-                session, db.Session, api_models.ChatSession, name=session_id
+                session, db.Session, api_models.ChatSession, name=session_name
             )
         elif user_id:
             # get the last session for the user
@@ -1017,7 +1218,7 @@ class SqlClient:
         :return:    A response object with the success status and the updated chat session when successful.
         """
         logger.debug(f"Updating chat session: {chat_session}")
-        return self._update(session, db.Session, chat_session, id=chat_session.id)
+        return self._update(session, db.Session, chat_session, name=chat_session.name)
 
     def delete_chat_session(
         self, session_id: str, session: sqlalchemy.orm.Session = None
@@ -1061,7 +1262,7 @@ class SqlClient:
         session = self.get_db_session(session)
         query = session.query(db.Session)
         if user_id:
-            query = query.filter(db.Session.user_id == user_id)
+            query = query.filter(db.Session.owner_id == user_id)
         if workflow_id:
             query = query.filter(db.Session.workflow_id == workflow_id)
         if created_after:

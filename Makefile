@@ -24,3 +24,22 @@ controller:
 
 	# Announce the server is running:
 	@echo "GenAI Factory Controller is running in the background"
+
+.PHONY: fmt
+fmt: ## Format the code using Ruff
+	@echo "Running ruff checks and fixes..."
+	python -m ruff check --fix-only
+	python -m ruff format
+
+.PHONY: lint
+lint: fmt-check lint-imports ## Run lint on the code
+
+lint-imports: ## Validates import dependencies
+	@echo "Running import linter"
+	lint-imports
+
+.PHONY: fmt-check
+fmt-check: ## Check the code (using ruff)
+	@echo "Running ruff checks..."
+	python -m ruff check --exit-non-zero-on-fix
+	python -m ruff format --check

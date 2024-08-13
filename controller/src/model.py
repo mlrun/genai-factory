@@ -15,7 +15,7 @@
 from datetime import datetime
 from enum import Enum
 from http.client import HTTPException
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Type, Union
 
 import yaml
 from pydantic import BaseModel
@@ -26,7 +26,7 @@ from pydantic import BaseModel
 # from llmapps.app.schema import Conversation, Message
 class ApiResponse(BaseModel):
     success: bool
-    data: Optional[Union[list, BaseModel, dict]] = None
+    data: Optional[Union[list, Type[BaseModel], dict]] = None
     error: Optional[str] = None
 
     def with_raise(self, format=None) -> "ApiResponse":
@@ -52,7 +52,7 @@ class ChatRole(str, Enum):
 
 class Message(BaseModel):
     role: ChatRole
-    body: str
+    content: str
     extra_data: Optional[dict] = None
     sources: Optional[List[dict]] = None
     human_feedback: Optional[str] = None
@@ -63,10 +63,10 @@ class Conversation(BaseModel):
     saved_index: int = 0
 
     def __str__(self):
-        return "\n".join([f"{m.role}: {m.body}" for m in self.messages])
+        return "\n".join([f"{m.role}: {m.content}" for m in self.messages])
 
-    def add_message(self, role, body, sources=None):
-        self.messages.append(Message(role=role, body=body, sources=sources))
+    def add_message(self, role, content, sources=None):
+        self.messages.append(Message(role=role, content=content, sources=sources))
 
     def to_list(self):
         return self.dict()["messages"]
@@ -84,9 +84,9 @@ class Conversation(BaseModel):
 
 class QueryItem(BaseModel):
     question: str
-    session_id: Optional[str] = None
+    session_name: Optional[str] = None
     filter: Optional[List[Tuple[str, str]]] = None
-    collection: Optional[str] = None
+    data_source: Optional[str] = None
 
 
 class OutputMode(str, Enum):
@@ -248,8 +248,8 @@ class Base(BaseModel):
 
 
 class BaseWithMetadata(Base):
-    id: str
     name: str
+    id: Optional[str] = None
     description: Optional[str] = None
     labels: Optional[Dict[str, Union[str, None]]] = None
     created: Optional[Union[str, datetime]] = None
@@ -282,16 +282,16 @@ class Project(BaseWithVerMetadata):
 class DataSource(BaseWithVerMetadata):
     _top_level_fields = ["data_source_type"]
 
-    project_id: str
     data_source_type: DataSourceType
+    project_id: Optional[str] = None
     category: Optional[str] = None
-    database_kwargs: Optional[dict[str, str]] = None
+    database_kwargs: Optional[dict[str, str]] = {}
 
 
 class Dataset(BaseWithVerMetadata):
     _top_level_fields = ["task"]
 
-    project_id: str
+    project_id: Optional[str] = None
     task: str
     sources: Optional[List[str]] = None
     path: str
@@ -302,9 +302,9 @@ class Model(BaseWithVerMetadata):
     _extra_fields = ["path", "producer", "deployment"]
     _top_level_fields = ["model_type", "task"]
 
-    project_id: str
     model_type: ModelType
     base_model: str
+    project_id: Optional[str] = None
     task: Optional[str] = None
     path: Optional[str] = None
     producer: Optional[str] = None
@@ -315,35 +315,37 @@ class PromptTemplate(BaseWithVerMetadata):
     _extra_fields = ["arguments"]
     _top_level_fields = ["text"]
 
-    project_id: str
     text: str
+    project_id: Optional[str] = None
     arguments: Optional[List[str]] = None
 
 
 class Document(BaseWithVerMetadata):
     _top_level_fields = ["path", "origin"]
-    project_id: str
     path: str
+    project_id: Optional[str] = None
     origin: Optional[str] = None
 
 
 class Workflow(BaseWithVerMetadata):
     _top_level_fields = ["workflow_type"]
 
-    project_id: str
     workflow_type: WorkflowType
+    deployment: str
+    project_id: Optional[str] = None
     workflow_function: Optional[str] = None
     configuration: Optional[dict] = None
     graph: Optional[dict] = None
-    deployment: Optional[str] = None
+
+    def get_infer_path(self):
+        return f"{self.deployment}/api/workflows/{self.name}/infer"
 
 
-class ChatSession(BaseWithMetadata):
-    _extra_fields = ["history", "features", "state", "agent_name"]
-    _top_level_fields = ["username"]
+class ChatSession(BaseWithOwner):
+    _extra_fields = ["history"]
+    _top_level_fields = ["workflow_id"]
 
     workflow_id: str
-    user_id: str
     history: Optional[List[Message]] = []
 
     def to_conversation(self):
