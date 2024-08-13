@@ -15,112 +15,10 @@
 from datetime import datetime
 from enum import Enum
 from http.client import HTTPException
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Dict, Optional, Type, Union
 
 import yaml
 from pydantic import BaseModel
-
-
-# ============================== from llmapps/app/schema.py ==============================
-# Temporary: This was copied to here to avoid import from the app like this:
-# from llmapps.app.schema import Conversation, Message
-class ApiResponse(BaseModel):
-    success: bool
-    data: Optional[Union[list, Type[BaseModel], dict]] = None
-    error: Optional[str] = None
-
-    def with_raise(self, format=None) -> "ApiResponse":
-        if not self.success:
-            format = format or "API call failed: %s"
-            raise ValueError(format % self.error)
-        return self
-
-    def with_raise_http(self, format=None) -> "ApiResponse":
-        if not self.success:
-            format = format or "API call failed: %s"
-            raise HTTPException(status_code=400, detail=format % self.error)
-        return self
-
-
-class ChatRole(str, Enum):
-    Human = "Human"
-    AI = "AI"
-    System = "System"
-    User = "User"  # for co-pilot user (vs Human?)
-    Agent = "Agent"  # for co-pilot agent
-
-
-class Message(BaseModel):
-    role: ChatRole
-    content: str
-    extra_data: Optional[dict] = None
-    sources: Optional[List[dict]] = None
-    human_feedback: Optional[str] = None
-
-
-class Conversation(BaseModel):
-    messages: list[Message] = []
-    saved_index: int = 0
-
-    def __str__(self):
-        return "\n".join([f"{m.role}: {m.content}" for m in self.messages])
-
-    def add_message(self, role, content, sources=None):
-        self.messages.append(Message(role=role, content=content, sources=sources))
-
-    def to_list(self):
-        return self.dict()["messages"]
-        # return self.model_dump(mode="json")["messages"]
-
-    def to_dict(self):
-        return self.dict()["messages"]
-        # return self.model_dump(mode="json")["messages"]
-
-    @classmethod
-    def from_list(cls, data: list):
-        return cls.parse_obj({"messages": data or []})
-        # return cls.model_validate({"messages": data or []})
-
-
-class QueryItem(BaseModel):
-    question: str
-    session_name: Optional[str] = None
-    filter: Optional[List[Tuple[str, str]]] = None
-    data_source: Optional[str] = None
-
-
-class OutputMode(str, Enum):
-    Names = "names"
-    Short = "short"
-    Dict = "dict"
-    Details = "details"
-
-
-class DataSourceType(str, Enum):
-    relational = "relational"
-    vector = "vector"
-    graph = "graph"
-    key_value = "key-value"
-    column_family = "column-family"
-    storage = "storage"
-    other = "other"
-
-
-class ModelType(str, Enum):
-    model = "model"
-    adapter = "adapter"
-
-
-class WorkflowType(str, Enum):
-    ingestion = "ingestion"
-    application = "application"
-    data_processing = "data-processing"
-    training = "training"
-    evaluation = "evaluation"
-
-
-# ========================================================================================
-
 
 metadata_fields = [
     "id",
@@ -264,89 +162,26 @@ class BaseWithVerMetadata(BaseWithOwner):
     version: Optional[str] = ""
 
 
-class User(BaseWithMetadata):
-    _extra_fields = ["policy", "features"]
-    _top_level_fields = ["email", "full_name"]
+class ApiResponse(BaseModel):
+    success: bool
+    data: Optional[Union[list, Type[BaseModel], dict]] = None
+    error: Optional[str] = None
 
-    email: str
-    full_name: Optional[str] = None
-    features: Optional[dict[str, str]] = None
-    policy: Optional[dict[str, str]] = None
-    is_admin: Optional[bool] = False
+    def with_raise(self, format=None) -> "ApiResponse":
+        if not self.success:
+            format = format or "API call failed: %s"
+            raise ValueError(format % self.error)
+        return self
 
-
-class Project(BaseWithVerMetadata):
-    pass
-
-
-class DataSource(BaseWithVerMetadata):
-    _top_level_fields = ["data_source_type"]
-
-    data_source_type: DataSourceType
-    project_id: Optional[str] = None
-    category: Optional[str] = None
-    database_kwargs: Optional[dict[str, str]] = {}
+    def with_raise_http(self, format=None) -> "ApiResponse":
+        if not self.success:
+            format = format or "API call failed: %s"
+            raise HTTPException(status_code=400, detail=format % self.error)
+        return self
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task"]
-
-    project_id: Optional[str] = None
-    task: str
-    sources: Optional[List[str]] = None
-    path: str
-    producer: Optional[str] = None
-
-
-class Model(BaseWithVerMetadata):
-    _extra_fields = ["path", "producer", "deployment"]
-    _top_level_fields = ["model_type", "task"]
-
-    model_type: ModelType
-    base_model: str
-    project_id: Optional[str] = None
-    task: Optional[str] = None
-    path: Optional[str] = None
-    producer: Optional[str] = None
-    deployment: Optional[str] = None
-
-
-class PromptTemplate(BaseWithVerMetadata):
-    _extra_fields = ["arguments"]
-    _top_level_fields = ["text"]
-
-    text: str
-    project_id: Optional[str] = None
-    arguments: Optional[List[str]] = None
-
-
-class Document(BaseWithVerMetadata):
-    _top_level_fields = ["path", "origin"]
-    path: str
-    project_id: Optional[str] = None
-    origin: Optional[str] = None
-
-
-class Workflow(BaseWithVerMetadata):
-    _top_level_fields = ["workflow_type"]
-
-    workflow_type: WorkflowType
-    deployment: str
-    project_id: Optional[str] = None
-    workflow_function: Optional[str] = None
-    configuration: Optional[dict] = None
-    graph: Optional[dict] = None
-
-    def get_infer_path(self):
-        return f"{self.deployment}/api/workflows/{self.name}/infer"
-
-
-class ChatSession(BaseWithOwner):
-    _extra_fields = ["history"]
-    _top_level_fields = ["workflow_id"]
-
-    workflow_id: str
-    history: Optional[List[Message]] = []
-
-    def to_conversation(self):
-        return Conversation.from_list(self.history)
+class OutputMode(str, Enum):
+    Names = "names"
+    Short = "short"
+    Dict = "dict"
+    Details = "details"

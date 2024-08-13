@@ -19,11 +19,10 @@ from typing import List, Type, Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-import controller.src.sqldb as db
-from controller.src import model as api_models
-from controller.src.config import config, logger
-from controller.src.model import ApiResponse
-from controller.src.sqldb import Base
+import controller.src.db.sqldb as db
+import controller.src.schemas as api_models
+from controller.src.config import logger
+from controller.src.schemas import ApiResponse
 
 
 class SqlClient:
@@ -70,10 +69,10 @@ class SqlClient:
         """
         tables = None
         if names:
-            tables = [Base.metadata.tables[name] for name in names]
+            tables = [db.Base.metadata.tables[name] for name in names]
         if drop_old:
-            Base.metadata.drop_all(self.engine, tables=tables)
-        Base.metadata.create_all(self.engine, tables=tables, checkfirst=True)
+            db.Base.metadata.drop_all(self.engine, tables=tables)
+        db.Base.metadata.create_all(self.engine, tables=tables, checkfirst=True)
         return ApiResponse(success=True)
 
     def _create(self, session: sqlalchemy.orm.Session, db_class, obj) -> ApiResponse:
@@ -1294,6 +1293,3 @@ def _process_output(
         return items
     short = mode == api_models.OutputMode.Short
     return [item.to_dict(short=short) for item in items]
-
-
-client = SqlClient(config.sql_connection_str, verbose=config.verbose)

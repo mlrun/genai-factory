@@ -1,0 +1,25 @@
+[tool.ruff]
+extend-include = ["*.ipynb"]
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "F", # pyflakes
+    "W", # pycodestyle
+    "E", # pycodestyle
+    "I", # isort
+]
+exclude = ["*.ipynb"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+
+[tool.importlinter]
+root_packages = [
+    "controller.src",
+]
+include_external_packages = true

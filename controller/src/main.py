@@ -22,7 +22,8 @@ from tabulate import tabulate
 
 import controller.src.api as api
 from controller.src.config import config
-from controller.src.model import (
+from controller.src.db import client
+from controller.src.schemas import (
     DataSource,
     Document,
     Project,
@@ -30,7 +31,6 @@ from controller.src.model import (
     User,
     Workflow,
 )
-from controller.src.sqlclient import client
 
 
 @click.group()
@@ -108,8 +108,8 @@ def print_config():
 
 
 @click.command()
-@click.argument("project", type=str)
 @click.argument("path", type=str)
+@click.option("-p", "--project", type=str, help="Project name", default="default")
 @click.option("-n", "--name", type=str, help="Document name", default=None)
 @click.option("-l", "--loader", type=str, help="Type of data loader")
 @click.option(
@@ -120,12 +120,12 @@ def print_config():
 @click.option(
     "-f", "--from-file", is_flag=True, help="Take the document paths from the file"
 )
-def ingest(project, path, name, loader, metadata, version, data_source, from_file):
+def ingest(path, project, name, loader, metadata, version, data_source, from_file):
     """
     Ingest data into the data source.
 
-    :param project:     The project name to which the document belongs.
     :param path:        Path to the document
+    :param project:     The project name to which the document belongs.
     :param name:        Name of the document
     :param loader:      Type of data loader, web, .csv, .md, .pdf, .txt, etc.
     :param metadata:    Metadata Key value pair labels
@@ -201,7 +201,7 @@ def ingest(project, path, name, loader, metadata, version, data_source, from_fil
     help="Search filter Key value pair",
 )
 @click.option("-c", "--data-source", type=str, help="Data Source name")
-@click.option("-u", "--user", type=str, help="Username")
+@click.option("-u", "--user", type=str, help="Username", default="guest")
 @click.option("-s", "--session", type=str, help="Session ID")
 def infer(
     question: str, project: str, workflow_name: str, filter, data_source, user, session
