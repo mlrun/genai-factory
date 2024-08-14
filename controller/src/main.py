@@ -159,7 +159,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
         document=document,
         session=session,
     ).data
-
+    document = Document.from_dict(document).to_dict(to_datestr=True)
     # Send ingest to application:
     params = {
         "loader": loader,
