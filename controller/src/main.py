@@ -20,7 +20,7 @@ import click
 import yaml
 from tabulate import tabulate
 
-import controller.src.api as api
+from controller.src.api.utils import _send_to_application
 from controller.src.config import config
 from controller.src.db import client
 from controller.src.schemas import (
@@ -175,7 +175,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
         params["metadata"] = json.dumps({metadata[0]: metadata[1]})
 
     click.echo(f"Running Data Ingestion from: {path} with loader: {loader}")
-    response = api._send_to_application(
+    response = _send_to_application(
         path=f"data_sources/{data_source.name}/ingest",
         method="POST",
         data=json.dumps(data),
@@ -243,7 +243,7 @@ def infer(
     headers = {"x_username": user} if user else {}
 
     # Sent the event to the application's workflow:
-    response = api._send_to_application(
+    response = _send_to_application(
         path=path,
         method="POST",
         data=json.dumps(data),
