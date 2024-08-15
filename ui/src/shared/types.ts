@@ -58,7 +58,7 @@ export type User = {
   email?: string
   role?: string
   registered?: string
-  username: string
+  username?: string
   admin?: boolean
   token?: string
 }

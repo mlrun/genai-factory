@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Data from '@assets/data.json';
-import { UserSession } from '@shared/types';
+import { User, UserSession } from '@shared/types';
 
 class MockClient {
 
@@ -35,6 +35,14 @@ class MockClient {
       };
     }
     return Data;
+  }
+
+  async getUsers(username?: string): Promise<User[]> {
+    return [{
+      "name": "5c3c04ce538d461d91931112e14c0a37",
+      "username": "yhaviv@gmail.com",
+      "role": 'agent',
+    }];
   }
 
   async submitQuery(id: string, question: string) {

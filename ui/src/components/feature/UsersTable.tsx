@@ -1,12 +1,13 @@
-import { AddIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons'
+import { selectedUserAtom } from '@atoms/index'
+import { AddIcon, DeleteIcon, UpDownIcon } from '@chakra-ui/icons'
 import { Button, Flex, useDisclosure, useToast } from '@chakra-ui/react'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
 import FilterComponent from '@components/shared/Filter'
 import { colors } from '@shared/theme'
 import { DataRow, User } from '@shared/types'
+import { useAtom } from 'jotai'
 import React, { useMemo, useState } from 'react'
-import AddEditUserModal from './AddEditUserModal'
 
 const UsersTable: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<DataRow<Partial<User>>[]>([])
@@ -40,6 +41,8 @@ const UsersTable: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
 
+  const [selectedUser, setSelectedUser] = useAtom<User>(selectedUserAtom)
+
   const columns = [
     {
       name: 'Name',
@@ -62,6 +65,19 @@ const UsersTable: React.FC = () => {
       sortable: true
     }
   ]
+
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const users = await Client.getUsers()
+
+  //     if (users) {
+  //       setUsers(users)
+  //     } else {
+  //       setUsers([])
+  //     }
+  //   }
+  //   fetchData()
+  // }, [])
 
   const handleSave = (user: Partial<User>) => {
     if (user.id) {
@@ -102,17 +118,17 @@ const UsersTable: React.FC = () => {
   const contextActions = useMemo(() => {
     return (
       <Flex gap={4}>
-        {selectedRows.length === 1 && (
+        {selectedRows.length === 2 && (
           <Button
-            key="edit"
+            key="compare"
             style={{ backgroundColor: colors.gray700 }}
-            leftIcon={<EditIcon />}
+            leftIcon={<UpDownIcon />}
             onClick={() => {
-              setEditRow(selectedRows[0].data as User)
+              setSelectedUser(selectedRows[0].data as User)
               onOpen()
             }}
           >
-            Edit
+            Compare
           </Button>
         )}
         <Button
@@ -173,7 +189,7 @@ const UsersTable: React.FC = () => {
         subheaderComponent={subHeaderComponentMemo}
         filterText={filterText}
       />
-      <AddEditUserModal isOpen={isOpen} onClose={onClose} onSave={handleSave} user={editRow as User} />
+      {/* <AddEditUserModal isOpen={isOpen} onClose={onClose} onSave={handleSave} user={editRow as User} /> */}
     </Flex>
   )
 }

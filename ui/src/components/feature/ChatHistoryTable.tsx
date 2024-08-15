@@ -83,6 +83,7 @@ const ChatHistoryTable = () => {
       />
 
       <DataTableComponent
+        filterText={''}
         expandableRows
         title={'Chat Histories'}
         data={data}

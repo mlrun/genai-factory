@@ -24,3 +24,5 @@ export const messagesAtom = atom<ChatHistory[]>([]);
 export const conversationsAtom = atom<ChatHistory[]>([]);
 export const userAtom = atomWithStorage<User | null>('user', localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null);
 export const usernameAtom = atom<string>('');
+export const selectedUserAtom = atom<User>({ username: '', admin: false, token: '' });
+export const comparisonUserAtom = atom<User>({ username: '', admin: false, token: '' });

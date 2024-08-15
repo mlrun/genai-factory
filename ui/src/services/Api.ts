@@ -66,6 +66,17 @@ class ApiClient {
     }
   }
 
+  async getUsers(username?: string) {
+    try {
+      const response = await this.client.get(`/users`, {
+        headers: { 'x-username': username || 'guest' }
+      })
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
   async submitQuery(id: string, question: string, username?: string) {
     try {
       const response = await this.client.post(

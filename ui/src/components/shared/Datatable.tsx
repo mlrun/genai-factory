@@ -12,9 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useColorMode } from '@chakra-ui/react'
+import { comparisonUserAtom, selectedUserAtom } from '@atoms/index'
+import {
+  Box,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  useColorMode,
+  useDisclosure
+} from '@chakra-ui/react'
 import { colors } from '@shared/theme'
-import { DataRow } from '@shared/types'
+import { DataRow, User } from '@shared/types'
+import { useAtom } from 'jotai'
+import { useState } from 'react'
 import DataTable, { Alignment, TableColumn, createTheme } from 'react-data-table-component'
 
 createTheme(
@@ -54,6 +69,8 @@ type Props = {
   onSelectedRowChange?: (e: any) => void
   subheaderComponent?: React.ReactNode
   filterText: string
+  drawerComponent?: React.ReactNode
+  user?: User
 }
 
 const DataTableComponent = ({
@@ -64,9 +81,15 @@ const DataTableComponent = ({
   contextActions,
   onSelectedRowChange,
   subheaderComponent,
-  filterText
+  filterText,
+  drawerComponent
 }: Props) => {
   const { colorMode } = useColorMode()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedRow, setSelectedRow] = useState<DataRow<Partial<any>> | null>(null)
+  const [selectedUser, setSelectedUser] = useAtom<User>(selectedUserAtom)
+  const [comparisonUser, setComparisonUser] = useAtom<User>(comparisonUserAtom)
 
   const filteredItems = data.filter(
     item =>
@@ -76,27 +99,60 @@ const DataTableComponent = ({
       (item.data.user && item.data.user.toLowerCase().includes(filterText.toLowerCase()))
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ExpandedComponent = ({ data }: any) => <pre>{JSON.stringify(data, null, 2)}</pre>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setSelectedUser({ ...selectedUser, [name]: value })
+  }
+
   return (
-    <Box boxShadow="md" borderRadius="md">
-      <DataTable
-        expandableRowsComponent={ExpandedComponent}
-        expandableRows={expandableRows}
-        title={title}
-        theme={colorMode}
-        columns={columns}
-        data={filteredItems}
-        pagination
-        subHeader
-        subHeaderComponent={subheaderComponent}
-        persistTableHead
-        subHeaderAlign={Alignment.RIGHT}
-        selectableRows
-        onSelectedRowsChange={onSelectedRowChange}
-        contextActions={contextActions}
-      />
-    </Box>
+    <>
+      <Box boxShadow="md" borderRadius="md">
+        <DataTable
+          title={title}
+          theme={colorMode}
+          columns={columns}
+          data={filteredItems}
+          pagination
+          subHeader
+          subHeaderComponent={subheaderComponent}
+          persistTableHead
+          subHeaderAlign={Alignment.RIGHT}
+          selectableRows
+          onSelectedRowsChange={onSelectedRowChange}
+          contextActions={contextActions}
+          highlightOnHover
+          pointerOnHover
+          onRowClicked={row => {
+            setSelectedRow(row)
+            setSelectedUser(row.data)
+            onOpen()
+          }}
+        />
+      </Box>
+      <Drawer placement="right" size={'xl'} isOpen={isOpen} onClose={onClose}>
+        <DrawerContent>
+          <DrawerHeader borderBottomWidth="1px">{selectedRow?.data.name} </DrawerHeader>
+          <DrawerBody>
+            <Flex height={250} gap={10}>
+              <Flex width={'100%'} flexDirection={'column'}>
+                <FormControl id="name" mb={4}>
+                  <FormLabel>Name</FormLabel>
+                  <Input type="text" name="name" value={selectedUser.name || ''} onChange={handleChange} />
+                </FormControl>
+                <FormControl id="email" mb={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Input type="email" name="email" value={selectedUser.email || ''} onChange={handleChange} />
+                </FormControl>
+                <FormControl id="role" mb={4}>
+                  <FormLabel>Role</FormLabel>
+                  <Input type="text" name="role" value={selectedUser.role || ''} onChange={handleChange} />
+                </FormControl>
+              </Flex>
+            </Flex>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </>
   )
 }
 
