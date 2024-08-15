@@ -23,10 +23,9 @@ from controller.src.schemas import ApiResponse, Model, OutputMode
 router = APIRouter(prefix="/projects/{project_name}")
 
 
-@router.post("/models/{model_name}")
+@router.post("/models")
 def create_model(
     project_name: str,
-    model_name: str,
     model: Model,
     session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
@@ -35,7 +34,6 @@ def create_model(
     Create a new model in the database.
 
     :param project_name:    The name of the project to create the model in.
-    :param model_name:      The name of the model to create.
     :param model:           The model to create.
     :param session:         The database session.
     :param auth:            The authentication information.
@@ -47,7 +45,6 @@ def create_model(
         model.owner_id = client.get_user(user_name=auth.username, session=session).data[
             "id"
         ]
-    model.name = model_name
     model.project_id = client.get_project(
         project_name=project_name, session=session
     ).data["id"]

@@ -35,10 +35,9 @@ from controller.src.schemas import (
 router = APIRouter(prefix="/projects/{project_name}")
 
 
-@router.post("/data_sources/{data_source_name}")
+@router.post("/data_sources")
 def create_data_source(
     project_name: str,
-    data_source_name: str,
     data_source: DataSource,
     session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
@@ -47,7 +46,6 @@ def create_data_source(
     Create a new data source in the database.
 
     :param project_name:        The name of the project to create the data source in.
-    :param data_source_name:    The name of the data source to create.
     :param data_source:         The data source to create.
     :param session:             The database session.
     :param auth:                The authentication information.
@@ -59,7 +57,6 @@ def create_data_source(
         data_source.owner_id = client.get_user(
             user_name=auth.username, session=session
         ).data["id"]
-    data_source.name = data_source_name
     data_source.project_id = client.get_project(
         project_name=project_name, session=session
     ).data["id"]

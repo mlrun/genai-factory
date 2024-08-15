@@ -35,10 +35,9 @@ from controller.src.schemas import (
 router = APIRouter(prefix="/projects/{project_name}")
 
 
-@router.post("/workflows/{workflow_name}")
+@router.post("/workflows")
 def create_workflow(
     project_name: str,
-    workflow_name: str,
     workflow: Workflow,
     session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
@@ -47,7 +46,6 @@ def create_workflow(
     Create a new workflow in the database.
 
     :param project_name:    The name of the project to create the workflow in.
-    :param workflow_name:   The name of the workflow to create.
     :param workflow:        The workflow to create.
     :param session:         The database session.
     :param auth:            The authentication information.
@@ -59,7 +57,6 @@ def create_workflow(
         workflow.owner_id = client.get_user(
             user_name=auth.username, session=session
         ).data["id"]
-    workflow.name = workflow_name
     workflow.project_id = client.get_project(
         project_name=project_name, session=session
     ).data["id"]
@@ -166,6 +163,7 @@ def list_workflows(
         project_id=project_id,
         owner_id=owner_id,
         version=version,
+        workflow_type=workflow_type,
         labels_match=labels,
         output_mode=mode,
         session=session,

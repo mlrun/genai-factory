@@ -23,10 +23,9 @@ from controller.src.schemas import ApiResponse, OutputMode, PromptTemplate
 router = APIRouter(prefix="/projects/{project_name}")
 
 
-@router.post("/prompt_templates/{prompt_name}")
+@router.post("/prompt_templates")
 def create_prompt(
     project_name: str,
-    prompt_name: str,
     prompt: PromptTemplate,
     session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
@@ -35,7 +34,6 @@ def create_prompt(
     Create a new prompt in the database.
 
     :param project_name:    The name of the project to create the prompt in.
-    :param prompt_name:     The name of the prompt to create.
     :param prompt:          The prompt to create.
     :param session:         The database session.
     :param auth:            The authentication information.
@@ -47,7 +45,6 @@ def create_prompt(
         prompt.owner_id = client.get_user(
             user_name=auth.username, session=session
         ).data["id"]
-    prompt.name = prompt_name
     prompt.project_id = client.get_project(
         project_name=project_name, session=session
     ).data["id"]

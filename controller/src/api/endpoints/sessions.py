@@ -21,10 +21,9 @@ from controller.src.schemas import ApiResponse, ChatSession, OutputMode
 router = APIRouter(prefix="/users/{user_name}")
 
 
-@router.post("/sessions/{session_name}")
+@router.post("/sessions")
 def create_session(
     user_name: str,
-    session_name: str,
     chat_session: ChatSession,
     session=Depends(get_db),
 ) -> ApiResponse:
@@ -32,7 +31,6 @@ def create_session(
     Create a new session in the database.
 
     :param user_name:       The name of the user to create the session for.
-    :param session_name:    The name of the session to create.
     :param chat_session:    The session to create.
     :param session:         The database session.
 
@@ -85,6 +83,25 @@ def update_session(
         "id"
     ]
     return client.update_chat_session(chat_session=chat_session, session=session)
+
+
+@router.delete("/sessions/{session_id}")
+def delete_session(
+    user_name: str, session_id: str, session=Depends(get_db)
+) -> ApiResponse:
+    """
+    Delete a session from the database.
+
+    :param user_name:       The name of the user to delete the session for.
+    :param session_id:      The ID of the session to delete.
+    :param session:         The database session.
+
+    :return:    The response from the database.
+    """
+    user_id = client.get_user(user_name=user_name, session=session).data["id"]
+    return client.delete_chat_session(
+        session_name=session_id, user_id=user_id, session=session
+    )
 
 
 @router.get("/sessions")

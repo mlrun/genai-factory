@@ -84,7 +84,7 @@ def delete_user(user_name: str, session=Depends(get_db)) -> ApiResponse:
     return client.delete_user(user_name=user_name, session=session)
 
 
-@router.get("/users/users")
+@router.get("/users")
 def list_users(
     email: str = None,
     full_name: str = None,

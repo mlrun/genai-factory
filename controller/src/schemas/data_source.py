@@ -33,5 +33,4 @@ class DataSource(BaseWithVerMetadata):
 
     data_source_type: DataSourceType
     project_id: Optional[str] = None
-    category: Optional[str] = None
     database_kwargs: Optional[dict[str, str]] = {}
