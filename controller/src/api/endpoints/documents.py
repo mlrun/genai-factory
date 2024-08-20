@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends
 
 from controller.src.api.utils import AuthInfo, get_auth_user, get_db
 from controller.src.db import client
-from controller.src.schemas import ApiResponse, Document, OutputMode
+from controller.src.schemas import APIResponse, Document, OutputMode
 
 router = APIRouter(prefix="/projects/{project_name}")
 
@@ -28,48 +28,50 @@ def create_document(
     project_name: str,
     document: Document,
     session=Depends(get_db),
-    auth: AuthInfo = Depends(get_auth_user),
-) -> ApiResponse:
+) -> APIResponse:
     """
     Create a new document in the database.
 
     :param project_name:    The name of the project to create the document in.
     :param document:        The document to create.
     :param session:         The database session.
-    :param auth:            The authentication information.
 
     :return:    The response from the database.
     """
-    # If the owner ID is not provided, get it from the username
-    if document.owner_id is None:
-        document.owner_id = client.get_user(
-            user_name=auth.username, session=session
-        ).data["id"]
-    document.project_id = client.get_project(
-        project_name=project_name, session=session
-    ).data["id"]
-    return client.create_document(document=document, session=session)
+    try:
+        data = client.create_document(document=document, session=session)
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            error=f"Failed to create document {document.name} in project {project_name}: {e}",
+        )
 
 
-@router.get("/documents/{document_name}")
-def get_document(
-    project_name: str, document_name: str, session=Depends(get_db)
-) -> ApiResponse:
+@router.get("/documents/{uid}")
+def get_document(project_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
     """
     Get a document from the database.
 
     :param project_name:    The name of the project to get the document from.
-    :param document_name:   The name of the document to get.
+    :param uid:             The UID of the document to get.
     :param session:         The database session.
 
     :return:    The document from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).data[
-        "id"
-    ]
-    return client.get_document(
-        project_id=project_id, document_name=document_name, session=session
-    )
+    project_id = client.get_project(project_name=project_name, session=session).uid
+    try:
+        data = client.get_document(project_id=project_id, uid=uid, session=session)
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Document with uid = {uid} not found"
+            )
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            error=f"Failed to get document {uid} in project {project_name}: {e}",
+        )
 
 
 @router.put("/documents/{document_name}")
@@ -78,7 +80,7 @@ def update_document(
     document: Document,
     document_name: str,
     session=Depends(get_db),
-) -> ApiResponse:
+) -> APIResponse:
     """
     Update a document in the database.
 
@@ -89,50 +91,55 @@ def update_document(
 
     :return:    The response from the database.
     """
-    document.project_id = client.get_project(
-        project_name=project_name, session=session
-    ).data["id"]
-    if document_name != document.name:
-        raise ValueError(
-            f"Document name does not match: {document_name} != {document.name}"
+    try:
+        data = client.update_document(document=document, session=session)
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            error=f"Failed to update document {document.name} in project {project_name}: {e}",
         )
-    return client.update_document(document=document, session=session)
 
 
-@router.delete("/documents/{document_id}")
+@router.delete("/documents/{uid}")
 def delete_document(
-    project_name: str, document_id: str, session=Depends(get_db)
-) -> ApiResponse:
+    project_name: str, uid: str, session=Depends(get_db)
+) -> APIResponse:
     """
     Delete a document from the database.
 
     :param project_name:    The name of the project to delete the document from.
-    :param document_id:     The ID of the document to delete.
+    :param uid:             The UID of the document to delete.
     :param session:         The database session.
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).data[
-        "id"
-    ]
-    return client.delete_document(
-        project_id=project_id, document_id=document_id, session=session
-    )
+    project_id = client.get_project(project_name=project_name, session=session).uid
+    try:
+        client.delete_document(project_id=project_id, uid=uid, session=session)
+        return APIResponse(success=True)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            error=f"Failed to delete document {uid} in project {project_name}: {e}",
+        )
 
 
 @router.get("/documents")
 def list_documents(
     project_name: str,
+    name: str = None,
     version: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
-    mode: OutputMode = OutputMode.Details,
+    mode: OutputMode = OutputMode.DETAILS,
     session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
-) -> ApiResponse:
+) -> APIResponse:
     """
     List documents in the database.
 
     :param project_name:    The name of the project to list the documents from.
+    :param name:            The name to filter by.
     :param version:         The version to filter by.
     :param labels:          The labels to filter by.
     :param mode:            The output mode.
@@ -141,15 +148,21 @@ def list_documents(
 
     :return:    The response from the database.
     """
-    owner_id = client.get_user(user_name=auth.username, session=session).data["id"]
-    project_id = client.get_project(project_name=project_name, session=session).data[
-        "id"
-    ]
-    return client.list_documents(
-        project_id=project_id,
-        owner_id=owner_id,
-        version=version,
-        labels_match=labels,
-        output_mode=mode,
-        session=session,
-    )
+    owner_id = client.get_user(user_name=auth.username, session=session).uid
+    project_id = client.get_project(project_name=project_name, session=session).uid
+    try:
+        data = client.list_documents(
+            project_id=project_id,
+            name=name,
+            owner_id=owner_id,
+            version=version,
+            labels_match=labels,
+            output_mode=mode,
+            session=session,
+        )
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            error=f"Failed to list documents in project {project_name}: {e}",
+        )

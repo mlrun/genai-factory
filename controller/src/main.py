@@ -58,7 +58,7 @@ def initdb():
             is_admin=True,
         ),
         session=session,
-    ).data["id"]
+    ).uid
 
     # Create project:
     click.echo("Creating default project")
@@ -69,7 +69,7 @@ def initdb():
             owner_id=user_id,
         ),
         session=session,
-    ).data["id"]
+    ).uid
 
     # Create data source:
     click.echo("Creating default data source")
@@ -93,7 +93,7 @@ def initdb():
             owner_id=user_id,
             project_id=project_id,
             workflow_type="application",
-            deployment="http://localhost:8000",
+            deployment="http://localhost:8000/api/workflows/default",
         ),
         session=session,
     )
@@ -136,14 +136,10 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     :return:    None
     """
     session = client.get_db_session()
-    project = client.get_project(project_name=project, session=session).data
-    project = Project.from_dict(project)
-    data_source = client.get_data_source(
-        project_id=project.id,
-        data_source_name=data_source or "default",
-        session=session,
-    ).data
-    data_source = DataSource.from_dict(data_source)
+    project = client.get_project(project_name=project, session=session)
+    data_source = client.list_data_sources(
+        project_id=project.uid, name=data_source, session=session
+    )[0]
 
     # Create document from path:
     document = Document(
@@ -151,7 +147,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
         version=version,
         path=path,
         owner_id=data_source.owner_id,
-        project_id=project.id,
+        project_id=project.uid,
     )
 
     # Add document to the database:
@@ -159,7 +155,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
         document=document,
         session=session,
     )
-    document = Document.from_dict(response.data).to_dict(to_datestr=True)
+    document = response.to_dict(to_datestr=True)
 
     # Send ingest to application:
     params = {
@@ -222,13 +218,12 @@ def infer(
     """
     db_session = client.get_db_session()
 
-    project = client.get_project(project_name=project, session=db_session).data
+    project = client.get_project(project_name=project, session=db_session)
     # Getting the workflow:
-    workflow = client.get_workflow(
-        project_id=project["id"], workflow_name=workflow_name, session=db_session
-    ).data
-    workflow = Workflow.from_dict(workflow)
-    path = Workflow.get_infer_path(workflow)
+    workflow = client.list_workflows(
+        project_id=project.uid, name=workflow_name, session=db_session
+    )[0]
+    path = workflow.get_infer_path()
 
     query = QueryItem(
         question=question,
@@ -239,7 +234,7 @@ def infer(
 
     data = {
         "item": query.dict(),
-        "workflow": workflow.dict(),
+        "workflow": workflow.to_dict(short=True),
     }
     headers = {"x_username": user} if user else {}
 
@@ -282,7 +277,7 @@ def list_users(user, email):
     """
     click.echo("Running List Users")
 
-    data = client.list_users(email, user, output_mode="short").data
+    data = client.list_users(email, user, output_mode="short")
     table = format_table_results(data)
     click.echo(table)
 
@@ -309,9 +304,9 @@ def list_data_sources(owner, project, version, source_type, metadata):
     """
     click.echo("Running List Collections")
     if owner:
-        owner = client.get_user(username=owner).data["id"]
+        owner = client.get_user(username=owner).uid
     if project:
-        project = client.get_project(project_name=project).data["id"]
+        project = client.get_project(project_name=project).uid
 
     data = client.list_data_sources(
         owner_id=owner,
@@ -320,7 +315,7 @@ def list_data_sources(owner, project, version, source_type, metadata):
         data_source_type=source_type,
         labels_match=metadata,
         output_mode="short",
-    ).data
+    )
     table = format_table_results(data)
     click.echo(table)
 
@@ -352,18 +347,18 @@ def update_data_source(name, project, owner, description, source_type, labels):
 
     session = client.get_db_session()
     # check if the collection exists, if it does, update it, otherwise create it
-    project = client.get_project(project_name=project, session=session).data
-    collection_exists = client.get_data_source(
-        project_id=project["id"],
+    project = client.get_project(project_name=project, session=session)
+    data_source = client.list_data_sources(
+        project_id=project.uid,
         data_source_name=name,
         session=session,
-    ).success
+    )
 
-    if collection_exists:
+    if data_source is not None:
         client.update_data_source(
             session=session,
             collection=DataSource(
-                project_id=project["id"],
+                project_id=project.uid,
                 name=name,
                 description=description,
                 data_source_type=source_type,
@@ -371,10 +366,10 @@ def update_data_source(name, project, owner, description, source_type, labels):
             ),
         ).with_raise()
     else:
-        client.create_collection(
+        client.create_data_source(
             session=session,
-            collection=DataSource(
-                project_id=project["id"],
+            data_source=DataSource(
+                project_id=project.uid,
                 name=name,
                 description=description,
                 owner_name=owner,
@@ -401,10 +396,10 @@ def list_sessions(user, last, created):
     click.echo("Running List Sessions")
 
     if user:
-        user = client.get_user(user_name=user).data["id"]
+        user = client.get_user(user_name=user).uid
     data = client.list_chat_sessions(
         user_id=user, created_after=created, last=last, output_mode="short"
-    ).data
+    )
     table = format_table_results(data)
     click.echo(table)
 

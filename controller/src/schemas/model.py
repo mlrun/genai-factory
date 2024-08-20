@@ -19,8 +19,8 @@ from controller.src.schemas.base import BaseWithVerMetadata
 
 
 class ModelType(str, Enum):
-    model = "model"
-    adapter = "adapter"
+    MODEL = "model"
+    ADAPTER = "adapter"
 
 
 class Model(BaseWithVerMetadata):
@@ -29,8 +29,8 @@ class Model(BaseWithVerMetadata):
 
     model_type: ModelType
     base_model: str
-    project_id: Optional[str] = None
-    task: Optional[str] = None
-    path: Optional[str] = None
-    producer: Optional[str] = None
-    deployment: Optional[str] = None
+    project_id: str
+    task: Optional[str]
+    path: Optional[str]
+    producer: Optional[str]
+    deployment: Optional[str]

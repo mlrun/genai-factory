@@ -22,25 +22,25 @@ from controller.src.schemas.base import BaseWithOwner
 
 class QueryItem(BaseModel):
     question: str
-    session_name: Optional[str] = None
-    filter: Optional[List[Tuple[str, str]]] = None
-    data_source: Optional[str] = None
+    session_id: Optional[str]
+    filter: Optional[List[Tuple[str, str]]]
+    data_source: Optional[str]
 
 
 class ChatRole(str, Enum):
-    Human = "Human"
+    HUMAN = "Human"
     AI = "AI"
-    System = "System"
-    User = "User"  # for co-pilot user (vs Human?)
-    Agent = "Agent"  # for co-pilot agent
+    SYSTEM = "System"
+    USER = "User"  # for co-pilot user (vs Human?)
+    AGENT = "Agent"  # for co-pilot agent
 
 
 class Message(BaseModel):
     role: ChatRole
     content: str
-    extra_data: Optional[dict] = None
-    sources: Optional[List[dict]] = None
-    human_feedback: Optional[str] = None
+    extra_data: Optional[dict]
+    sources: Optional[List[dict]]
+    human_feedback: Optional[str]
 
 
 class ChatSession(BaseWithOwner):

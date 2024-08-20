@@ -42,4 +42,4 @@ RUN pip install -r /controller/requirements.txt
 RUN python -m controller.src.main initdb
 
 # Run the controller's API server:
-CMD ["uvicorn", "controller.src.api.api:app", "--port", "8001"]
+CMD ["uvicorn", "controller.src.api:app", "--port", "8001"]

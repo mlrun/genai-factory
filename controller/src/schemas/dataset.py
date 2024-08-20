@@ -20,8 +20,8 @@ from controller.src.schemas.base import BaseWithVerMetadata
 class Dataset(BaseWithVerMetadata):
     _top_level_fields = ["task"]
 
-    project_id: Optional[str] = None
     task: str
-    sources: Optional[List[str]] = None
     path: str
-    producer: Optional[str] = None
+    project_id: str
+    sources: Optional[List[str]]
+    producer: Optional[str]

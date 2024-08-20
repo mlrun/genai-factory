@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from enum import Enum
 from typing import Optional
 
@@ -19,22 +20,24 @@ from controller.src.schemas.base import BaseWithVerMetadata
 
 
 class WorkflowType(str, Enum):
-    ingestion = "ingestion"
-    application = "application"
-    data_processing = "data-processing"
-    training = "training"
-    evaluation = "evaluation"
+    INGESTION = "ingestion"
+    APPLICATION = "application"
+    DATA_PROCESSING = "data-processing"
+    TRAINING = "training"
+    EVALUATION = "evaluation"
 
 
 class Workflow(BaseWithVerMetadata):
     _top_level_fields = ["workflow_type"]
 
     workflow_type: WorkflowType
-    deployment: str
-    project_id: Optional[str] = None
-    workflow_function: Optional[str] = None
-    configuration: Optional[dict] = None
-    graph: Optional[dict] = None
+    project_id: str
+    deployment: Optional[str]
+    workflow_function: Optional[str]
+    configuration: Optional[dict]
+    graph: Optional[dict]
 
     def get_infer_path(self):
-        return f"{self.deployment}/api/workflows/{self.name}/infer"
+        if self.deployment is None:
+            return None
+        return os.path.join(self.deployment, "infer")

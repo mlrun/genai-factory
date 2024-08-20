@@ -19,18 +19,18 @@ from controller.src.schemas.base import BaseWithVerMetadata
 
 
 class DataSourceType(str, Enum):
-    relational = "relational"
-    vector = "vector"
-    graph = "graph"
-    key_value = "key-value"
-    column_family = "column-family"
-    storage = "storage"
-    other = "other"
+    RELATIONAL = "relational"
+    VECTOR = "vector"
+    GRAPH = "graph"
+    KEY_VALUE = "key-value"
+    COLUMN_FAMILY = "column-family"
+    STORAGE = "storage"
+    OTHER = "other"
 
 
 class DataSource(BaseWithVerMetadata):
     _top_level_fields = ["data_source_type"]
 
     data_source_type: DataSourceType
-    project_id: Optional[str] = None
+    project_id: str
     database_kwargs: Optional[dict[str, str]] = {}

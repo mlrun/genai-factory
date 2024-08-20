@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import ApiResponse, Base, OutputMode
+from .base import APIResponse, Base, OutputMode
 from .data_source import DataSource, DataSourceType
 from .dataset import Dataset
 from .document import Document

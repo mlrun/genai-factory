@@ -22,5 +22,5 @@ class PromptTemplate(BaseWithVerMetadata):
     _top_level_fields = ["text"]
 
     text: str
-    project_id: Optional[str] = None
-    arguments: Optional[List[str]] = None
+    project_id: str
+    arguments: Optional[List[str]]

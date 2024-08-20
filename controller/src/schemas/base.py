@@ -21,7 +21,7 @@ import yaml
 from pydantic import BaseModel
 
 metadata_fields = [
-    "id",
+    "uid",
     "name",
     "description",
     "labels",
@@ -124,7 +124,7 @@ class Base(BaseModel):
         }
         labels = obj_dict.pop("labels", None)
         if uid:
-            obj_dict["id"] = uid
+            obj_dict["uid"] = uid
         obj = obj_class(**obj_dict)
         if labels:
             obj.labels.clear()
@@ -147,33 +147,33 @@ class Base(BaseModel):
 
 class BaseWithMetadata(Base):
     name: str
-    id: Optional[str] = None
-    description: Optional[str] = None
-    labels: Optional[Dict[str, Union[str, None]]] = None
-    created: Optional[Union[str, datetime]] = None
-    updated: Optional[Union[str, datetime]] = None
+    uid: Optional[str]
+    description: Optional[str]
+    labels: Optional[Dict[str, Union[str, None]]]
+    created: Optional[Union[str, datetime]]
+    updated: Optional[Union[str, datetime]]
 
 
 class BaseWithOwner(BaseWithMetadata):
-    owner_id: Optional[str] = None
+    owner_id: str
 
 
 class BaseWithVerMetadata(BaseWithOwner):
     version: Optional[str] = ""
 
 
-class ApiResponse(BaseModel):
+class APIResponse(BaseModel):
     success: bool
-    data: Optional[Union[list, Type[BaseModel], dict]] = None
-    error: Optional[str] = None
+    data: Optional[Union[list, Type[BaseModel], dict]]
+    error: Optional[str]
 
-    def with_raise(self, format=None) -> "ApiResponse":
+    def with_raise(self, format=None) -> "APIResponse":
         if not self.success:
             format = format or "API call failed: %s"
             raise ValueError(format % self.error)
         return self
 
-    def with_raise_http(self, format=None) -> "ApiResponse":
+    def with_raise_http(self, format=None) -> "APIResponse":
         if not self.success:
             format = format or "API call failed: %s"
             raise HTTPException(status_code=400, detail=format % self.error)
@@ -181,7 +181,7 @@ class ApiResponse(BaseModel):
 
 
 class OutputMode(str, Enum):
-    Names = "names"
-    Short = "short"
-    Dict = "dict"
-    Details = "details"
+    NAMES = "names"
+    SHORT = "short"
+    DICT = "dict"
+    DETAILS = "details"

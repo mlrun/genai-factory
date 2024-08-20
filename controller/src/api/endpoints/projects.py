@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends
 
 from controller.src.api.utils import get_db
 from controller.src.db import client
-from controller.src.schemas import ApiResponse, OutputMode, Project
+from controller.src.schemas import APIResponse, OutputMode, Project
 
 router = APIRouter()
 
@@ -27,7 +27,7 @@ router = APIRouter()
 def create_project(
     project: Project,
     session=Depends(get_db),
-) -> ApiResponse:
+) -> APIResponse:
     """
     Create a new project in the database.
 
@@ -36,11 +36,17 @@ def create_project(
 
     :return:    The response from the database.
     """
-    return client.create_project(project=project, session=session)
+    try:
+        data = client.create_project(project=project, session=session)
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False, error=f"Failed to create project {project.name}: {e}"
+        )
 
 
 @router.get("/projects/{project_name}")
-def get_project(project_name: str, session=Depends(get_db)) -> ApiResponse:
+def get_project(project_name: str, session=Depends(get_db)) -> APIResponse:
     """
     Get a project from the database.
 
@@ -49,7 +55,17 @@ def get_project(project_name: str, session=Depends(get_db)) -> ApiResponse:
 
     :return:    The project from the database.
     """
-    return client.get_project(project_name=project_name, session=session)
+    try:
+        data = client.get_project(project_name=project_name, session=session)
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Project with name {project_name} not found"
+            )
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False, error=f"Failed to get project {project_name}: {e}"
+        )
 
 
 @router.put("/projects/{project_name}")
@@ -57,7 +73,7 @@ def update_project(
     project: Project,
     project_name: str,
     session=Depends(get_db),
-) -> ApiResponse:
+) -> APIResponse:
     """
     Update a project in the database.
 
@@ -67,15 +83,17 @@ def update_project(
 
     :return:    The response from the database.
     """
-    if project_name != project.name:
-        raise ValueError(
-            f"Project name does not match: {project_name} != {project.name}"
+    try:
+        data = client.update_project(project=project, session=session)
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False, error=f"Failed to update project {project_name}: {e}"
         )
-    return client.update_project(project=project, session=session)
 
 
 @router.delete("/projects/{project_name}")
-def delete_project(project_name: str, session=Depends(get_db)) -> ApiResponse:
+def delete_project(project_name: str, session=Depends(get_db)) -> APIResponse:
     """
     Delete a project from the database.
 
@@ -84,19 +102,29 @@ def delete_project(project_name: str, session=Depends(get_db)) -> ApiResponse:
 
     :return:    The response from the database.
     """
-    return client.delete_project(project_name=project_name, session=session)
+    project = client.get_project(project_name=project_name, session=session)
+
+    try:
+        client.delete_project(uid=project.uid, session=session)
+        return APIResponse(success=True)
+    except Exception as e:
+        return APIResponse(
+            success=False, error=f"Failed to delete project {project_name}: {e}"
+        )
 
 
 @router.get("/projects")
 def list_projects(
+    name: str = None,
     owner_name: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
-    mode: OutputMode = OutputMode.Details,
+    mode: OutputMode = OutputMode.DETAILS,
     session=Depends(get_db),
-) -> ApiResponse:
+) -> APIResponse:
     """
     List projects in the database.
 
+    :param name:        The name of the project to filter by.
     :param owner_name:  The name of the owner to filter by.
     :param labels:      The labels to filter by.
     :param mode:        The output mode.
@@ -105,9 +133,17 @@ def list_projects(
     :return:    The response from the database.
     """
     if owner_name is not None:
-        owner_id = client.get_user(user_name=owner_name, session=session).data["id"]
+        owner_id = client.get_user(user_name=owner_name, session=session).uid
     else:
         owner_id = None
-    return client.list_projects(
-        owner_id=owner_id, labels_match=labels, output_mode=mode, session=session
-    )
+    try:
+        data = client.list_projects(
+            owner_id=owner_id,
+            labels_match=labels,
+            output_mode=mode,
+            session=session,
+            name=name,
+        )
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(success=False, error=f"Failed to list projects: {e}")
