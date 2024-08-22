@@ -1,195 +1,125 @@
-import { selectedUserAtom } from '@atoms/index'
-import { AddIcon, DeleteIcon, UpDownIcon } from '@chakra-ui/icons'
+// Copyright 2024 Iguazio
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { usersAtom, usersWithFetchAtom } from '@atoms/apiAtoms'
+import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { Button, Flex, useDisclosure, useToast } from '@chakra-ui/react'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
 import FilterComponent from '@components/shared/Filter'
-import { colors } from '@shared/theme'
-import { DataRow, User } from '@shared/types'
+import Client from '@services/Api'
+import { User } from '@shared/types'
 import { useAtom } from 'jotai'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { TableColumn } from 'react-data-table-component'
+import AddEditUserModal from './AddEditUserModal'
 
 const UsersTable: React.FC = () => {
-  const [selectedRows, setSelectedRows] = useState<DataRow<Partial<User>>[]>([])
-  const [data, setData] = useState<DataRow<Partial<User>>[]>([
-    { id: 1, data: { name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', registered: '2021-01-10' } },
-    { id: 2, data: { name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User', registered: '2021-02-14' } },
-    {
-      id: 3,
-      data: { name: 'Alice Johnson', email: 'alice.johnson@example.com', role: 'User', registered: '2021-03-20' }
-    },
-    { id: 4, data: { name: 'Bob Brown', email: 'bob.brown@example.com', role: 'Moderator', registered: '2021-04-18' } },
-    {
-      id: 5,
-      data: { name: 'Charlie Davis', email: 'charlie.davis@example.com', role: 'User', registered: '2021-05-22' }
-    },
-    { id: 6, data: { name: 'Diana Evans', email: 'diana.evans@example.com', role: 'User', registered: '2021-06-25' } },
-    { id: 7, data: { name: 'Frank Green', email: 'frank.green@example.com', role: 'Admin', registered: '2021-07-30' } },
-    { id: 8, data: { name: 'Grace Hill', email: 'grace.hill@example.com', role: 'User', registered: '2021-08-11' } },
-    {
-      id: 9,
-      data: { name: 'Henry Irving', email: 'henry.irving@example.com', role: 'User', registered: '2021-09-15' }
-    },
-    {
-      id: 10,
-      data: { name: 'Isabel Jackson', email: 'isabel.jackson@example.com', role: 'Moderator', registered: '2021-10-19' }
-    }
-  ])
-  const [editRow, setEditRow] = useState<User>()
+  const [selectedRows, setSelectedRows] = useState<User[]>([])
+  const [, fetchUsers] = useAtom(usersWithFetchAtom)
+
+  const [editRow, setEditRow] = useState<User>({ name: '', email: '', full_name: '' })
   const [filterText, setFilterText] = useState('')
 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
+  const [users] = useAtom(usersAtom)
 
-  const [selectedUser, setSelectedUser] = useAtom<User>(selectedUserAtom)
+  const [columns] = useState([
+    { name: 'Username', selector: (row: Partial<User>) => row.name ?? '', sortable: true },
+    { name: 'Email', selector: (row: Partial<User>) => row.email ?? '', sortable: true },
+    { name: 'Full Name', selector: (row: Partial<User>) => row.full_name ?? '', sortable: true }
+  ])
 
-  const columns = [
-    {
-      name: 'Name',
-      selector: (row: DataRow<Partial<User>>) => row.data.name ?? '',
-      sortable: true
-    },
-    {
-      name: 'Email',
-      selector: (row: DataRow<Partial<User>>) => row.data.email ?? '',
-      sortable: true
-    },
-    {
-      name: 'Role',
-      selector: (row: DataRow<Partial<User>>) => row.data.role ?? '',
-      sortable: true
-    },
-    {
-      name: 'Registered',
-      selector: (row: DataRow<Partial<User>>) => row.data.registered ?? '',
-      sortable: true
-    }
-  ]
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const users = await Client.getUsers()
-
-  //     if (users) {
-  //       setUsers(users)
-  //     } else {
-  //       setUsers([])
-  //     }
-  //   }
-  //   fetchData()
-  // }, [])
-
-  const handleSave = (user: Partial<User>) => {
-    if (user.id) {
-      setData(data.map(item => (item.data.id === user.id ? { id: item.id, data: user } : item)))
-      toast({
-        title: 'User updated.',
-        description: 'The user has been updated successfully.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true
-      })
-    } else {
-      const newId = data.length ? Math.max(...data.map(item => item.id)) + 1 : 1
-      const newUser = { id: newId, data: user }
-      setData([...data, newUser])
-      toast({
-        title: 'User added.',
-        description: 'A new user has been added successfully.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true
-      })
+  const handleSave = async (user: User) => {
+    try {
+      if (user.uid) {
+        await Client.updateUser(user.uid, user)
+        toast({ title: 'User updated.', status: 'success', duration: 3000, isClosable: true })
+      } else {
+        await Client.createUser(user)
+        toast({ title: 'User added successfully.', status: 'success', duration: 3000, isClosable: true })
+      }
+      await fetchUsers()
+      onClose()
+    } catch (error) {
+      console.error('Error saving user:', error)
+      toast({ title: 'Error saving user.', status: 'error', duration: 3000, isClosable: true })
     }
   }
 
-  const handleDelete = () => {
-    // setData(data.filter(item => !selectedRows.includes(item.data as User)))
-    setSelectedRows([])
-    toast({
-      title: 'Users deleted.',
-      description: 'The selected users have been deleted successfully.',
-      status: 'success',
-      duration: 3000,
-      isClosable: true
-    })
-  }
+  const handleDelete = useCallback(async () => {
+    try {
+      await Promise.all(selectedRows.map(row => Client.deleteUser(row.uid as string)))
+      setSelectedRows([])
+      await fetchUsers()
+      toast({ title: 'Users deleted.', status: 'success', duration: 3000, isClosable: true })
+    } catch (error) {
+      console.error('Error deleting users:', error)
+      toast({ title: 'Error deleting users.', status: 'error', duration: 3000, isClosable: true })
+    }
+  }, [fetchUsers, selectedRows, toast])
 
-  const contextActions = useMemo(() => {
-    return (
-      <Flex gap={4}>
-        {selectedRows.length === 2 && (
-          <Button
-            key="compare"
-            style={{ backgroundColor: colors.gray700 }}
-            leftIcon={<UpDownIcon />}
-            onClick={() => {
-              setSelectedUser(selectedRows[0].data as User)
-              onOpen()
-            }}
-          >
-            Compare
-          </Button>
-        )}
-        <Button
-          key="delete"
-          style={{ backgroundColor: colors.danger }}
-          leftIcon={<DeleteIcon />}
-          onClick={handleDelete}
-        >
-          Delete
-        </Button>
-      </Flex>
-    )
-  }, [selectedRows])
+  const contextActions = useMemo(
+    () => (
+      <Button key="delete" leftIcon={<DeleteIcon />} onClick={handleDelete}>
+        Delete
+      </Button>
+    ),
+    [handleDelete]
+  )
 
-  const subHeaderComponentMemo = useMemo(() => {
-    return (
+  const subHeaderComponentMemo = useMemo(
+    () => (
       <Flex gap={4}>
-        <FilterComponent
-          onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
-          filterText={filterText}
-        />
+        <FilterComponent onFilter={e => setFilterText(e.target.value)} filterText={filterText} />
         <Button
-          bg={colors.mintDark}
-          _hover={{ backgroundColor: colors.mint }}
           leftIcon={<AddIcon />}
           onClick={() => {
-            setEditRow({ id: '', name: '', email: '', role: '', registered: '', username: '' })
+            setEditRow({ name: '', email: '', full_name: '' })
             onOpen()
           }}
         >
-          Add New
+          New
         </Button>
       </Flex>
-    )
-  }, [filterText])
+    ),
+    [filterText]
+  )
 
   return (
-    <Flex p={4} flexDirection={'column'} flexGrow={'grow'} width={'100%'}>
+    <Flex p={4} flexDirection={'column'} width={'100%'}>
       <Breadcrumbs
         crumbs={[
-          {
-            page: 'Admin',
-            url: '/admin'
-          },
-          {
-            page: 'Users',
-            url: '/users'
-          }
+          { page: 'Admin', url: '/admin' },
+          { page: 'Users', url: '/users' }
         ]}
       />
-
       <DataTableComponent
         title={'Users'}
-        data={data}
-        columns={columns}
+        data={users}
+        columns={columns as TableColumn<Partial<User>>[]}
         contextActions={contextActions}
         onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
         subheaderComponent={subHeaderComponentMemo}
         filterText={filterText}
       />
-      {/* <AddEditUserModal isOpen={isOpen} onClose={onClose} onSave={handleSave} user={editRow as User} /> */}
+      <AddEditUserModal isOpen={isOpen} onClose={onClose} onSave={handleSave} user={editRow} />
     </Flex>
   )
 }

@@ -19,6 +19,7 @@ import DataTableComponent from '@components/shared/Datatable'
 import { colors } from '@shared/theme'
 import { DataRow } from '@shared/types'
 import { useMemo, useState } from 'react'
+import { TableColumn } from 'react-data-table-component'
 
 type ChatHistory = {
   user: string
@@ -26,22 +27,22 @@ type ChatHistory = {
 const ChatHistoryTable = () => {
   const [selectedRows, setSelectedRows] = useState<ChatHistory[]>([])
 
-  const data: DataRow<Partial<ChatHistory>>[] = [
-    { id: 1, data: { user: 'John Doe' } },
-    { id: 2, data: { user: 'Jane Smith' } },
-    { id: 3, data: { user: 'Alice Johnson' } },
-    { id: 4, data: { user: 'Bob Brown' } },
-    { id: 5, data: { user: 'Charlie Davis' } },
-    { id: 6, data: { user: 'Diana Evans' } },
-    { id: 7, data: { user: 'Frank Green' } },
-    { id: 8, data: { user: 'Grace Hill' } },
-    { id: 9, data: { user: 'Henry Irving' } },
-    { id: 10, data: { user: 'Isabel Jackson' } },
-    { id: 11, data: { user: 'Isabel Jackson' } },
-    { id: 12, data: { user: 'Isabel Jackson' } },
-    { id: 13, data: { user: 'Isabel Jackson' } },
-    { id: 14, data: { user: 'Isabel Jackson' } },
-    { id: 15, data: { user: 'Isabel Jackson' } }
+  const data: Partial<ChatHistory>[] = [
+    { user: 'John Doe' },
+    { user: 'Jane Smith' },
+    { user: 'Alice Johnson' },
+    { user: 'Bob Brown' },
+    { user: 'Charlie Davis' },
+    { user: 'Diana Evans' },
+    { user: 'Frank Green' },
+    { user: 'Grace Hill' },
+    { user: 'Henry Irving' },
+    { user: 'Isabel Jackson' },
+    { user: 'Isabel Jackson' },
+    { user: 'Isabel Jackson' },
+    { user: 'Isabel Jackson' },
+    { user: 'Isabel Jackson' },
+    { user: 'Isabel Jackson' }
   ]
 
   const columns = [
@@ -84,10 +85,9 @@ const ChatHistoryTable = () => {
 
       <DataTableComponent
         filterText={''}
-        expandableRows
         title={'Chat Histories'}
         data={data}
-        columns={columns}
+        columns={columns as TableColumn<Partial<ChatHistory>>[]}
         contextActions={contextActions}
         onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
       />

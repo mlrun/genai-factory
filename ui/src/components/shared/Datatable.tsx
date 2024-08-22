@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { comparisonUserAtom, selectedUserAtom } from '@atoms/index'
+import { selectedUserAtom } from '@atoms/index'
 import {
   Box,
   Drawer,
@@ -27,9 +27,9 @@ import {
   useDisclosure
 } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
-import { DataRow, User } from '@shared/types'
+import { User } from '@shared/types'
 import { useAtom } from 'jotai'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DataTable, { Alignment, TableColumn, createTheme } from 'react-data-table-component'
 
 createTheme(
@@ -59,17 +59,15 @@ createTheme(
 )
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: DataRow<Partial<any>>[]
+  data: Partial<any>[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: TableColumn<DataRow<Partial<any>>>[]
+  columns: TableColumn<Partial<any>>[]
   title: string
-  expandableRows?: boolean
   contextActions: JSX.Element
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSelectedRowChange?: (e: any) => void
   subheaderComponent?: React.ReactNode
   filterText: string
-  drawerComponent?: React.ReactNode
   user?: User
 }
 
@@ -77,27 +75,31 @@ const DataTableComponent = ({
   data,
   columns,
   title,
-  expandableRows,
   contextActions,
   onSelectedRowChange,
   subheaderComponent,
-  filterText,
-  drawerComponent
+  filterText
 }: Props) => {
   const { colorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedRow, setSelectedRow] = useState<DataRow<Partial<any>> | null>(null)
+  const [selectedRow, setSelectedRow] = useState<Partial<any> | null>(null)
   const [selectedUser, setSelectedUser] = useAtom<User>(selectedUserAtom)
-  const [comparisonUser, setComparisonUser] = useAtom<User>(comparisonUserAtom)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data)
 
-  const filteredItems = data.filter(
-    item =>
-      (item.data.name && item.data.name.toLowerCase().includes(filterText.toLowerCase())) ||
-      (item.data.email && item.data.email.toLowerCase().includes(filterText.toLowerCase())) ||
-      (item.data.role && item.data.role.toLowerCase().includes(filterText.toLowerCase())) ||
-      (item.data.user && item.data.user.toLowerCase().includes(filterText.toLowerCase()))
-  )
+  useEffect(() => {
+    if (data) {
+      setFilteredItems(
+        data.filter(
+          item =>
+            (item.name && item.name.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.email && item.email.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.full_name && item.full_name.toLowerCase().includes(filterText.toLowerCase()))
+        )
+      )
+    }
+  }, [filterText, data])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -112,6 +114,7 @@ const DataTableComponent = ({
           theme={colorMode}
           columns={columns}
           data={filteredItems}
+          progressPending={!filteredItems?.length}
           pagination
           subHeader
           subHeaderComponent={subheaderComponent}
@@ -124,14 +127,14 @@ const DataTableComponent = ({
           pointerOnHover
           onRowClicked={row => {
             setSelectedRow(row)
-            setSelectedUser(row.data)
+            setSelectedUser(row)
             onOpen()
           }}
         />
       </Box>
       <Drawer placement="right" size={'xl'} isOpen={isOpen} onClose={onClose}>
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">{selectedRow?.data.name} </DrawerHeader>
+          <DrawerHeader borderBottomWidth="1px">{selectedRow?.name} </DrawerHeader>
           <DrawerBody>
             <Flex height={250} gap={10}>
               <Flex width={'100%'} flexDirection={'column'}>
@@ -143,9 +146,9 @@ const DataTableComponent = ({
                   <FormLabel>Email</FormLabel>
                   <Input type="email" name="email" value={selectedUser.email || ''} onChange={handleChange} />
                 </FormControl>
-                <FormControl id="role" mb={4}>
-                  <FormLabel>Role</FormLabel>
-                  <Input type="text" name="role" value={selectedUser.role || ''} onChange={handleChange} />
+                <FormControl id="full_name" mb={4}>
+                  <FormLabel>Full Name</FormLabel>
+                  <Input type="text" name="full_name" value={selectedUser.full_name || ''} onChange={handleChange} />
                 </FormControl>
               </Flex>
             </Flex>

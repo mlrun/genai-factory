@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import axios, { AxiosResponse } from 'axios'
-import MockClient from './Mock'
+import { User } from '@shared/types';
+import axios, { AxiosResponse } from 'axios';
 
-const debugMode = false // Set this to true if you are in debug mode
 
 class ApiClient {
   private client
@@ -31,17 +30,18 @@ class ApiClient {
   }
 
   private handleResponse(response: AxiosResponse) {
-    if (response.data.success) {
-      return response.data.data
+    if (response.status >= 200 && response.status < 300) {
+      return response.data;
     } else {
-      console.error(response.data.error)
-      return null
+      console.error('Error:', response.data.error || 'Unknown error');
+      return null;
     }
   }
 
-  private handleError(error: Error) {
-    console.error(error.message)
-    return null
+  // eslint-disable-next-line
+  private handleError(error: any) {
+    console.error('Request failed:', error.message);
+    return null;
   }
 
   async listSessions(username?: string, mode?: string, last?: number) {
@@ -77,6 +77,42 @@ class ApiClient {
     }
   }
 
+  async getUser(username: string) {
+    try {
+      const response = await this.client.get(`/users/${username}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createUser(user: User) {
+    try {
+      const response = await this.client.post('/users', user);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateUser(username: string, user: Partial<User>) {
+    try {
+      const response = await this.client.put(`/users/${username}`, user);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteUser(username: string) {
+    try {
+      const response = await this.client.delete(`/users/${username}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
   async submitQuery(id: string, question: string, username?: string) {
     try {
       const response = await this.client.post(
@@ -94,11 +130,7 @@ class ApiClient {
 }
 
 function getClient() {
-  if (debugMode) {
-    return new MockClient()
-  } else {
-    return new ApiClient() // Return the real client here
-  }
+  return new ApiClient() // Return the real client here
 }
 
 const Client = getClient()

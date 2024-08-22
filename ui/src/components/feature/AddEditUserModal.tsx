@@ -1,3 +1,17 @@
+// Copyright 2024 Iguazio
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import {
   Button,
   FormControl,
@@ -22,10 +36,7 @@ type UserModalProps = {
 }
 
 const AddEditUserModal: React.FC<UserModalProps> = ({ isOpen, onClose, onSave, user }) => {
-  const [formData, setFormData] = useState<User>(
-    user || { id: '', name: '', email: '', role: '', registered: '', username: '' }
-  )
-
+  const [formData, setFormData] = useState<User>(user || { name: '', email: '', full_name: '' })
   useEffect(() => {
     if (user) {
       setFormData(user)
@@ -46,11 +57,13 @@ const AddEditUserModal: React.FC<UserModalProps> = ({ isOpen, onClose, onSave, u
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{user ? 'Edit User' : 'Add New User'}</ModalHeader>
+        <ModalHeader>
+          {user?.uid ? 'Edit' : 'Add New'} {' User'}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FormControl id="name" mb={4}>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>Username</FormLabel>
             <Input type="text" name="name" value={formData.name || ''} onChange={handleChange} />
           </FormControl>
           <FormControl id="email" mb={4}>
@@ -58,13 +71,13 @@ const AddEditUserModal: React.FC<UserModalProps> = ({ isOpen, onClose, onSave, u
             <Input type="email" name="email" value={formData.email || ''} onChange={handleChange} />
           </FormControl>
           <FormControl id="role" mb={4}>
-            <FormLabel>Role</FormLabel>
-            <Input type="text" name="role" value={formData.role || ''} onChange={handleChange} />
+            <FormLabel>Full Name</FormLabel>
+            <Input type="text" name="full_name" value={formData.full_name || ''} onChange={handleChange} />
           </FormControl>
         </ModalBody>
         <ModalFooter>
           <Button
-            isDisabled={!formData.email || !formData.name || !formData.role}
+            isDisabled={!formData.email || !formData.name || !formData.full_name}
             colorScheme="blue"
             mr={3}
             onClick={handleSubmit}

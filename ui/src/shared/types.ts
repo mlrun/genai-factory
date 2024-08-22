@@ -53,7 +53,7 @@ export interface DataRow<T> {
 }
 
 export type User = {
-  id?: string
+  uid?: string
   name?: string
   email?: string
   role?: string
@@ -61,5 +61,6 @@ export type User = {
   username?: string
   admin?: boolean
   token?: string
+  full_name?: string;
 }
 

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChatHistory, User } from '@shared/types';
+import Client from '@services/Api';
+import { ChatHistory, DataRow, User } from '@shared/types';
 import { atom } from 'jotai';
 import { atomWithStorage } from "jotai/utils";
+
 
 export const sessionIdAtom = atom<string>('');
 export const adminAtom = atomWithStorage('admin', localStorage.getItem('admin') === 'true');
@@ -26,3 +28,18 @@ export const userAtom = atomWithStorage<User | null>('user', localStorage.getIte
 export const usernameAtom = atom<string>('');
 export const selectedUserAtom = atom<User>({ username: '', admin: false, token: '' });
 export const comparisonUserAtom = atom<User>({ username: '', admin: false, token: '' });
+
+
+export const usersAtom = atom<DataRow<User>[]>([]);
+export const createUserAtom = atom(
+  null,
+  async (get, set, newUser: User) => {
+    try {
+      const createdUser = await Client.createUser(newUser);
+      set(usersAtom, (prev) => [...prev, createdUser]);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
