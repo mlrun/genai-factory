@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { usersWithFetchAtom } from '@atoms/apiAtoms'
 import { selectedUserAtom } from '@atoms/index'
 import {
   Box,
+  Button,
   Drawer,
   DrawerBody,
   DrawerContent,
@@ -24,8 +26,10 @@ import {
   FormLabel,
   Input,
   useColorMode,
-  useDisclosure
+  useDisclosure,
+  useToast
 } from '@chakra-ui/react'
+import Client from '@services/Api'
 import { colors } from '@shared/theme'
 import { User } from '@shared/types'
 import { useAtom } from 'jotai'
@@ -87,6 +91,9 @@ const DataTableComponent = ({
   const [selectedUser, setSelectedUser] = useAtom<User>(selectedUserAtom)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data)
+  const [, fetchUsers] = useAtom(usersWithFetchAtom)
+
+  const toast = useToast()
 
   useEffect(() => {
     if (data) {
@@ -104,6 +111,29 @@ const DataTableComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setSelectedUser({ ...selectedUser, [name]: value })
+  }
+
+  const handleUpdateUser = async () => {
+    try {
+      await Client.updateUser(selectedUser)
+      toast({
+        title: 'User updated.',
+        description: 'The user has been updated successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true
+      })
+      await fetchUsers()
+      onClose()
+    } catch (error) {
+      toast({
+        title: 'Error updating user.',
+        description: 'There was an error updating the user.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      })
+    }
   }
 
   return (
@@ -134,7 +164,7 @@ const DataTableComponent = ({
       </Box>
       <Drawer placement="right" size={'xl'} isOpen={isOpen} onClose={onClose}>
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">{selectedRow?.name} </DrawerHeader>
+          <DrawerHeader borderBottomWidth="1px">{selectedUser?.name} </DrawerHeader>
           <DrawerBody>
             <Flex height={250} gap={10}>
               <Flex width={'100%'} flexDirection={'column'}>
@@ -152,6 +182,9 @@ const DataTableComponent = ({
                 </FormControl>
               </Flex>
             </Flex>
+            <Button marginTop={4} onClick={handleUpdateUser}>
+              Save changes
+            </Button>
           </DrawerBody>
         </DrawerContent>
       </Drawer>

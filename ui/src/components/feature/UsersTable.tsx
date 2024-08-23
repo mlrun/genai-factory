@@ -49,7 +49,7 @@ const UsersTable: React.FC = () => {
   const handleSave = async (user: User) => {
     try {
       if (user.uid) {
-        await Client.updateUser(user.uid, user)
+        await Client.updateUser(user)
         toast({ title: 'User updated.', status: 'success', duration: 3000, isClosable: true })
       } else {
         await Client.createUser(user)
@@ -65,7 +65,7 @@ const UsersTable: React.FC = () => {
 
   const handleDelete = useCallback(async () => {
     try {
-      await Promise.all(selectedRows.map(row => Client.deleteUser(row.uid as string)))
+      await Promise.all(selectedRows.map(row => Client.deleteUser(row.name as string)))
       setSelectedRows([])
       await fetchUsers()
       toast({ title: 'Users deleted.', status: 'success', duration: 3000, isClosable: true })

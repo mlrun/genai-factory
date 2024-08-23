@@ -95,9 +95,9 @@ class ApiClient {
     }
   }
 
-  async updateUser(username: string, user: Partial<User>) {
+  async updateUser(user: Partial<User>) {
     try {
-      const response = await this.client.put(`/users/${username}`, user);
+      const response = await this.client.put(`/users/${user.name}`, user);
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
