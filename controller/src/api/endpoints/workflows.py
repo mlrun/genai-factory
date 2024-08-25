@@ -162,7 +162,9 @@ def list_workflows(
 
     :return:    The response from the database.
     """
-    owner_id = client.get_user(user_name=auth.username, session=session).uid
+    owner_id = client.get_user(
+        user_name=auth.username, email=auth.username, session=session
+    ).uid
     project_id = client.get_project(project_name=project_name, session=session).uid
     try:
         data = client.list_workflows(
@@ -209,16 +211,16 @@ def infer_workflow(
 
     if query.session_id:
         # Get session by id:
-        session = client.get_chat_session(uid=query.session_id, session=session)
-        if session is None:
+        chat_session = client.get_chat_session(uid=query.session_id, session=session)
+        if chat_session is None:
             # If not id found, get session by name:
             session_name = query.session_id
-            session = client.list_chat_sessions(name=session_name, session=session)
+            chat_session = client.list_chat_sessions(name=session_name, session=session)
             # If not name found, create a new session:
-            if session:
-                session = session[0]
+            if chat_session:
+                chat_session = chat_session[0]
             else:
-                session = client.create_chat_session(
+                chat_session = client.create_chat_session(
                     chat_session=ChatSession(
                         name=session_name,
                         workflow_id=uid,
@@ -227,7 +229,7 @@ def infer_workflow(
                         ).uid,
                     ),
                 )
-        query.session_id = session.uid
+        query.session_id = chat_session.uid
     # Prepare the data to send to the application's workflow
     data = {
         "item": query.dict(),
