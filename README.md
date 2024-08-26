@@ -48,7 +48,7 @@ python -m controller.src.main ingest -l web https://milvus.io/docs/overview.md
 
 To ask a question:
 ```shell   
-python -m controller.src.main query "What is a vector?" 
+python -m controller.src.main infer "What is Milvus?"
 ```
 
 
@@ -64,8 +64,9 @@ Options:
 
 Commands:
   config  Print the config as a yaml file
-  ingest  Ingest documents into the vector database
-  initdb  Initialize the database (delete old tables)
+  infer   Run a chat query on the data source
+  ingest  Ingest data into the data source.
+  initdb  Initialize the database tables (delete old tables).
   list    List the different objects in the database (by category)
-  query   Run a chat query on the vector database collection
+  update  Create or update an object in the database
 ```
