@@ -45,7 +45,7 @@ def initdb():
     Initialize the database tables (delete old tables).
     """
     click.echo("Running Init DB")
-    session = client.get_db_session()
+    db_session = client.get_db_session()
     client.create_tables(True)
 
     # Create admin user:
@@ -57,7 +57,7 @@ def initdb():
             full_name="Guest User",
             is_admin=True,
         ),
-        session=session,
+        db_session=db_session,
     ).uid
 
     # Create project:
@@ -68,7 +68,7 @@ def initdb():
             description="Default Project",
             owner_id=user_id,
         ),
-        session=session,
+        db_session=db_session,
     ).uid
 
     # Create data source:
@@ -81,7 +81,7 @@ def initdb():
             project_id=project_id,
             data_source_type="vector",
         ),
-        session=session,
+        db_session=db_session,
     )
 
     # Create Workflow:
@@ -95,9 +95,9 @@ def initdb():
             workflow_type="application",
             deployment="http://localhost:8000/api/workflows/default",
         ),
-        session=session,
+        db_session=db_session,
     )
-    session.close()
+    db_session.close()
 
 
 @click.command("config")
@@ -135,10 +135,10 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
 
     :return:    None
     """
-    session = client.get_db_session()
-    project = client.get_project(project_name=project, session=session)
+    db_session = client.get_db_session()
+    project = client.get_project(project_name=project, db_session=db_session)
     data_source = client.list_data_sources(
-        project_id=project.uid, name=data_source, session=session
+        project_id=project.uid, name=data_source, db_session=db_session
     )[0]
 
     # Create document from path:
@@ -153,7 +153,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     # Add document to the database:
     response = client.create_document(
         document=document,
-        session=session,
+        db_session=db_session,
     )
     document = response.to_dict(to_datestr=True)
 
@@ -218,10 +218,10 @@ def infer(
     """
     db_session = client.get_db_session()
 
-    project = client.get_project(project_name=project, session=db_session)
+    project = client.get_project(project_name=project, db_session=db_session)
     # Getting the workflow:
     workflow = client.list_workflows(
-        project_id=project.uid, name=workflow_name, session=db_session
+        project_id=project.uid, name=workflow_name, db_session=db_session
     )[0]
     path = workflow.get_infer_path()
 
@@ -345,18 +345,18 @@ def update_data_source(name, project, owner, description, source_type, labels):
     click.echo("Running Create or Update Collection")
     labels = fill_params(labels)
 
-    session = client.get_db_session()
+    db_session = client.get_db_session()
     # check if the collection exists, if it does, update it, otherwise create it
-    project = client.get_project(project_name=project, session=session)
+    project = client.get_project(project_name=project, db_session=db_session)
     data_source = client.list_data_sources(
         project_id=project.uid,
         data_source_name=name,
-        session=session,
+        db_session=db_session,
     )
 
     if data_source is not None:
         client.update_data_source(
-            session=session,
+            db_session=db_session,
             collection=DataSource(
                 project_id=project.uid,
                 name=name,
@@ -367,7 +367,7 @@ def update_data_source(name, project, owner, description, source_type, labels):
         ).with_raise()
     else:
         client.create_data_source(
-            session=session,
+            db_session=db_session,
             data_source=DataSource(
                 project_id=project.uid,
                 name=name,
@@ -397,7 +397,7 @@ def list_sessions(user, last, created):
 
     if user:
         user = client.get_user(user_name=user).uid
-    data = client.list_chat_sessions(
+    data = client.list_sessions(
         user_id=user, created_after=created, last=last, output_mode="short"
     )
     table = format_table_results(data)

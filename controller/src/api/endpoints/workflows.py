@@ -22,6 +22,7 @@ from controller.src.api.utils import (
     _send_to_application,
     get_auth_user,
     get_db,
+    parse_version,
 )
 from controller.src.db import client
 from controller.src.schemas import (
@@ -40,19 +41,19 @@ router = APIRouter(prefix="/projects/{project_name}")
 def create_workflow(
     project_name: str,
     workflow: Workflow,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Create a new workflow in the database.
 
     :param project_name:    The name of the project to create the workflow in.
     :param workflow:        The workflow to create.
-    :param session:         The database session.
+    :param db_session:      The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.create_workflow(workflow=workflow, session=session)
+        data = client.create_workflow(workflow=workflow, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -61,79 +62,86 @@ def create_workflow(
         )
 
 
-@router.get("/workflows/{uid}")
-def get_workflow(project_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.get("/workflows/{name}")
+def get_workflow(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Get a workflow from the database.
 
     :param project_name:    The name of the project to get the workflow from.
+    :param name:            The name of the workflow to get.
     :param uid:             The UID of the workflow to get.
-    :param session:         The database session.
+    :param version:         The version of the workflow to get.
+    :param db_session:      The database session.
 
     :return:    The workflow from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    uid, version = parse_version(uid, version)
     try:
-        data = client.get_workflow(project_id=project_id, uid=uid, session=session)
+        data = client.get_workflow(name=name, project_id=project_id, uid=uid, version=version, db_session=db_session)
         if data is None:
             return APIResponse(
-                success=False, error=f"Workflow with uid = {uid} not found"
+                success=False, error=f"Workflow with name = {name} not found"
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to get workflow {uid} in project {project_name}: {e}",
+            error=f"Failed to get workflow {name} in project {project_name}: {e}",
         )
 
 
-@router.put("/workflows/{workflow_name}")
+@router.put("/workflows/{name}")
 def update_workflow(
     project_name: str,
     workflow: Workflow,
-    workflow_name: str,
-    session=Depends(get_db),
+    name: str,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a workflow in the database.
 
     :param project_name:    The name of the project to update the workflow in.
     :param workflow:        The workflow to update.
-    :param workflow_name:   The name of the workflow to update.
-    :param session:         The database session.
+    :param name:            The name of the workflow to update.
+    :param db_session:      The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.update_workflow(workflow=workflow, session=session)
+        data = client.update_workflow(workflow=workflow, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update workflow {workflow_name} in project {project_name}: {e}",
+            error=f"Failed to update workflow {name} in project {project_name}: {e}",
         )
 
 
-@router.delete("/workflows/{uid}")
+@router.delete("/workflows/{name}")
 def delete_workflow(
-    project_name: str, uid: str, session=Depends(get_db)
+    project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
 ) -> APIResponse:
     """
     Delete a workflow from the database.
 
     :param project_name:    The name of the project to delete the workflow from.
+    :param name:            The name of the workflow to delete.
     :param uid:             The UID of the workflow to delete.
-    :param session:         The database session.
+    :param version:         The version of the workflow to delete.
+    :param db_session:      The database session.
 
     :return:    The response from the database.
     """
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_workflow(uid=uid, session=session)
+        client.delete_workflow(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to delete workflow {uid} in project {project_name}: {e}",
+            error=f"Failed to delete workflow {name} in project {project_name}: {e}",
         )
 
 
@@ -145,7 +153,7 @@ def list_workflows(
     workflow_type: Union[WorkflowType, str] = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.DETAILS,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
@@ -157,15 +165,15 @@ def list_workflows(
     :param workflow_type:   The workflow type to filter by.
     :param labels:          The labels to filter by.
     :param mode:            The output mode.
-    :param session:         The database session.
+    :param db_session:      The database session.
     :param auth:            The authentication information.
 
     :return:    The response from the database.
     """
     owner_id = client.get_user(
-        user_name=auth.username, email=auth.username, session=session
+        user_name=auth.username, email=auth.username, db_session=db_session
     ).uid
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
     try:
         data = client.list_workflows(
             name=name,
@@ -175,7 +183,7 @@ def list_workflows(
             workflow_type=workflow_type,
             labels_match=labels,
             output_mode=mode,
-            session=session,
+            db_session=db_session,
         )
         return APIResponse(success=True, data=data)
     except Exception as e:
@@ -190,7 +198,7 @@ def infer_workflow(
     project_name: str,
     uid: str,
     query: QueryItem,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
@@ -199,37 +207,37 @@ def infer_workflow(
     :param project_name:    The name of the project to run the workflow in.
     :param uid:             The UID of the workflow to run.
     :param query:           The query to run.
-    :param session:         The database session.
+    :param db_session:      The database session.
     :param auth:            The authentication information.
 
     :return:    The response from the database.
     """
     # Get workflow from the database
-    project_id = client.get_project(project_name=project_name, session=session).uid
-    workflow = client.get_workflow(project_id=project_id, uid=uid, session=session)
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    workflow = client.get_workflow(project_id=project_id, uid=uid, db_session=db_session)
     path = workflow.get_infer_path()
 
     if query.session_id:
         # Get session by id:
-        chat_session = client.get_chat_session(uid=query.session_id, session=session)
-        if chat_session is None:
+        session = client.get_session(uid=query.session_id, db_session=db_session)
+        if session is None:
             # If not id found, get session by name:
             session_name = query.session_id
-            chat_session = client.list_chat_sessions(name=session_name, session=session)
+            session = client.list_sessions(name=session_name, db_session=db_session)
             # If not name found, create a new session:
-            if chat_session:
-                chat_session = chat_session[0]
+            if session:
+                session = session[0]
             else:
-                chat_session = client.create_chat_session(
-                    chat_session=ChatSession(
+                session = client.create_session(
+                    session=ChatSession(
                         name=session_name,
                         workflow_id=uid,
                         owner_id=client.get_user(
-                            user_name=auth.username, session=session
+                            user_name=auth.username, db_session=db_session
                         ).uid,
                     ),
                 )
-        query.session_id = chat_session.uid
+        query.session_id = session.uid
     # Prepare the data to send to the application's workflow
     data = {
         "item": query.dict(),

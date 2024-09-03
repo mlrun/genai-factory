@@ -14,7 +14,7 @@
 
 from fastapi import APIRouter, Depends
 
-from controller.src.api.utils import get_db
+from controller.src.api.utils import get_db, parse_version
 from controller.src.db import client
 from controller.src.schemas import APIResponse, ChatSession, OutputMode
 
@@ -24,48 +24,51 @@ router = APIRouter(prefix="/users/{user_name}")
 @router.post("/sessions")
 def create_session(
     user_name: str,
-    chat_session: ChatSession,
-    session=Depends(get_db),
+    session: ChatSession,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Create a new session in the database.
 
-    :param user_name:       The name of the user to create the session for.
-    :param chat_session:    The session to create.
-    :param session:         The database session.
+    :param user_name:   The name of the user to create the session for.
+    :param session:     The session to create.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.create_chat_session(chat_session=chat_session, session=session)
+        data = client.create_session(session=session, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to create session {chat_session.uid} for user {user_name}: {e}",
+            error=f"Failed to create session {session.uid} for user {user_name}: {e}",
         )
 
 
-@router.get("/sessions/{uid}")
-def get_session(user_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.get("/sessions/{name}")
+def get_session(user_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Get a session from the database. If the session ID is "$last", get the last session for the user.
 
-    :param user_name:       The name of the user to get the session for.
-    :param uid:             The UID of the session to get. if "$last" bring the last user's session.
-    :param session:         The database session.
+    :param user_name:   The name of the user to get the session for.
+    :param name:        The name of the session to get.
+    :param uid:         The UID of the session to get. if "$last" bring the last user's session.
+    :param version:     The version of the session to get.
+    :param db_session:  The database session.
 
     :return:    The session from the database.
     """
     user_id = None
-    if uid == "$last":
-        user_id = client.get_user(user_name=user_name, session=session).uid
-        uid = None
+    uid, version = parse_version(uid=uid, version=version)
+    if name == "$last":
+        user_id = client.get_user(user_name=user_name, db_session=db_session).uid
+        name = None
     try:
-        data = client.get_chat_session(uid=uid, user_id=user_id, session=session)
+        data = client.get_session(user_id=user_id, name=name, uid=uid, version=version, db_session=db_session)
         if data is None:
             return APIResponse(
-                success=False, error=f"Session with uid = {uid} not found"
+                success=False, error=f"Session with name = {name} not found"
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
@@ -75,50 +78,55 @@ def get_session(user_name: str, uid: str, session=Depends(get_db)) -> APIRespons
         )
 
 
-@router.put("/sessions/{session_name}")
+@router.put("/sessions/{name}")
 def update_session(
     user_name: str,
-    chat_session: ChatSession,
-    session=Depends(get_db),
+    name: str,
+    session: ChatSession,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a session in the database.
 
-    :param user_name:       The name of the user to update the session for.
-    :param chat_session:    The session to update.
-    :param session:         The database session.
+    :param user_name:   The name of the user to update the session for.
+    :param name:        The name of the session to update.
+    :param session:     The session to update.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.update_chat_session(chat_session=chat_session, session=session)
+        data = client.update_session(session=session, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update session {chat_session.uid} for user {user_name}: {e}",
+            error=f"Failed to update session {name} for user {user_name}: {e}",
         )
 
 
-@router.delete("/sessions/{uid}")
-def delete_session(user_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.delete("/sessions/{name}")
+def delete_session(user_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Delete a session from the database.
 
     :param user_name:   The name of the user to delete the session for.
+    :param name:        The name of the session to delete.
     :param uid:         The UID of the session to delete.
-    :param session:     The database session.
+    :param version:     The version of the session to delete.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
-    user_id = client.get_user(user_name=user_name, session=session).uid
+    user_id = client.get_user(user_name=user_name, db_session=db_session).uid
+    uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_chat_session(uid=uid, user_id=user_id, session=session)
+        client.delete_session(name=name, uid=uid, version=version, user_id=user_id, db_session=db_session)
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to delete session {uid} for user {user_name}: {e}",
+            error=f"Failed to delete session {name} for user {user_name}: {e}",
         )
 
 
@@ -130,7 +138,7 @@ def list_sessions(
     created: str = None,
     workflow_id: str = None,
     mode: OutputMode = OutputMode.DETAILS,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     List sessions in the database.
@@ -141,20 +149,20 @@ def list_sessions(
     :param created:     The date to filter by.
     :param workflow_id: The ID of the workflow to filter by.
     :param mode:        The output mode.
-    :param session:     The database session.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
-    user_id = client.get_user(user_name=user_name, session=session).uid
+    user_id = client.get_user(user_name=user_name, db_session=db_session).uid
     try:
-        data = client.list_chat_sessions(
+        data = client.list_sessions(
             user_id=user_id,
             name=name,
             last=last,
             created_after=created,
             workflow_id=workflow_id,
             output_mode=mode,
-            session=session,
+            db_session=db_session,
         )
         return APIResponse(success=True, data=data)
     except Exception as e:

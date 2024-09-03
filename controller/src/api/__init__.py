@@ -78,7 +78,7 @@ api_router.include_router(
 )
 api_router.include_router(
     sessions.router,
-    tags=["chat_sessions"],
+    tags=["sessions"],
 )
 
 # Include the router in the main app

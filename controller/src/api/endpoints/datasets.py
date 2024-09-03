@@ -16,7 +16,7 @@ from typing import List, Optional, Tuple
 
 from fastapi import APIRouter, Depends
 
-from controller.src.api.utils import AuthInfo, get_auth_user, get_db
+from controller.src.api.utils import AuthInfo, get_auth_user, get_db, parse_version
 from controller.src.db import client
 from controller.src.schemas import APIResponse, Dataset, OutputMode
 
@@ -27,19 +27,19 @@ router = APIRouter(prefix="/projects/{project_name}")
 def create_dataset(
     project_name: str,
     dataset: Dataset,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Create a new dataset in the database.
 
     :param project_name:    The name of the project to create the dataset in.
     :param dataset:         The dataset to create.
-    :param session:         The database session.
+    :param db_session:      The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.create_dataset(dataset=dataset, session=session)
+        data = client.create_dataset(dataset=dataset, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -48,20 +48,23 @@ def create_dataset(
         )
 
 
-@router.get("/datasets/{uid}")
-def get_dataset(project_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.get("/datasets/{name}")
+def get_dataset(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Get a dataset from the database.
 
     :param project_name:    The name of the project to get the dataset from.
+    :param name:            The name of the dataset to get.
     :param uid:             The name of the dataset to get.
-    :param session:         The database session.
+    :param version:         The version of the dataset to get.
+    :param db_session:      The database session.
 
     :return:    The dataset from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
     try:
-        data = client.get_dataset(project_id=project_id, uid=uid, session=session)
+        uid, version = parse_version(uid, version)
+        data = client.get_dataset(name=name, project_id=project_id, uid=uid, version=version, db_session=db_session)
         if data is None:
             return APIResponse(
                 success=False, error=f"Dataset with uid = {uid} not found"
@@ -74,52 +77,55 @@ def get_dataset(project_name: str, uid: str, session=Depends(get_db)) -> APIResp
         )
 
 
-@router.put("/datasets/{dataset_name}")
+@router.put("/datasets/{name}")
 def update_dataset(
     project_name: str,
     dataset: Dataset,
-    dataset_name: str,
-    session=Depends(get_db),
+    name: str,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a dataset in the database.
 
     :param project_name:    The name of the project to update the dataset in.
     :param dataset:         The dataset to update.
-    :param dataset_name:    The name of the dataset to update.
-    :param session:         The database session.
+    :param name:            The name of the dataset to update.
+    :param db_session:      The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.update_dataset(dataset=dataset, session=session)
+        data = client.update_dataset(dataset=dataset, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update dataset {dataset_name} in project {project_name}: {e}",
+            error=f"Failed to update dataset {name} in project {project_name}: {e}",
         )
 
 
-@router.delete("/datasets/{uid}")
-def delete_dataset(project_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.delete("/datasets/{name}")
+def delete_dataset(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Delete a dataset from the database.
 
     :param project_name:    The name of the project to delete the dataset from.
+    :param name:            The name of the dataset to delete.
     :param uid:             The UID of the dataset to delete.
-    :param session:         The database session.
+    :param version:         The version of the dataset to delete.
+    :param db_session:      The database session.
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    uid, version = parse_version(uid, version)
     try:
-        client.delete_dataset(project_id=project_id, uid=uid, session=session)
+        client.delete_dataset(name=name, project_id=project_id, uid=uid, version=version, db_session=db_session)
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to delete dataset {uid} in project {project_name}: {e}",
+            error=f"Failed to delete dataset {name} in project {project_name}: {e}",
         )
 
 
@@ -131,7 +137,7 @@ def list_datasets(
     task: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.DETAILS,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
@@ -143,13 +149,13 @@ def list_datasets(
     :param task:            The task to filter by.
     :param labels:          The labels to filter by.
     :param mode:            The output mode.
-    :param session:         The database session.
+    :param db_session:      The database session.
     :param auth:            The authentication information.
 
     :return:    The response from the database.
     """
-    owner_id = client.get_user(user_name=auth.username, session=session).uid
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
+    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
     try:
         data = client.list_datasets(
             project_id=project_id,
@@ -159,7 +165,7 @@ def list_datasets(
             task=task,
             labels_match=labels,
             output_mode=mode,
-            session=session,
+            db_session=db_session,
         )
         return APIResponse(success=True, data=data)
     except Exception as e:

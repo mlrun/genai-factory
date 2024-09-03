@@ -14,7 +14,7 @@
 
 from fastapi import APIRouter, Depends
 
-from controller.src.api.utils import get_db
+from controller.src.api.utils import get_db, parse_version
 from controller.src.db import client
 from controller.src.schemas import APIResponse, OutputMode, User
 
@@ -24,18 +24,18 @@ router = APIRouter()
 @router.post("/users")
 def create_user(
     user: User,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Create a new user in the database.
 
-    :param user:    The user to create.
-    :param session: The database session.
+    :param user:        The user to create.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.create_user(user=user, session=session)
+        data = client.create_user(user=user, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -43,73 +43,78 @@ def create_user(
         )
 
 
-@router.get("/users/{user_name}")
-def get_user(user_name: str, email: str = None, session=Depends(get_db)) -> APIResponse:
+@router.get("/users/{name}")
+def get_user(name: str, email: str = None, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Get a user from the database.
 
-    :param user_name:   The name of the user to get.
+    :param name:        The name of the user to get.
     :param email:       The email address to get the user by if the name is not provided.
-    :param session:     The database session.
+    :param uid:         The UID of the user to get.
+    :param version:     The version of the user to get.
+    :param db_session:  The database session.
 
     :return:    The user from the database.
     """
+    uid, version = parse_version(uid=uid, version=version)
     try:
-        data = client.get_user(user_name=user_name, email=email, session=session)
+        data = client.get_user(name=name, email=email, uid=uid, version=version, db_session=db_session)
         if data is None:
             return APIResponse(
                 success=False,
-                error=f"User with name = {user_name}, email = {email} not found",
+                error=f"User with name = {name}, email = {email} not found",
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to get user with name = {user_name}, email = {email}: {e}",
+            error=f"Failed to get user with name = {name}, email = {email}: {e}",
         )
 
 
-@router.put("/users/{user_name}")
+@router.put("/users/{name}")
 def update_user(
     user: User,
-    user_name: str,
-    session=Depends(get_db),
+    name: str,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a user in the database.
 
     :param user:        The user to update.
-    :param user_name:   The name of the user to update.
-    :param session:     The database session.
+    :param name:        The name of the user to update.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
     try:
-        data = client.update_user(user=user, session=session)
+        data = client.update_user(user=user, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
-            success=False, error=f"Failed to update user {user_name}: {e}"
+            success=False, error=f"Failed to update user {name}: {e}"
         )
 
 
-@router.delete("/users/{user_name}")
-def delete_user(user_name: str, session=Depends(get_db)) -> APIResponse:
+@router.delete("/users/{name}")
+def delete_user(name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Delete a user from the database.
 
-    :param user_name:   The name of the user to delete.
-    :param session:     The database session.
+    :param name:        The name of the user to delete.
+    :param uid:         The UID of the user to delete.
+    :param version:     The version of the user to delete.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
-    user = client.get_user(user_name=user_name, session=session)
+    uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_user(uid=user.uid, session=session)
+        client.delete_user(name=name, uid=uid, version=version, db_session=db_session)
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
-            success=False, error=f"Failed to delete user {user_name}: {e}"
+            success=False, error=f"Failed to delete user {name}: {e}"
         )
 
 
@@ -119,7 +124,7 @@ def list_users(
     email: str = None,
     full_name: str = None,
     mode: OutputMode = OutputMode.DETAILS,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     List users in the database.
@@ -128,7 +133,7 @@ def list_users(
     :param email:       The email address to filter by.
     :param full_name:   The full name to filter by.
     :param mode:        The output mode.
-    :param session:     The database session.
+    :param db_session:  The database session.
 
     :return:    The response from the database.
     """
@@ -138,7 +143,7 @@ def list_users(
             email=email,
             full_name=full_name,
             output_mode=mode,
-            session=session,
+            db_session=db_session,
         )
         return APIResponse(success=True, data=data)
     except Exception as e:
