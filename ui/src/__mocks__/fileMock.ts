@@ -12,13 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from '@components/feature/Layout'
-import UsersTable from '@components/feature/UsersTable'
-
-export const UsersTablePage = () => {
-  return (
-    <Layout>
-      <UsersTable />
-    </Layout>
-  )
-}
+export default ''

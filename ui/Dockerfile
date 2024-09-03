@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+FROM node:18-alpine
 
-cd ui
-npm run lint
-npm test
-npm run build
+WORKDIR /app
 
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+RUN npm install -g serve
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-l", "3000"]
