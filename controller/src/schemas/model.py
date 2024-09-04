@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from enum import Enum
+from typing import Optional
 
 from controller.src.schemas.base import BaseWithVerMetadata
 
@@ -29,7 +30,7 @@ class Model(BaseWithVerMetadata):
     model_type: ModelType
     base_model: str
     project_id: str
-    task: str = None
-    path: str = None
-    producer: str = None
-    deployment: str = None
+    task: Optional[str] = None
+    path: Optional[str] = None
+    producer: Optional[str] = None
+    deployment: Optional[str] = None
