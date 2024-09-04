@@ -12,24 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { usersWithFetchAtom } from '@atoms/apiAtoms'
-import { selectedUserAtom } from '@atoms/index'
-import {
-  Box,
-  Button,
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerHeader,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  useColorMode,
-  useDisclosure,
-  useToast
-} from '@chakra-ui/react'
-import Client from '@services/Api'
+import { selectedRowAtom } from '@atoms/index'
+import { Box, useColorMode } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
 import { User } from '@shared/types'
 import { useAtom } from 'jotai'
@@ -73,6 +57,8 @@ type Props = {
   subheaderComponent?: React.ReactNode
   filterText: string
   user?: User
+  toggleClearRows: boolean
+  onOpenDrawer: () => void
 }
 
 const DataTableComponent = ({
@@ -82,18 +68,15 @@ const DataTableComponent = ({
   contextActions,
   onSelectedRowChange,
   subheaderComponent,
-  filterText
+  filterText,
+  onOpenDrawer,
+  toggleClearRows
 }: Props) => {
   const { colorMode } = useColorMode()
-  const { isOpen, onOpen, onClose } = useDisclosure()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedRow, setSelectedRow] = useState<Partial<any> | null>(null)
-  const [selectedUser, setSelectedUser] = useAtom<User>(selectedUserAtom)
+  const [, setSelectedRow] = useAtom<any>(selectedRowAtom)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data)
-  const [, fetchUsers] = useAtom(usersWithFetchAtom)
-
-  const toast = useToast()
 
   useEffect(() => {
     if (data) {
@@ -107,34 +90,6 @@ const DataTableComponent = ({
       )
     }
   }, [filterText, data])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setSelectedUser({ ...selectedUser, [name]: value })
-  }
-
-  const handleUpdateUser = async () => {
-    try {
-      await Client.updateUser(selectedUser)
-      toast({
-        title: 'User updated.',
-        description: 'The user has been updated successfully.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true
-      })
-      await fetchUsers()
-      onClose()
-    } catch (error) {
-      toast({
-        title: 'Error updating user.',
-        description: 'There was an error updating the user.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true
-      })
-    }
-  }
 
   return (
     <>
@@ -155,39 +110,13 @@ const DataTableComponent = ({
           contextActions={contextActions}
           highlightOnHover
           pointerOnHover
+          clearSelectedRows={toggleClearRows}
           onRowClicked={row => {
             setSelectedRow(row)
-            setSelectedUser(row)
-            onOpen()
+            onOpenDrawer()
           }}
         />
       </Box>
-      <Drawer placement="right" size={'xl'} isOpen={isOpen} onClose={onClose}>
-        <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">{selectedUser?.name} </DrawerHeader>
-          <DrawerBody>
-            <Flex height={250} gap={10}>
-              <Flex width={'100%'} flexDirection={'column'}>
-                <FormControl id="name" mb={4}>
-                  <FormLabel>Name</FormLabel>
-                  <Input type="text" name="name" value={selectedUser.name || ''} onChange={handleChange} />
-                </FormControl>
-                <FormControl id="email" mb={4}>
-                  <FormLabel>Email</FormLabel>
-                  <Input type="email" name="email" value={selectedUser.email || ''} onChange={handleChange} />
-                </FormControl>
-                <FormControl id="full_name" mb={4}>
-                  <FormLabel>Full Name</FormLabel>
-                  <Input type="text" name="full_name" value={selectedUser.full_name || ''} onChange={handleChange} />
-                </FormControl>
-              </Flex>
-            </Flex>
-            <Button marginTop={4} onClick={handleUpdateUser}>
-              Save changes
-            </Button>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
     </>
   )
 }

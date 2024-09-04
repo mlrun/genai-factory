@@ -13,8 +13,21 @@
 // limitations under the License.
 
 import { usersAtom, usersWithFetchAtom } from '@atoms/apiAtoms'
+import { selectedRowAtom } from '@atoms/index'
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
-import { Button, Flex, useDisclosure, useToast } from '@chakra-ui/react'
+import {
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  useDisclosure,
+  useToast
+} from '@chakra-ui/react'
 import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
 import FilterComponent from '@components/shared/Filter'
@@ -27,13 +40,11 @@ import AddEditUserModal from './AddEditUserModal'
 
 const UsersTable: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<User[]>([])
-  const [, fetchUsers] = useAtom(usersWithFetchAtom)
-
+  const [selectedRow, setSelectedRow] = useAtom(selectedRowAtom)
   const [editRow, setEditRow] = useState<User>({ name: '', email: '', full_name: '' })
   const [filterText, setFilterText] = useState('')
+  const [toggledClearRows, setToggleClearRows] = useState(false)
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const toast = useToast()
   const [users] = useAtom(usersAtom)
 
   const [columns] = useState([
@@ -41,6 +52,13 @@ const UsersTable: React.FC = () => {
     { name: 'Email', selector: (row: Partial<User>) => row.email ?? '', sortable: true },
     { name: 'Full Name', selector: (row: Partial<User>) => row.full_name ?? '', sortable: true }
   ])
+
+  const [, fetchUsers] = useAtom(usersWithFetchAtom)
+
+  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure()
+  const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure()
+
+  const toast = useToast()
 
   useEffect(() => {
     fetchUsers()
@@ -56,12 +74,16 @@ const UsersTable: React.FC = () => {
         toast({ title: 'User added successfully.', status: 'success', duration: 3000, isClosable: true })
       }
       await fetchUsers()
-      onClose()
+      onDrawerClose()
     } catch (error) {
       console.error('Error saving user:', error)
       toast({ title: 'Error saving user.', status: 'error', duration: 3000, isClosable: true })
     }
   }
+
+  const handleClearRows = useCallback(() => {
+    setToggleClearRows(!toggledClearRows)
+  }, [toggledClearRows])
 
   const handleDelete = useCallback(async () => {
     try {
@@ -73,7 +95,36 @@ const UsersTable: React.FC = () => {
       console.error('Error deleting users:', error)
       toast({ title: 'Error deleting users.', status: 'error', duration: 3000, isClosable: true })
     }
-  }, [fetchUsers, selectedRows, toast])
+    handleClearRows()
+  }, [fetchUsers, selectedRows, toast, handleClearRows])
+
+  const handleUpdate = async () => {
+    try {
+      await Client.updateUser(selectedRow)
+      toast({
+        title: 'User updated.',
+        description: 'The user has been updated successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true
+      })
+      await fetchUsers()
+      onDrawerClose()
+    } catch (error) {
+      toast({
+        title: 'Error updating user.',
+        description: 'There was an error updating the user.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      })
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setSelectedRow({ ...selectedRow, [name]: value })
+  }
 
   const contextActions = useMemo(
     () => (
@@ -92,7 +143,7 @@ const UsersTable: React.FC = () => {
           leftIcon={<AddIcon />}
           onClick={() => {
             setEditRow({ name: '', email: '', full_name: '' })
-            onOpen()
+            onModalOpen()
           }}
         >
           New
@@ -115,11 +166,43 @@ const UsersTable: React.FC = () => {
         data={users}
         columns={columns as TableColumn<Partial<User>>[]}
         contextActions={contextActions}
-        onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
+        onSelectedRowChange={e => {
+          setSelectedRows(e.selectedRows)
+        }}
         subheaderComponent={subHeaderComponentMemo}
         filterText={filterText}
+        onOpenDrawer={() => {
+          onDrawerOpen()
+        }}
+        toggleClearRows={toggledClearRows}
       />
-      <AddEditUserModal isOpen={isOpen} onClose={onClose} onSave={handleSave} user={editRow} />
+      <AddEditUserModal isOpen={isModalOpen} onClose={onModalClose} onSave={handleSave} user={editRow} />
+      <Drawer placement="right" size={'xl'} isOpen={isDrawerOpen} onClose={onDrawerClose}>
+        <DrawerContent>
+          <DrawerHeader borderBottomWidth="1px">{selectedRow?.name} </DrawerHeader>
+          <DrawerBody>
+            <Flex height={250} gap={10}>
+              <Flex width={'100%'} flexDirection={'column'}>
+                <FormControl id="name" mb={4}>
+                  <FormLabel>Name</FormLabel>
+                  <Input type="text" name="name" value={selectedRow.name || ''} onChange={handleChange} />
+                </FormControl>
+                <FormControl id="email" mb={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Input type="email" name="email" value={selectedRow.email || ''} onChange={handleChange} />
+                </FormControl>
+                <FormControl id="full_name" mb={4}>
+                  <FormLabel>Full Name</FormLabel>
+                  <Input type="text" name="full_name" value={selectedRow.full_name || ''} onChange={handleChange} />
+                </FormControl>
+              </Flex>
+            </Flex>
+            <Button marginTop={4} onClick={handleUpdate}>
+              Save changes
+            </Button>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Flex>
   )
 }

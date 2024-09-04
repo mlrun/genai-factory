@@ -29,6 +29,9 @@ export const usernameAtom = atom<string>('');
 export const selectedUserAtom = atom<User>({ username: '', admin: false, token: '' });
 export const comparisonUserAtom = atom<User>({ username: '', admin: false, token: '' });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const selectedRowAtom = atom<any>({});
+
 
 export const usersAtom = atom<DataRow<User>[]>([]);
 export const createUserAtom = atom(
