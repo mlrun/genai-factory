@@ -14,7 +14,7 @@
 
 from fastapi import APIRouter, Depends
 
-from controller.src.api.utils import get_db, parse_version
+from controller.src.api.utils import get_db
 from controller.src.db import client
 from controller.src.schemas import APIResponse, ChatSession, OutputMode
 
@@ -51,7 +51,6 @@ def get_session(
     user_name: str,
     name: str,
     uid: str = None,
-    version: str = None,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
@@ -60,19 +59,17 @@ def get_session(
     :param user_name:   The name of the user to get the session for.
     :param name:        The name of the session to get.
     :param uid:         The UID of the session to get. if "$last" bring the last user's session.
-    :param version:     The version of the session to get.
     :param db_session:  The database session.
 
     :return:    The session from the database.
     """
     user_id = None
-    uid, version = parse_version(uid=uid, version=version)
     if name == "$last":
         user_id = client.get_user(user_name=user_name, db_session=db_session).uid
         name = None
     try:
         data = client.get_session(
-            user_id=user_id, name=name, uid=uid, version=version, db_session=db_session
+            user_id=user_id, name=name, uid=uid, db_session=db_session
         )
         if data is None:
             return APIResponse(
@@ -118,7 +115,6 @@ def delete_session(
     user_name: str,
     name: str,
     uid: str = None,
-    version: str = None,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
@@ -127,16 +123,14 @@ def delete_session(
     :param user_name:   The name of the user to delete the session for.
     :param name:        The name of the session to delete.
     :param uid:         The UID of the session to delete.
-    :param version:     The version of the session to delete.
     :param db_session:  The database session.
 
     :return:    The response from the database.
     """
     user_id = client.get_user(user_name=user_name, db_session=db_session).uid
-    uid, version = parse_version(uid=uid, version=version)
     try:
         client.delete_session(
-            name=name, uid=uid, version=version, user_id=user_id, db_session=db_session
+            name=name, uid=uid, user_id=user_id, db_session=db_session
         )
         return APIResponse(success=True)
     except Exception as e:

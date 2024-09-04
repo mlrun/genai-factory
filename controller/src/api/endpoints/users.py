@@ -14,7 +14,7 @@
 
 from fastapi import APIRouter, Depends
 
-from controller.src.api.utils import get_db, parse_version
+from controller.src.api.utils import get_db
 from controller.src.db import client
 from controller.src.schemas import APIResponse, OutputMode, User
 
@@ -48,7 +48,6 @@ def get_user(
     name: str,
     email: str = None,
     uid: str = None,
-    version: str = None,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
@@ -57,15 +56,13 @@ def get_user(
     :param name:        The name of the user to get.
     :param email:       The email address to get the user by if the name is not provided.
     :param uid:         The UID of the user to get.
-    :param version:     The version of the user to get.
     :param db_session:  The database session.
 
     :return:    The user from the database.
     """
-    uid, version = parse_version(uid=uid, version=version)
     try:
         data = client.get_user(
-            name=name, email=email, uid=uid, version=version, db_session=db_session
+            name=name, email=email, uid=uid, db_session=db_session
         )
         if data is None:
             return APIResponse(
@@ -104,21 +101,19 @@ def update_user(
 
 @router.delete("/users/{name}")
 def delete_user(
-    name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+    name: str, uid: str = None, db_session=Depends(get_db)
 ) -> APIResponse:
     """
     Delete a user from the database.
 
     :param name:        The name of the user to delete.
     :param uid:         The UID of the user to delete.
-    :param version:     The version of the user to delete.
     :param db_session:  The database session.
 
     :return:    The response from the database.
     """
-    uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_user(name=name, uid=uid, version=version, db_session=db_session)
+        client.delete_user(name=name, uid=uid, db_session=db_session)
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(success=False, error=f"Failed to delete user {name}: {e}")
