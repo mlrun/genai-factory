@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional
+from typing import List
 
 from controller.src.schemas.base import BaseWithVerMetadata
 
@@ -23,5 +23,5 @@ class Dataset(BaseWithVerMetadata):
     task: str
     path: str
     project_id: str
-    sources: Optional[List[str]]
-    producer: Optional[str]
+    sources: List[str] = None
+    producer: str = None

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import Optional
 
 from controller.src.schemas.base import BaseWithVerMetadata
 
@@ -33,4 +32,4 @@ class DataSource(BaseWithVerMetadata):
 
     data_source_type: DataSourceType
     project_id: str
-    database_kwargs: Optional[dict[str, str]] = {}
+    database_kwargs: dict[str, str] = {}

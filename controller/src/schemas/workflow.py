@@ -14,7 +14,7 @@
 
 import os
 from enum import Enum
-from typing import List, Optional
+from typing import List
 
 from controller.src.schemas.base import BaseWithVerMetadata
 
@@ -32,10 +32,10 @@ class Workflow(BaseWithVerMetadata):
 
     workflow_type: WorkflowType
     project_id: str
-    deployment: Optional[str]
-    workflow_function: Optional[str]
-    configuration: Optional[dict]
-    graph: Optional[List[dict]]
+    deployment: str = None
+    workflow_function: str = None
+    configuration: dict = None
+    graph: List[dict] = None
 
     def get_infer_path(self):
         if self.deployment is None:

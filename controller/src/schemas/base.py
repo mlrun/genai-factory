@@ -15,7 +15,7 @@
 from datetime import datetime
 from enum import Enum
 from http.client import HTTPException
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Type, Union
 
 import yaml
 from pydantic import BaseModel
@@ -147,11 +147,11 @@ class Base(BaseModel):
 
 class BaseWithMetadata(Base):
     name: str
-    uid: Optional[str]
-    description: Optional[str]
-    labels: Optional[Dict[str, Union[str, None]]]
-    created: Optional[Union[str, datetime]]
-    updated: Optional[Union[str, datetime]]
+    uid: str = None
+    description: str = None
+    labels: Dict[str, Union[str, None]] = None
+    created: Union[str, datetime] = None
+    updated: Union[str, datetime] = None
 
 
 class BaseWithOwner(BaseWithMetadata):
@@ -159,13 +159,13 @@ class BaseWithOwner(BaseWithMetadata):
 
 
 class BaseWithVerMetadata(BaseWithOwner):
-    version: Optional[str] = ""
+    version: str = ""
 
 
 class APIResponse(BaseModel):
     success: bool
-    data: Optional[Union[list, Type[BaseModel], dict]]
-    error: Optional[str]
+    data: Union[list, Type[BaseModel], dict] = None
+    error: str = None
 
     def with_raise(self, format=None) -> "APIResponse":
         if not self.success:
