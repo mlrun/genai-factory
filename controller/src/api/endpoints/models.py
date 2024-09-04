@@ -49,7 +49,13 @@ def create_model(
 
 
 @router.get("/models/{name}")
-def get_model(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_model(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a model from the database.
 
@@ -61,12 +67,22 @@ def get_model(project_name: str, name: str, uid: str = None, version: str = None
 
     :return:    The model from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        data = client.get_model(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        data = client.get_model(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         if data is None:
-            return APIResponse(success=False, error=f"Model with name = {name} not found")
+            return APIResponse(
+                success=False, error=f"Model with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -87,7 +103,7 @@ def update_model(
 
     :param project_name:    The name of the project to update the model in.
     :param model:           The model to update.
-    :param model_name:      The name of the model to update.
+    :param name:            The name of the model to update.
     :param db_session:      The database session.
 
     :return:    The response from the database.
@@ -103,7 +119,13 @@ def update_model(
 
 
 @router.delete("/models/{name}")
-def delete_model(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def delete_model(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Delete a model from the database.
 
@@ -115,10 +137,18 @@ def delete_model(project_name: str, name: str, uid: str = None, version: str = N
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        client.delete_model(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        client.delete_model(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
@@ -153,7 +183,9 @@ def list_models(
     :return:    The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_models(
             project_id=project_id,

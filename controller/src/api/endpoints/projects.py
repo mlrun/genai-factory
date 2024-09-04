@@ -46,7 +46,9 @@ def create_project(
 
 
 @router.get("/projects/{name}")
-def get_project(name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_project(
+    name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+) -> APIResponse:
     """
     Get a project from the database.
 
@@ -59,16 +61,16 @@ def get_project(name: str, uid: str = None, version: str = None, db_session=Depe
     """
     uid, version = parse_version(uid=uid, version=version)
     try:
-        data = client.get_project(name=name, uid=uid, version=version, db_session=db_session)
+        data = client.get_project(
+            name=name, uid=uid, version=version, db_session=db_session
+        )
         if data is None:
             return APIResponse(
                 success=False, error=f"Project with name {name} not found"
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
-        return APIResponse(
-            success=False, error=f"Failed to get project {name}: {e}"
-        )
+        return APIResponse(success=False, error=f"Failed to get project {name}: {e}")
 
 
 @router.put("/projects/{project_name}")
@@ -96,7 +98,9 @@ def update_project(
 
 
 @router.delete("/projects/{name}")
-def delete_project(name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def delete_project(
+    name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+) -> APIResponse:
     """
     Delete a project from the database.
 
@@ -109,12 +113,12 @@ def delete_project(name: str, uid: str = None, version: str = None, db_session=D
     """
     uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_project(name=name, uid=uid, version=version, db_session=db_session)
+        client.delete_project(
+            name=name, uid=uid, version=version, db_session=db_session
+        )
         return APIResponse(success=True)
     except Exception as e:
-        return APIResponse(
-            success=False, error=f"Failed to delete project {name}: {e}"
-        )
+        return APIResponse(success=False, error=f"Failed to delete project {name}: {e}")
 
 
 @router.get("/projects")

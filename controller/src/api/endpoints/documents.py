@@ -49,7 +49,13 @@ def create_document(
 
 
 @router.get("/documents/{name}")
-def get_document(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_document(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a document from the database.
 
@@ -61,10 +67,18 @@ def get_document(project_name: str, name: str, uid: str = None, version: str = N
 
     :return:    The document from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        data = client.get_document(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        data = client.get_document(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         if data is None:
             return APIResponse(
                 success=False, error=f"Document with name = {name} not found"
@@ -95,7 +109,9 @@ def update_document(
     :return:    The response from the database.
     """
     try:
-        data = client.update_document(document=document, db_session=db_session)
+        data = client.update_document(
+            name=name, document=document, db_session=db_session
+        )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -106,7 +122,11 @@ def update_document(
 
 @router.delete("/documents/{name}")
 def delete_document(
-    project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Delete a document from the database.
@@ -119,10 +139,18 @@ def delete_document(
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        client.delete_document(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        client.delete_document(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
@@ -155,7 +183,9 @@ def list_documents(
     :return:    The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_documents(
             project_id=project_id,

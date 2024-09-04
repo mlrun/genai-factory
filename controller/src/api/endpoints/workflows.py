@@ -63,7 +63,13 @@ def create_workflow(
 
 
 @router.get("/workflows/{name}")
-def get_workflow(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_workflow(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a workflow from the database.
 
@@ -75,10 +81,18 @@ def get_workflow(project_name: str, name: str, uid: str = None, version: str = N
 
     :return:    The workflow from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        data = client.get_workflow(name=name, project_id=project_id, uid=uid, version=version, db_session=db_session)
+        data = client.get_workflow(
+            name=name,
+            project_id=project_id,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         if data is None:
             return APIResponse(
                 success=False, error=f"Workflow with name = {name} not found"
@@ -120,7 +134,11 @@ def update_workflow(
 
 @router.delete("/workflows/{name}")
 def delete_workflow(
-    project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Delete a workflow from the database.
@@ -133,10 +151,18 @@ def delete_workflow(
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_workflow(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        client.delete_workflow(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
@@ -173,7 +199,9 @@ def list_workflows(
     owner_id = client.get_user(
         user_name=auth.username, email=auth.username, db_session=db_session
     ).uid
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_workflows(
             name=name,
@@ -213,8 +241,12 @@ def infer_workflow(
     :return:    The response from the database.
     """
     # Get workflow from the database
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
-    workflow = client.get_workflow(project_id=project_id, uid=uid, db_session=db_session)
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
+    workflow = client.get_workflow(
+        project_id=project_id, uid=uid, db_session=db_session
+    )
     path = workflow.get_infer_path()
 
     if query.session_id:

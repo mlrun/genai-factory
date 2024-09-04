@@ -44,7 +44,13 @@ def create_user(
 
 
 @router.get("/users/{name}")
-def get_user(name: str, email: str = None, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_user(
+    name: str,
+    email: str = None,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a user from the database.
 
@@ -58,7 +64,9 @@ def get_user(name: str, email: str = None, uid: str = None, version: str = None,
     """
     uid, version = parse_version(uid=uid, version=version)
     try:
-        data = client.get_user(name=name, email=email, uid=uid, version=version, db_session=db_session)
+        data = client.get_user(
+            name=name, email=email, uid=uid, version=version, db_session=db_session
+        )
         if data is None:
             return APIResponse(
                 success=False,
@@ -91,13 +99,13 @@ def update_user(
         data = client.update_user(user=user, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
-        return APIResponse(
-            success=False, error=f"Failed to update user {name}: {e}"
-        )
+        return APIResponse(success=False, error=f"Failed to update user {name}: {e}")
 
 
 @router.delete("/users/{name}")
-def delete_user(name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def delete_user(
+    name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+) -> APIResponse:
     """
     Delete a user from the database.
 
@@ -113,9 +121,7 @@ def delete_user(name: str, uid: str = None, version: str = None, db_session=Depe
         client.delete_user(name=name, uid=uid, version=version, db_session=db_session)
         return APIResponse(success=True)
     except Exception as e:
-        return APIResponse(
-            success=False, error=f"Failed to delete user {name}: {e}"
-        )
+        return APIResponse(success=False, error=f"Failed to delete user {name}: {e}")
 
 
 @router.get("/users")

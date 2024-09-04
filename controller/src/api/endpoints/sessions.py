@@ -47,7 +47,13 @@ def create_session(
 
 
 @router.get("/sessions/{name}")
-def get_session(user_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_session(
+    user_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a session from the database. If the session ID is "$last", get the last session for the user.
 
@@ -65,7 +71,9 @@ def get_session(user_name: str, name: str, uid: str = None, version: str = None,
         user_id = client.get_user(user_name=user_name, db_session=db_session).uid
         name = None
     try:
-        data = client.get_session(user_id=user_id, name=name, uid=uid, version=version, db_session=db_session)
+        data = client.get_session(
+            user_id=user_id, name=name, uid=uid, version=version, db_session=db_session
+        )
         if data is None:
             return APIResponse(
                 success=False, error=f"Session with name = {name} not found"
@@ -106,7 +114,13 @@ def update_session(
 
 
 @router.delete("/sessions/{name}")
-def delete_session(user_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def delete_session(
+    user_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Delete a session from the database.
 
@@ -121,7 +135,9 @@ def delete_session(user_name: str, name: str, uid: str = None, version: str = No
     user_id = client.get_user(user_name=user_name, db_session=db_session).uid
     uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_session(name=name, uid=uid, version=version, user_id=user_id, db_session=db_session)
+        client.delete_session(
+            name=name, uid=uid, version=version, user_id=user_id, db_session=db_session
+        )
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(

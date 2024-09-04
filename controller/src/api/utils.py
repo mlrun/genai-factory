@@ -102,6 +102,8 @@ def parse_version(uid: str = None, version: str = None) -> Tuple[str, str]:
     if uid and ":" in uid:
         uid, version_from_uid = uid.split(":")
         if version_from_uid and version:
-            raise ValueError("Version cannot be specified in both the UID and the version parameter.")
+            raise ValueError(
+                "Version cannot be specified in both the UID and the version parameter."
+            )
         version = version_from_uid
     return uid, version

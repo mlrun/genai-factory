@@ -107,8 +107,13 @@ class SqlClient:
         """
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
-        obj = session.query(db_class).filter_by(**kwargs).one_or_none()
+        obj = session.query(db_class).filter_by(**kwargs)
         if obj:
+            if obj.count() > 1:
+                if getattr(api_class, "version", None):
+                    # Take the latest version:
+                    # TODO: Add support for sorting x.y.z versions, can be resolved in the future by tag=latest.
+                    obj = obj.order_by(db_class.version.desc()).first()
             return api_class.from_orm_object(obj)
 
     def _update(
@@ -132,7 +137,9 @@ class SqlClient:
             session.commit()
             return api_object.__class__.from_orm_object(obj)
         else:
-            raise ValueError(f"{db_class} object ({kwargs}) not found")
+            # Create a new object if not found
+            logger.debug(f"Object not found, creating a new one: {api_object}")
+            return self._create(session, db_class, api_object)
 
     def _delete(self, session: sqlalchemy.orm.Session, db_class, **kwargs):
         """
@@ -189,7 +196,9 @@ class SqlClient:
         return {k: v for k, v in kwargs.items() if v is not None}
 
     def create_user(
-        self, user: Union[api_models.User, dict], db_session: sqlalchemy.orm.Session = None
+        self,
+        user: Union[api_models.User, dict],
+        db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Create a new user in the database.
@@ -211,7 +220,7 @@ class SqlClient:
         name: str = None,
         email: str = None,
         db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Get a user from the database.
@@ -240,7 +249,9 @@ class SqlClient:
         return self._get(db_session, db.User, api_models.User, **args)
 
     def update_user(
-        self, user: Union[api_models.User, dict], db_session: sqlalchemy.orm.Session = None
+        self,
+        user: Union[api_models.User, dict],
+        db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing user in the database.
@@ -255,7 +266,9 @@ class SqlClient:
             user = api_models.User.from_dict(user)
         return self._update(db_session, db.User, user, uid=user.uid)
 
-    def delete_user(self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs):
+    def delete_user(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
         """
         Delete a user from the database.
 
@@ -323,7 +336,9 @@ class SqlClient:
             project = api_models.Project.from_dict(project)
         return self._create(db_session, db.Project, project)
 
-    def get_project(self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs):
+    def get_project(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
         """
         Get a project from the database.
 
@@ -334,7 +349,9 @@ class SqlClient:
         :return:    The requested project.
         """
         logger.debug(f"Getting project: name={name}")
-        return self._get(db_session, db.Project, api_models.Project, name=name, **kwargs)
+        return self._get(
+            db_session, db.Project, api_models.Project, name=name, **kwargs
+        )
 
     def update_project(
         self,
@@ -354,7 +371,9 @@ class SqlClient:
             project = api_models.Project.from_dict(project)
         return self._update(db_session, db.Project, project, uid=project.uid)
 
-    def delete_project(self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs):
+    def delete_project(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
         """
         Delete a project from the database.
 
@@ -423,10 +442,7 @@ class SqlClient:
         return self._create(db_session, db.DataSource, data_source)
 
     def get_data_source(
-        self,
-        name: str,
-        db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
     ):
         """
         Get a data source from the database.
@@ -438,21 +454,19 @@ class SqlClient:
         """
         logger.debug(f"Getting data source: name={name}")
         return self._get(
-            db_session,
-            db.DataSource,
-            api_models.DataSource,
-            name=name,
-            **kwargs
+            db_session, db.DataSource, api_models.DataSource, name=name, **kwargs
         )
 
     def update_data_source(
         self,
+        name: str,
         data_source: Union[api_models.DataSource, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing data source in the database.
 
+        :param name:        The name of the data source to update.
         :param data_source: The data source object with the new data.
         :param db_session:  The session to use.
 
@@ -461,13 +475,10 @@ class SqlClient:
         logger.debug(f"Updating data source: {data_source}")
         if isinstance(data_source, dict):
             data_source = api_models.DataSource.from_dict(data_source)
-        return self._update(db_session, db.DataSource, data_source, uid=data_source.uid)
+        return self._update(db_session, db.DataSource, data_source, name=name)
 
     def delete_data_source(
-        self,
-        name: str,
-        db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
     ):
         """
         Delete a data source from the database.
@@ -562,21 +573,19 @@ class SqlClient:
         """
         logger.debug(f"Getting dataset: name={name}")
         return self._get(
-            db_session,
-            db.Dataset,
-            api_models.Dataset,
-            name=name,
-            **kwargs
+            db_session, db.Dataset, api_models.Dataset, name=name, **kwargs
         )
 
     def update_dataset(
         self,
+        name: str,
         dataset: Union[api_models.Dataset, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing dataset in the database.
 
+        :param name:        The name of the dataset to update.
         :param dataset:     The dataset object with the new data.
         :param db_session:  The session to use.
 
@@ -585,7 +594,7 @@ class SqlClient:
         logger.debug(f"Updating dataset: {dataset}")
         if isinstance(dataset, dict):
             dataset = api_models.Dataset.from_dict(dataset)
-        return self._update(db_session, db.Dataset, dataset, uid=dataset.uid)
+        return self._update(db_session, db.Dataset, dataset, name=dataset.name)
 
     def delete_dataset(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -667,9 +676,7 @@ class SqlClient:
             model = api_models.Model.from_dict(model)
         return self._create(db_session, db.Model, model)
 
-    def get_model(
-        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
-    ):
+    def get_model(self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs):
         """
         Get a model from the database.
 
@@ -680,9 +687,7 @@ class SqlClient:
         :return:    The requested model.
         """
         logger.debug(f"Getting model: name={name}")
-        return self._get(
-            db_session, db.Model, api_models.Model, name=name, **kwargs
-        )
+        return self._get(db_session, db.Model, api_models.Model, name=name, **kwargs)
 
     def update_model(
         self,
@@ -787,10 +792,7 @@ class SqlClient:
         return self._create(db_session, db.PromptTemplate, prompt_template)
 
     def get_prompt_template(
-        self,
-        name: str = None,
-        db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        self, name: str = None, db_session: sqlalchemy.orm.Session = None, **kwargs
     ):
         """
         Get a prompt template from the database.
@@ -806,7 +808,7 @@ class SqlClient:
             db.PromptTemplate,
             api_models.PromptTemplate,
             name=name,
-            **kwargs
+            **kwargs,
         )
 
     def update_prompt_template(
@@ -830,10 +832,7 @@ class SqlClient:
         )
 
     def delete_prompt_template(
-        self,
-        name: str = None,
-        db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        self, name: str = None, db_session: sqlalchemy.orm.Session = None, **kwargs
     ):
         """
         Delete a prompt template from the database.
@@ -922,21 +921,19 @@ class SqlClient:
         """
         logger.debug(f"Getting document: name={name}")
         return self._get(
-            db_session,
-            db.Document,
-            api_models.Document,
-            name=name,
-            **kwargs
+            db_session, db.Document, api_models.Document, name=name, **kwargs
         )
 
     def update_document(
         self,
+        name: str,
         document: Union[api_models.Document, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing document in the database.
 
+        :param name:        The name of the document to update.
         :param document:    The document object with the new data.
         :param db_session:  The session to use.
 
@@ -945,7 +942,7 @@ class SqlClient:
         logger.debug(f"Updating document: {document}")
         if isinstance(document, dict):
             document = api_models.Document.from_dict(document)
-        return self._update(db_session, db.Document, document, uid=document.uid)
+        return self._update(db_session, db.Document, document, name=name)
 
     def delete_document(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -1024,10 +1021,7 @@ class SqlClient:
         return self._create(db_session, db.Workflow, workflow)
 
     def get_workflow(
-        self,
-        name: str,
-        db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
     ):
         """
         Get a workflow from the database.
@@ -1040,11 +1034,7 @@ class SqlClient:
         """
         logger.debug(f"Getting workflow: name={name}")
         return self._get(
-            db_session,
-            db.Workflow,
-            api_models.Workflow,
-            name=name,
-            **kwargs
+            db_session, db.Workflow, api_models.Workflow, name=name, **kwargs
         )
 
     def update_workflow(
@@ -1065,7 +1055,9 @@ class SqlClient:
             workflow = api_models.Workflow.from_dict(workflow)
         return self._update(db_session, db.Workflow, workflow, uid=workflow.uid)
 
-    def delete_workflow(self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs):
+    def delete_workflow(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
         """
         Delete a workflow from the database.
 
@@ -1149,7 +1141,7 @@ class SqlClient:
         uid: str = None,
         user_id: str = None,
         db_session: sqlalchemy.orm.Session = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Get a session from the database.
@@ -1164,10 +1156,14 @@ class SqlClient:
         """
         logger.debug(f"Getting session: name={name}, uid={uid}, user_id={user_id}")
         if uid:
-            return self._get(db_session, db.Session, api_models.ChatSession, uid=uid, **kwargs)
+            return self._get(
+                db_session, db.Session, api_models.ChatSession, uid=uid, **kwargs
+            )
         elif user_id:
             # get the last session for the user
-            return self.list_sessions(user_id=user_id, last=1, db_session=db_session, **kwargs)[0]
+            return self.list_sessions(
+                user_id=user_id, last=1, db_session=db_session, **kwargs
+            )[0]
         raise ValueError("session_name or user_id must be provided")
 
     def update_session(
@@ -1186,7 +1182,9 @@ class SqlClient:
         logger.debug(f"Updating chat session: {session}")
         return self._update(db_session, db.Session, session, uid=session.uid)
 
-    def delete_session(self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs):
+    def delete_session(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
         """
         Delete a session from the database.
 

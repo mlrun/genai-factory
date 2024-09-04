@@ -49,7 +49,13 @@ def create_prompt(
 
 
 @router.get("/prompt_templates/{name}")
-def get_prompt(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def get_prompt(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a prompt from the database.
 
@@ -61,10 +67,18 @@ def get_prompt(project_name: str, name: str, uid: str = None, version: str = Non
 
     :return:    The prompt from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        data = client.get_prompt_template(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        data = client.get_prompt_template(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         if data is None:
             return APIResponse(
                 success=False, error=f"Prompt with name = {name} not found"
@@ -105,7 +119,13 @@ def update_prompt(
 
 
 @router.delete("/prompt_templates/{name}")
-def delete_prompt(project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)) -> APIResponse:
+def delete_prompt(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Delete a prompt from the database.
 
@@ -117,10 +137,18 @@ def delete_prompt(project_name: str, name: str, uid: str = None, version: str = 
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
-        client.delete_prompt_template(project_id=project_id, name=name, uid=uid, version=version, db_session=db_session)
+        client.delete_prompt_template(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
@@ -153,7 +181,9 @@ def list_prompts(
     :return:    The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_prompt_templates(
             project_id=project_id,

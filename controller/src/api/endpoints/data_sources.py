@@ -63,7 +63,11 @@ def create_data_source(
 
 @router.get("/data_sources/{name}")
 def get_data_source(
-    project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Get a data source from the database.
@@ -76,7 +80,9 @@ def get_data_source(
 
     :return:    The data source from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         # Parse the version if provided:
         uid, version = parse_version(uid, version)
@@ -117,7 +123,9 @@ def update_data_source(
     :return:    The response from the database.
     """
     try:
-        data = client.update_data_source(data_source=data_source, db_session=db_session)
+        data = client.update_data_source(
+            name=name, data_source=data_source, db_session=db_session
+        )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -128,7 +136,11 @@ def update_data_source(
 
 @router.delete("/data_sources/{name}")
 def delete_data_source(
-    project_name: str, name: str, uid: str = None, version: str = None, db_session=Depends(get_db)
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Delete a data source from the database.
@@ -141,11 +153,17 @@ def delete_data_source(
 
     :return:    The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, version = parse_version(uid, version)
     try:
         client.delete_data_source(
-            name=name, project_id=project_id, uid=uid, version=version, db_session=db_session
+            name=name,
+            project_id=project_id,
+            uid=uid,
+            version=version,
+            db_session=db_session,
         )
     except Exception as e:
         return APIResponse(
@@ -181,7 +199,9 @@ def list_data_sources(
     :return:    The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_data_sources(
             project_id=project_id,
@@ -230,10 +250,16 @@ def ingest(
 
     :return:    The response from the application.
     """
-    project_id = client.get_project(project_name=project_name, db_session=db_session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     uid, ds_version = parse_version(uid, version)
     data_source = client.get_data_source(
-        name=name, project_id=project_id, uid=uid, version=ds_version, db_session=db_session
+        name=name,
+        project_id=project_id,
+        uid=uid,
+        version=ds_version,
+        db_session=db_session,
     )
 
     # Create document from path:
