@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
-
 from controller.src.schemas.base import BaseWithMetadata
 
 
@@ -22,7 +20,7 @@ class User(BaseWithMetadata):
     _top_level_fields = ["email", "full_name"]
 
     email: str
-    full_name: Optional[str]
-    features: Optional[dict[str, str]]
-    policy: Optional[dict[str, str]]
-    is_admin: Optional[bool] = False
+    full_name: str = None
+    features: dict[str, str] = None
+    policy: dict[str, str] = None
+    is_admin: bool = False

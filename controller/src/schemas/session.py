@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from pydantic import BaseModel
 
@@ -22,9 +22,9 @@ from controller.src.schemas.base import BaseWithOwner
 
 class QueryItem(BaseModel):
     question: str
-    session_id: Optional[str]
-    filter: Optional[List[Tuple[str, str]]]
-    data_source: Optional[str]
+    session_id: str = None
+    filter: List[Tuple[str, str]] = None
+    data_source: str = None
 
 
 class ChatRole(str, Enum):
@@ -38,9 +38,9 @@ class ChatRole(str, Enum):
 class Message(BaseModel):
     role: ChatRole
     content: str
-    extra_data: Optional[dict]
-    sources: Optional[List[dict]]
-    human_feedback: Optional[str]
+    extra_data: dict = None
+    sources: List[dict] = None
+    human_feedback: str = None
 
 
 class ChatSession(BaseWithOwner):
@@ -48,4 +48,4 @@ class ChatSession(BaseWithOwner):
     _top_level_fields = ["workflow_id"]
 
     workflow_id: str
-    history: Optional[List[Message]] = []
+    history: List[Message] = []

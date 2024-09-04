@@ -35,7 +35,7 @@ class CtrlConfig(BaseModel):
     verbose: bool = True
     log_level: str = "DEBUG"
     # SQL Database
-    db_type = "sql"
+    db_type: str = "sql"
     sql_connection_str: str = default_db_path
     application_url: str = "http://localhost:8000"
 
