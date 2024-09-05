@@ -32,11 +32,11 @@ def create_prompt(
     """
     Create a new prompt in the database.
 
-    :param project_name:    The name of the project to create the prompt in.
-    :param prompt:          The prompt to create.
-    :param db_session:         The database session.
+    :param project_name: The name of the project to create the prompt in.
+    :param prompt:       The prompt to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_prompt_template(prompt=prompt, db_session=db_session)
@@ -59,13 +59,13 @@ def get_prompt(
     """
     Get a prompt from the database.
 
-    :param project_name:    The name of the project to get the prompt from.
-    :param name:            The name of the prompt to get.
-    :param uid:             The UID of the prompt to get.
-    :param version:         The version of the prompt to get.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to get the prompt from.
+    :param name:         The name of the prompt to get.
+    :param uid:          The UID of the prompt to get.
+    :param version:      The version of the prompt to get.
+    :param db_session:   The database session.
 
-    :return:    The prompt from the database.
+    :return: The prompt from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -101,15 +101,17 @@ def update_prompt(
     """
     Update a prompt in the database.
 
-    :param project_name:    The name of the project to update the prompt in.
-    :param prompt:          The prompt to update.
-    :param name:            The name of the prompt to update.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to update the prompt in.
+    :param prompt:       The prompt to update.
+    :param name:         The name of the prompt to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_prompt_template(prompt=prompt, db_session=db_session)
+        data = client.update_prompt_template(
+            name=name, prompt=prompt, db_session=db_session
+        )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -129,13 +131,13 @@ def delete_prompt(
     """
     Delete a prompt from the database.
 
-    :param project_name:    The name of the project to delete the prompt from.
-    :param name:            The name of the prompt to delete.
-    :param uid:             The UID of the prompt to delete.
-    :param version:         The version of the prompt to delete.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to delete the prompt from.
+    :param name:         The name of the prompt to delete.
+    :param uid:          The UID of the prompt to delete.
+    :param version:      The version of the prompt to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -170,15 +172,15 @@ def list_prompts(
     """
     List prompts in the database.
 
-    :param project_name:    The name of the project to list the prompts from.
-    :param name:            The name to filter by.
-    :param version:         The version to filter by.
-    :param labels:          The labels to filter by.
-    :param mode:            The output mode.
-    :param db_session:      The database session.
-    :param auth:            The authentication information.
+    :param project_name: The name of the project to list the prompts from.
+    :param name:         The name to filter by.
+    :param version:      The version to filter by.
+    :param labels:       The labels to filter by.
+    :param mode:         The output mode.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
     project_id = client.get_project(

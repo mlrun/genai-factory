@@ -30,11 +30,11 @@ def create_session(
     """
     Create a new session in the database.
 
-    :param user_name:   The name of the user to create the session for.
-    :param session:     The session to create.
-    :param db_session:  The database session.
+    :param user_name:  The name of the user to create the session for.
+    :param session:    The session to create.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_session(session=session, db_session=db_session)
@@ -56,12 +56,12 @@ def get_session(
     """
     Get a session from the database. If the session ID is "$last", get the last session for the user.
 
-    :param user_name:   The name of the user to get the session for.
-    :param name:        The name of the session to get.
-    :param uid:         The UID of the session to get. if "$last" bring the last user's session.
-    :param db_session:  The database session.
+    :param user_name:  The name of the user to get the session for.
+    :param name:       The name of the session to get.
+    :param uid:        The UID of the session to get. if "$last" bring the last user's session.
+    :param db_session: The database session.
 
-    :return:    The session from the database.
+    :return: The session from the database.
     """
     user_id = None
     if name == "$last":
@@ -93,15 +93,15 @@ def update_session(
     """
     Update a session in the database.
 
-    :param user_name:   The name of the user to update the session for.
-    :param name:        The name of the session to update.
-    :param session:     The session to update.
-    :param db_session:  The database session.
+    :param user_name:  The name of the user to update the session for.
+    :param name:       The name of the session to update.
+    :param session:    The session to update.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_session(session=session, db_session=db_session)
+        data = client.update_session(name=name, session=session, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -120,10 +120,10 @@ def delete_session(
     """
     Delete a session from the database.
 
-    :param user_name:   The name of the user to delete the session for.
-    :param name:        The name of the session to delete.
-    :param uid:         The UID of the session to delete.
-    :param db_session:  The database session.
+    :param user_name:  The name of the user to delete the session for.
+    :param name:       The name of the session to delete.
+    :param uid:        The UID of the session to delete.
+    :param db_session: The database session.
 
     :return:    The response from the database.
     """
@@ -161,7 +161,7 @@ def list_sessions(
     :param mode:        The output mode.
     :param db_session:  The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     user_id = client.get_user(user_name=user_name, db_session=db_session).uid
     try:

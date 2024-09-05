@@ -46,11 +46,11 @@ def create_workflow(
     """
     Create a new workflow in the database.
 
-    :param project_name:    The name of the project to create the workflow in.
-    :param workflow:        The workflow to create.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to create the workflow in.
+    :param workflow:     The workflow to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_workflow(workflow=workflow, db_session=db_session)
@@ -73,13 +73,13 @@ def get_workflow(
     """
     Get a workflow from the database.
 
-    :param project_name:    The name of the project to get the workflow from.
-    :param name:            The name of the workflow to get.
-    :param uid:             The UID of the workflow to get.
-    :param version:         The version of the workflow to get.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to get the workflow from.
+    :param name:         The name of the workflow to get.
+    :param uid:          The UID of the workflow to get.
+    :param version:      The version of the workflow to get.
+    :param db_session:   The database session.
 
-    :return:    The workflow from the database.
+    :return: The workflow from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -115,15 +115,17 @@ def update_workflow(
     """
     Update a workflow in the database.
 
-    :param project_name:    The name of the project to update the workflow in.
-    :param workflow:        The workflow to update.
-    :param name:            The name of the workflow to update.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to update the workflow in.
+    :param workflow:     The workflow to update.
+    :param name:         The name of the workflow to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_workflow(workflow=workflow, db_session=db_session)
+        data = client.update_workflow(
+            name=name, workflow=workflow, db_session=db_session
+        )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -143,13 +145,13 @@ def delete_workflow(
     """
     Delete a workflow from the database.
 
-    :param project_name:    The name of the project to delete the workflow from.
-    :param name:            The name of the workflow to delete.
-    :param uid:             The UID of the workflow to delete.
-    :param version:         The version of the workflow to delete.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to delete the workflow from.
+    :param name:         The name of the workflow to delete.
+    :param uid:          The UID of the workflow to delete.
+    :param version:      The version of the workflow to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -185,16 +187,16 @@ def list_workflows(
     """
     List workflows in the database.
 
-    :param project_name:    The name of the project to list the workflows from.
-    :param name:            The name to filter by.
-    :param version:         The version to filter by.
-    :param workflow_type:   The workflow type to filter by.
-    :param labels:          The labels to filter by.
-    :param mode:            The output mode.
-    :param db_session:      The database session.
-    :param auth:            The authentication information.
+    :param project_name:  The name of the project to list the workflows from.
+    :param name:          The name to filter by.
+    :param version:       The version to filter by.
+    :param workflow_type: The workflow type to filter by.
+    :param labels:        The labels to filter by.
+    :param mode:          The output mode.
+    :param db_session:    The database session.
+    :param auth:          The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     owner_id = client.get_user(
         user_name=auth.username, email=auth.username, db_session=db_session
@@ -232,13 +234,13 @@ def infer_workflow(
     """
     Run application workflow.
 
-    :param project_name:    The name of the project to run the workflow in.
-    :param uid:             The UID of the workflow to run.
-    :param query:           The query to run.
-    :param db_session:      The database session.
-    :param auth:            The authentication information.
+    :param project_name: The name of the project to run the workflow in.
+    :param uid:          The UID of the workflow to run.
+    :param query:        The query to run.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     # Get workflow from the database
     project_id = client.get_project(

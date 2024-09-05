@@ -32,11 +32,11 @@ def create_document(
     """
     Create a new document in the database.
 
-    :param project_name:    The name of the project to create the document in.
-    :param document:        The document to create.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to create the document in.
+    :param document:     The document to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_document(document=document, db_session=db_session)
@@ -59,13 +59,13 @@ def get_document(
     """
     Get a document from the database.
 
-    :param project_name:    The name of the project to get the document from.
-    :param name:            The name of the document to get.
-    :param uid:             The UID of the document to get.
-    :param version:         The version of the document to get.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to get the document from.
+    :param name:         The name of the document to get.
+    :param uid:          The UID of the document to get.
+    :param version:      The version of the document to get.
+    :param db_session:   The database session.
 
-    :return:    The document from the database.
+    :return: The document from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -101,12 +101,12 @@ def update_document(
     """
     Update a document in the database.
 
-    :param project_name:    The name of the project to update the document in.
-    :param document:        The document to update.
-    :param name:            The name of the document to update.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to update the document in.
+    :param document:     The document to update.
+    :param name:         The name of the document to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.update_document(
@@ -131,13 +131,13 @@ def delete_document(
     """
     Delete a document from the database.
 
-    :param project_name:    The name of the project to delete the document from.
-    :param name:            The name of the document to delete.
-    :param uid:             The UID of the document to delete.
-    :param version:         The version of the document to delete.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to delete the document from.
+    :param name:         The name of the document to delete.
+    :param uid:          The UID of the document to delete.
+    :param version:      The version of the document to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -172,15 +172,15 @@ def list_documents(
     """
     List documents in the database.
 
-    :param project_name:    The name of the project to list the documents from.
-    :param name:            The name to filter by.
-    :param version:         The version to filter by.
-    :param labels:          The labels to filter by.
-    :param mode:            The output mode.
-    :param db_session:      The database session.
-    :param auth:            The authentication information.
+    :param project_name: The name of the project to list the documents from.
+    :param name:         The name to filter by.
+    :param version:      The version to filter by.
+    :param labels:       The labels to filter by.
+    :param mode:         The output mode.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
     project_id = client.get_project(

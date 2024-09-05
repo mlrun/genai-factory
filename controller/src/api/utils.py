@@ -62,7 +62,7 @@ def _send_to_application(
     :param auth:    The authentication information to use. If provided, the username will be added to the headers.
     :param kwargs:  Additional keyword arguments to pass in the request function. For example, headers, params, etc.
 
-    :return:        The JSON response from the application.
+    :return: The JSON response from the application.
     """
     if config.application_url not in path:
         url = f"{config.application_url}/api/{path}"
@@ -97,7 +97,7 @@ def parse_version(uid: str = None, version: str = None) -> Tuple[str, str]:
     :param uid:     The UID string.
     :param version: The version string to parse.
 
-    :return:    The UID and version strings.
+    :return: The UID and version strings.
     """
     if uid and ":" in uid:
         uid, version_from_uid = uid.split(":")

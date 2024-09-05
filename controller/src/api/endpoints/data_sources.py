@@ -45,11 +45,11 @@ def create_data_source(
     """
     Create a new data source in the database.
 
-    :param project_name:        The name of the project to create the data source in.
-    :param data_source:         The data source to create.
-    :param db_session:          The database session.
+    :param project_name: The name of the project to create the data source in.
+    :param data_source:  The data source to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_data_source(data_source=data_source, db_session=db_session)
@@ -72,13 +72,13 @@ def get_data_source(
     """
     Get a data source from the database.
 
-    :param project_name:    The name of the project to get the data source from.
-    :param name:            The name of the data source to get.
-    :param uid:             The uid of the data source to get.
-    :param version:         The version of the data source to get.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to get the data source from.
+    :param name:         The name of the data source to get.
+    :param uid:          The uid of the data source to get.
+    :param version:      The version of the data source to get.
+    :param db_session:   The database session.
 
-    :return:    The data source from the database.
+    :return: The data source from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -115,12 +115,12 @@ def update_data_source(
     """
     Update a data source in the database.
 
-    :param project_name:    The name of the project to update the data source in.
-    :param data_source:     The data source to update.
-    :param name:            The name of the data source to update.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to update the data source in.
+    :param data_source:  The data source to update.
+    :param name:         The name of the data source to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.update_data_source(
@@ -145,13 +145,13 @@ def delete_data_source(
     """
     Delete a data source from the database.
 
-    :param project_name:    The name of the project to delete the data source from.
-    :param name:            The name of the data source to delete.
-    :param uid:             The ID of the data source to delete.
-    :param version:         The version of the data source to delete.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to delete the data source from.
+    :param name:         The name of the data source to delete.
+    :param uid:          The ID of the data source to delete.
+    :param version:      The version of the data source to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :returThe response from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -187,16 +187,16 @@ def list_data_sources(
     """
     List data sources in the database.
 
-    :param project_name:        The name of the project to list the data sources from.
-    :param name:                The name to filter by.
-    :param version:             The version to filter by.
-    :param data_source_type:    The data source type to filter by.
-    :param labels:              The labels to filter by.
-    :param mode:                The output mode.
-    :param db_session:          The database session.
-    :param auth:                The authentication information.
+    :param project_name:     The name of the project to list the data sources from.
+    :param name:             The name to filter by.
+    :param version:          The version to filter by.
+    :param data_source_type: The data source type to filter by.
+    :param labels:           The labels to filter by.
+    :param mode:             The output mode.
+    :param db_session:       The database session.
+    :param auth:             The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
     project_id = client.get_project(
@@ -237,18 +237,18 @@ def ingest(
     """
     Ingest document into the vector database.
 
-    :param project_name:        The name of the project to ingest the documents into.
-    :param name:                The name of the data source to ingest the documents into.
-    :param loader:              The data loader type to use.
-    :param path:                The path to the document to ingest.
-    :param uid:                 The UID of the data source to ingest the documents into.
-    :param metadata:            The metadata to associate with the documents.
-    :param version:             The version of the documents.
-    :param from_file:           Whether the documents are from a file.
-    :param db_session:          The database session.
-    :param auth:                The authentication information.
+    :param project_name: The name of the project to ingest the documents into.
+    :param name:         The name of the data source to ingest the documents into.
+    :param loader:       The data loader type to use.
+    :param path:         The path to the document to ingest.
+    :param uid:          The UID of the data source to ingest the documents into.
+    :param metadata:     The metadata to associate with the documents.
+    :param version:      The version of the documents.
+    :param from_file:    Whether the documents are from a file.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the application.
+    :return: The response from the application.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session

@@ -43,9 +43,9 @@ class SqlClient:
         """
         Get a session from the session maker.
 
-        :param session:    The session to use. If None, a new session will be created.
+        :param session: The session to use. If None, a new session will be created.
 
-        :return:    The session.
+        :return: The session.
         """
         return session or self._session_maker()
 
@@ -53,7 +53,7 @@ class SqlClient:
         """
         Get a local session from the local session maker.
 
-        :return:    The session.
+        :return: The session.
         """
         return self._local_maker()
 
@@ -61,8 +61,8 @@ class SqlClient:
         """
         Create the tables in the database.
 
-        :param drop_old:    Whether to drop the old tables before creating the new ones.
-        :param names:       The names of the tables to create. If None, all tables will be created.
+        :param drop_old: Whether to drop the old tables before creating the new ones.
+        :param names:    The names of the tables to create. If None, all tables will be created.
         """
         tables = None
         if names:
@@ -78,11 +78,11 @@ class SqlClient:
         Create an object in the database.
         This method generates a UID to the object and adds the object to the session and commits the transaction.
 
-        :param session:     The session to use.
-        :param db_class:    The DB class of the object.
-        :param obj:         The object to create.
+        :param session:  The session to use.
+        :param db_class: The DB class of the object.
+        :param obj:      The object to create.
 
-        :return:    The created object.
+        :return: The created object.
         """
         session = self.get_db_session(session)
         # try:
@@ -98,22 +98,23 @@ class SqlClient:
         """
         Get an object from the database.
 
-        :param session:     The session to use.
-        :param db_class:    The DB class of the object.
-        :param api_class:   The API class of the object.
-        :param kwargs:      The keyword arguments to filter the object.
+        :param session:   The session to use.
+        :param db_class:  The DB class of the object.
+        :param api_class: The API class of the object.
+        :param kwargs:    The keyword arguments to filter the object.
 
-        :return:    the object.
+        :return: The object.
         """
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
         obj = session.query(db_class).filter_by(**kwargs)
         if obj:
             if obj.count() > 1:
-                if getattr(api_class, "version", None):
-                    # Take the latest version:
-                    # TODO: Add support for sorting x.y.z versions, can be resolved in the future by tag=latest.
-                    obj = obj.order_by(db_class.version.desc()).first()
+                if not kwargs.get("version"):
+                    # Take the latest created:
+                    obj = obj.order_by(db_class.created.desc()).first()
+                else:
+                    obj = obj.one_or_none()
             return api_class.from_orm_object(obj)
 
     def _update(
@@ -122,13 +123,14 @@ class SqlClient:
         """
         Update an object in the database.
 
-        :param session:     The session to use.
-        :param db_class:    The DB class of the object.
-        :param api_object:  The API object with the new data.
-        :param kwargs:      The keyword arguments to filter the object.
+        :param session:    The session to use.
+        :param db_class:   The DB class of the object.
+        :param api_object: The API object with the new data.
+        :param kwargs:     The keyword arguments to filter the object.
 
-        :return:    The updated object.
+        :return: The updated object.
         """
+        kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
         obj = session.query(db_class).filter_by(**kwargs).one_or_none()
         if obj:
@@ -145,9 +147,9 @@ class SqlClient:
         """
         Delete an object from the database.
 
-        :param session:     The session to use.
-        :param db_class:    The DB class of the object.
-        :param kwargs:      The keyword arguments to filter the object.
+        :param session:  The session to use.
+        :param db_class: The DB class of the object.
+        :param kwargs:   The keyword arguments to filter the object.
         """
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
@@ -168,14 +170,14 @@ class SqlClient:
         """
         List objects from the database.
 
-        :param session:         The session to use.
-        :param db_class:        The DB class of the object.
-        :param api_class:       The API class of the object.
-        :param output_mode:     The output mode.
-        :param labels_match:    The labels to match, filter the objects by labels.
-        :param filters:         The filters to apply.
+        :param session:      The session to use.
+        :param db_class:     The DB class of the object.
+        :param api_class:    The API class of the object.
+        :param output_mode:  The output mode.
+        :param labels_match: The labels to match, filter the objects by labels.
+        :param filters:      The filters to apply.
 
-        :return:    A list of the desired objects.
+        :return: A list of the desired objects.
         """
         session = self.get_db_session(session)
 
@@ -203,10 +205,10 @@ class SqlClient:
         """
         Create a new user in the database.
 
-        :param user:        The user object to create.
-        :param db_session:  The session to use.
+        :param user:       The user object to create.
+        :param db_session: The session to use.
 
-        :return:    The created user.
+        :return: The created user.
         """
         logger.debug(f"Creating user: {user}")
         if isinstance(user, dict):
@@ -226,13 +228,13 @@ class SqlClient:
         Get a user from the database.
         Either user_id or user_name or email must be provided.
 
-        :param uid:         The UID of the user to get.
-        :param name:        The name of the user to get.
-        :param email:       The email of the user to get.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the user.
+        :param uid:        The UID of the user to get.
+        :param name:       The name of the user to get.
+        :param email:      The email of the user to get.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the user.
 
-        :return:    The user.
+        :return: The user.
         """
         args = {}
         if email:
@@ -250,21 +252,23 @@ class SqlClient:
 
     def update_user(
         self,
+        name: str,
         user: Union[api_models.User, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing user in the database.
 
-        :param user:        The user object with the new data.
-        :param db_session:  The session to use.
+        :param name:       The name of the user to update.
+        :param user:       The user object with the new data.
+        :param db_session: The session to use.
 
-        :return:    The updated user.
+        :return: The updated user.
         """
         logger.debug(f"Updating user: {user}")
         if isinstance(user, dict):
             user = api_models.User.from_dict(user)
-        return self._update(db_session, db.User, user, uid=user.uid)
+        return self._update(db_session, db.User, user, name=name, uid=user.uid)
 
     def delete_user(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -272,8 +276,8 @@ class SqlClient:
         """
         Delete a user from the database.
 
-        :param name:        The name of the user to delete.
-        :param db_session:  The session to use.
+        :param name:       The name of the user to delete.
+        :param db_session: The session to use.
         """
         logger.debug(f"Deleting user: name={name}")
         self._delete(db_session, db.User, name=name, **kwargs)
@@ -290,14 +294,14 @@ class SqlClient:
         """
         List users from the database.
 
-        :param name:            The name to filter the users by.
-        :param email:           The email to filter the users by.
-        :param full_name:       The full name to filter the users by.
-        :param labels_match:    The labels to match, filter the users by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:         The name to filter the users by.
+        :param email:        The email to filter the users by.
+        :param full_name:    The full name to filter the users by.
+        :param labels_match: The labels to match, filter the users by labels.
+        :param output_mode:  The output mode.
+        :param db_session:   The session to use.
 
-        :return:    List of users.
+        :return: List of users.
         """
         logger.debug(
             f"Getting users: email={email}, full_name={full_name}, mode={output_mode}"
@@ -326,10 +330,10 @@ class SqlClient:
         """
         Create a new project in the database.
 
-        :param project:     The project object to create.
-        :param db_session:  The session to use.
+        :param project:    The project object to create.
+        :param db_session: The session to use.
 
-        :return:    The created project.
+        :return: The created project.
         """
         logger.debug(f"Creating project: {project}")
         if isinstance(project, dict):
@@ -342,11 +346,11 @@ class SqlClient:
         """
         Get a project from the database.
 
-        :param name:        The name of the project to get.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the project.
+        :param name:       The name of the project to get.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the project.
 
-        :return:    The requested project.
+        :return: The requested project.
         """
         logger.debug(f"Getting project: name={name}")
         return self._get(
@@ -355,21 +359,23 @@ class SqlClient:
 
     def update_project(
         self,
+        name: str,
         project: Union[api_models.Project, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing project in the database.
 
-        :param project:     The project object with the new data.
-        :param db_session:  The session to use.
+        :param name:       The name of the project to update.
+        :param project:    The project object with the new data.
+        :param db_session: The session to use.
 
-        :return:    The updated project.
+        :return: The updated project.
         """
         logger.debug(f"Updating project: {project}")
         if isinstance(project, dict):
             project = api_models.Project.from_dict(project)
-        return self._update(db_session, db.Project, project, uid=project.uid)
+        return self._update(db_session, db.Project, project, name=name, uid=project.uid)
 
     def delete_project(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -377,8 +383,8 @@ class SqlClient:
         """
         Delete a project from the database.
 
-        :param name:        The name of the project to delete.
-        :param db_session:  The session to use.
+        :param name:       The name of the project to delete.
+        :param db_session: The session to use.
         """
         logger.debug(f"Deleting project: name={name}")
         self._delete(db_session, db.Project, name=name, **kwargs)
@@ -395,14 +401,14 @@ class SqlClient:
         """
         List projects from the database.
 
-        :param name:            The name to filter the projects by.
-        :param owner_id:        The owner to filter the projects by.
-        :param version:         The version to filter the projects by.
-        :param labels_match:    The labels to match, filter the projects by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:         The name to filter the projects by.
+        :param owner_id:     The owner to filter the projects by.
+        :param version:      The version to filter the projects by.
+        :param labels_match: The labels to match, filter the projects by labels.
+        :param output_mode:  The output mode.
+        :param db_session:   The session to use.
 
-        :return:    List of projects.
+        :return: List of projects.
         """
         logger.debug(
             f"Getting projects: owner_id={owner_id}, version={version}, labels_match={labels_match}, mode={output_mode}"
@@ -434,7 +440,7 @@ class SqlClient:
         :param data_source: The data source object to create.
         :param db_session:  The session to use.
 
-        :return:    The created data source.
+        :return: The created data source.
         """
         logger.debug(f"Creating data source: {data_source}")
         if isinstance(data_source, dict):
@@ -447,10 +453,10 @@ class SqlClient:
         """
         Get a data source from the database.
 
-        :param name:        The name of the data source to get.
-        :param db_session:  The session to use.
+        :param name:       The name of the data source to get.
+        :param db_session: The session to use.
 
-        :return:    The requested data source.
+        :return: The requested data source.
         """
         logger.debug(f"Getting data source: name={name}")
         return self._get(
@@ -470,12 +476,14 @@ class SqlClient:
         :param data_source: The data source object with the new data.
         :param db_session:  The session to use.
 
-        :return:    The updated data source.
+        :return: The updated data source.
         """
         logger.debug(f"Updating data source: {data_source}")
         if isinstance(data_source, dict):
             data_source = api_models.DataSource.from_dict(data_source)
-        return self._update(db_session, db.DataSource, data_source, name=name)
+        return self._update(
+            db_session, db.DataSource, data_source, name=name, uid=data_source.uid
+        )
 
     def delete_data_source(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -483,11 +491,11 @@ class SqlClient:
         """
         Delete a data source from the database.
 
-        :param name:        The name of the data source to delete.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the data source.
+        :param name:       The name of the data source to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the data source.
 
-        :return:    A response object with the success status.
+        :return: A response object with the success status.
         """
         logger.debug(f"Deleting data source: name={name}")
         self._delete(db_session, db.DataSource, name=name, **kwargs)
@@ -506,16 +514,16 @@ class SqlClient:
         """
         List data sources from the database.
 
-        :param name:                The name to filter the data sources by.
-        :param owner_id:            The owner to filter the data sources by.
-        :param version:             The version to filter the data sources by.
-        :param project_id:          The project to filter the data sources by.
-        :param data_source_type:    The data source type to filter the data sources by.
-        :param labels_match:        The labels to match, filter the data sources by labels.
-        :param output_mode:         The output mode.
-        :param db_session:          The session to use.
+        :param name:             The name to filter the data sources by.
+        :param owner_id:         The owner to filter the data sources by.
+        :param version:          The version to filter the data sources by.
+        :param project_id:       The project to filter the data sources by.
+        :param data_source_type: The data source type to filter the data sources by.
+        :param labels_match:     The labels to match, filter the data sources by labels.
+        :param output_mode:      The output mode.
+        :param db_session:       The session to use.
 
-        :return:    List of data sources.
+        :return: List of data sources.
         """
         logger.debug(
             f"Getting data sources: name={name}, owner_id={owner_id}, version={version},"
@@ -549,10 +557,10 @@ class SqlClient:
         """
         Create a new dataset in the database.
 
-        :param dataset:     The dataset object to create.
-        :param db_session:  The session to use.
+        :param dataset:    The dataset object to create.
+        :param db_session: The session to use.
 
-        :return:    The created dataset.
+        :return: The created dataset.
         """
         logger.debug(f"Creating dataset: {dataset}")
         if isinstance(dataset, dict):
@@ -565,11 +573,11 @@ class SqlClient:
         """
         Get a dataset from the database.
 
-        :param name:        The name of the dataset to get.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the dataset.
+        :param name:       The name of the dataset to get.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the dataset.
 
-        :return:    The requested dataset.
+        :return: The requested dataset.
         """
         logger.debug(f"Getting dataset: name={name}")
         return self._get(
@@ -585,16 +593,16 @@ class SqlClient:
         """
         Update an existing dataset in the database.
 
-        :param name:        The name of the dataset to update.
-        :param dataset:     The dataset object with the new data.
-        :param db_session:  The session to use.
+        :param name:       The name of the dataset to update.
+        :param dataset:    The dataset object with the new data.
+        :param db_session: The session to use.
 
-        :return:    The updated dataset.
+        :return: The updated dataset.
         """
         logger.debug(f"Updating dataset: {dataset}")
         if isinstance(dataset, dict):
             dataset = api_models.Dataset.from_dict(dataset)
-        return self._update(db_session, db.Dataset, dataset, name=dataset.name)
+        return self._update(db_session, db.Dataset, dataset, name=name, uid=dataset.uid)
 
     def delete_dataset(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -602,9 +610,9 @@ class SqlClient:
         """
         Delete a dataset from the database.
 
-        :param name:        The name of the dataset to delete.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the dataset.
+        :param name:       The name of the dataset to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the dataset.
         """
         logger.debug(f"Deleting dataset: name={name}")
         self._delete(db_session, db.Dataset, name=name, **kwargs)
@@ -623,16 +631,16 @@ class SqlClient:
         """
         List datasets from the database.
 
-        :param name:            The name to filter the datasets by.
-        :param owner_id:        The owner to filter the datasets by.
-        :param version:         The version to filter the datasets by.
-        :param project_id:      The project to filter the datasets by.
-        :param task:            The task to filter the datasets by.
-        :param labels_match:    The labels to match, filter the datasets by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:         The name to filter the datasets by.
+        :param owner_id:     The owner to filter the datasets by.
+        :param version:      The version to filter the datasets by.
+        :param project_id:   The project to filter the datasets by.
+        :param task:         The task to filter the datasets by.
+        :param labels_match: The labels to match, filter the datasets by labels.
+        :param output_mode:  The output mode.
+        :param db_session:   The session to use.
 
-        :return:    The list of datasets.
+        :return: The list of datasets.
         """
         logger.debug(
             f"Getting datasets: owner_id={owner_id}, version={version}, task={task}, labels_match={labels_match},"
@@ -666,10 +674,10 @@ class SqlClient:
         """
         Create a new model in the database.
 
-        :param model:       The model object to create.
-        :param db_session:  The session to use.
+        :param model:      The model object to create.
+        :param db_session: The session to use.
 
-        :return:    The created model.
+        :return: The created model.
         """
         logger.debug(f"Creating model: {model}")
         if isinstance(model, dict):
@@ -680,32 +688,34 @@ class SqlClient:
         """
         Get a model from the database.
 
-        :param name:        The name of the model to get.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the model.
+        :param name:       The name of the model to get.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the model.
 
-        :return:    The requested model.
+        :return: The requested model.
         """
         logger.debug(f"Getting model: name={name}")
         return self._get(db_session, db.Model, api_models.Model, name=name, **kwargs)
 
     def update_model(
         self,
+        name: str,
         model: Union[api_models.Model, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing model in the database.
 
-        :param model:       The model object with the new data.
-        :param db_session:  The session to use.
+        :param name:       The name of the model to update.
+        :param model:      The model object with the new data.
+        :param db_session: The session to use.
 
-        :return:    The updated model.
+        :return: The updated model.
         """
         logger.debug(f"Updating model: {model}")
         if isinstance(model, dict):
             model = api_models.Model.from_dict(model)
-        return self._update(db_session, db.Model, model, uid=model.uid)
+        return self._update(db_session, db.Model, model, name=name, uid=model.uid)
 
     def delete_model(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -713,9 +723,9 @@ class SqlClient:
         """
         Delete a model from the database.
 
-        :param name:        The name of the model to delete.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the model.
+        :param name:       The name of the model to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the model.
         """
         logger.debug(f"Deleting model: name={name}")
         self._delete(db_session, db.Model, name=name, **kwargs)
@@ -735,17 +745,17 @@ class SqlClient:
         """
         List models from the database.
 
-        :param name:            The name to filter the models by.
-        :param owner_id:        The owner to filter the models by.
-        :param version:         The version to filter the models by.
-        :param project_id:      The project to filter the models by.
-        :param model_type:      The model type to filter the models by.
-        :param task:            The task to filter the models by.
-        :param labels_match:    The labels to match, filter the models by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:         The name to filter the models by.
+        :param owner_id:     The owner to filter the models by.
+        :param version:      The version to filter the models by.
+        :param project_id:   The project to filter the models by.
+        :param model_type:   The model type to filter the models by.
+        :param task:         The task to filter the models by.
+        :param labels_match: The labels to match, filter the models by labels.
+        :param output_mode:  The output mode.
+        :param db_session:   The session to use.
 
-        :return:    The list of models.
+        :return: The list of models.
         """
         logger.debug(
             f"Getting models: owner_id={owner_id}, version={version}, project_id={project_id},"
@@ -784,7 +794,7 @@ class SqlClient:
         :param prompt_template: The prompt template object to create.
         :param db_session:      The session to use.
 
-        :return:    The created prompt template.
+        :return: The created prompt template.
         """
         logger.debug(f"Creating prompt template: {prompt_template}")
         if isinstance(prompt_template, dict):
@@ -797,10 +807,10 @@ class SqlClient:
         """
         Get a prompt template from the database.
 
-        :param name:        The name of the prompt template to get.
-        :param db_session:  The session to use.
+        :param name:       The name of the prompt template to get.
+        :param db_session: The session to use.
 
-        :return:    The requested prompt template.
+        :return: The requested prompt template.
         """
         logger.debug(f"Getting prompt template: name={name}")
         return self._get(
@@ -813,22 +823,28 @@ class SqlClient:
 
     def update_prompt_template(
         self,
+        name: str,
         prompt_template: Union[api_models.PromptTemplate, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing prompt template in the database.
 
+        :param name:            The name of the prompt template to update.
         :param prompt_template: The prompt template object with the new data.
         :param db_session:      The session to use.
 
-        :return:    The updated prompt template.
+        :return: The updated prompt template.
         """
         logger.debug(f"Updating prompt template: {prompt_template}")
         if isinstance(prompt_template, dict):
             prompt_template = api_models.PromptTemplate.from_dict(prompt_template)
         return self._update(
-            db_session, db.PromptTemplate, prompt_template, uid=prompt_template.uid
+            db_session,
+            db.PromptTemplate,
+            prompt_template,
+            name=name,
+            uid=prompt_template.uid,
         )
 
     def delete_prompt_template(
@@ -837,9 +853,9 @@ class SqlClient:
         """
         Delete a prompt template from the database.
 
-        :param name:        The name of the prompt template to delete.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the prompt template.
+        :param name:       The name of the prompt template to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the prompt template.
         """
         logger.debug(f"Deleting prompt template: name={name}")
         self._delete(db_session, db.PromptTemplate, name=name, **kwargs)
@@ -857,15 +873,15 @@ class SqlClient:
         """
         List prompt templates from the database.
 
-        :param name:            The name to filter the prompt templates by.
-        :param owner_id:        The owner to filter the prompt templates by.
-        :param version:         The version to filter the prompt templates by.
-        :param project_id:      The project to filter the prompt templates by.
-        :param labels_match:    The labels to match, filter the prompt templates by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:         The name to filter the prompt templates by.
+        :param owner_id:     The owner to filter the prompt templates by.
+        :param version:      The version to filter the prompt templates by.
+        :param project_id:   The project to filter the prompt templates by.
+        :param labels_match: The labels to match, filter the prompt templates by labels.
+        :param output_mode:  The output mode.
+        :param db_session:   The session to use.
 
-        :return:    The list of prompt templates.
+        :return: The list of prompt templates.
         """
         logger.debug(
             f"Getting prompt templates: owner_id={owner_id}, version={version}, project_id={project_id},"
@@ -897,10 +913,10 @@ class SqlClient:
         """
         Create a new document in the database.
 
-        :param document:    The document object to create.
-        :param db_session:  The session to use.
+        :param document:   The document object to create.
+        :param db_session: The session to use.
 
-        :return:    The created document.
+        :return: The created document.
         """
         logger.debug(f"Creating document: {document}")
         if isinstance(document, dict):
@@ -913,11 +929,11 @@ class SqlClient:
         """
         Get a document from the database.
 
-        :param name:        The name of the document to get.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the document.
+        :param name:       The name of the document to get.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the document.
 
-        :return:    The requested document.
+        :return: The requested document.
         """
         logger.debug(f"Getting document: name={name}")
         return self._get(
@@ -933,16 +949,18 @@ class SqlClient:
         """
         Update an existing document in the database.
 
-        :param name:        The name of the document to update.
-        :param document:    The document object with the new data.
-        :param db_session:  The session to use.
+        :param name:       The name of the document to update.
+        :param document:   The document object with the new data.
+        :param db_session: The session to use.
 
-        :return:    The updated document.
+        :return: The updated document.
         """
         logger.debug(f"Updating document: {document}")
         if isinstance(document, dict):
             document = api_models.Document.from_dict(document)
-        return self._update(db_session, db.Document, document, name=name)
+        return self._update(
+            db_session, db.Document, document, name=name, uid=document.uid
+        )
 
     def delete_document(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -950,9 +968,9 @@ class SqlClient:
         """
         Delete a document from the database.
 
-        :param name:        The name of the document to delete.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the document.
+        :param name:       The name of the document to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the document.
         """
         logger.debug(f"Deleting document: name={name}")
         self._delete(db_session, db.Document, name=name, **kwargs)
@@ -970,15 +988,15 @@ class SqlClient:
         """
         List documents from the database.
 
-        :param name:            The name to filter the documents by.
-        :param owner_id:        The owner to filter the documents by.
-        :param version:         The version to filter the documents by.
-        :param project_id:      The project to filter the documents by.
-        :param labels_match:    The labels to match, filter the documents by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:         The name to filter the documents by.
+        :param owner_id:     The owner to filter the documents by.
+        :param version:      The version to filter the documents by.
+        :param project_id:   The project to filter the documents by.
+        :param labels_match: The labels to match, filter the documents by labels.
+        :param output_mode:  The output mode.
+        :param db_session:   The session to use.
 
-        :return:    The list of documents.
+        :return: The list of documents.
         """
         logger.debug(
             f"Getting documents: owner_id={owner_id}, version={version}, project_id={project_id},"
@@ -1010,10 +1028,10 @@ class SqlClient:
         """
         Create a new workflow in the database.
 
-        :param workflow:    The workflow object to create.
-        :param db_session:  The session to use.
+        :param workflow:   The workflow object to create.
+        :param db_session: The session to use.
 
-        :return:    The created workflow.
+        :return: The created workflow.
         """
         logger.debug(f"Creating workflow: {workflow}")
         if isinstance(workflow, dict):
@@ -1026,11 +1044,11 @@ class SqlClient:
         """
         Get a workflow from the database.
 
-        :param name:        The name of the workflow to get.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the workflow.
+        :param name:       The name of the workflow to get.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the workflow.
 
-        :return:    The requested workflow.
+        :return: The requested workflow.
         """
         logger.debug(f"Getting workflow: name={name}")
         return self._get(
@@ -1039,21 +1057,25 @@ class SqlClient:
 
     def update_workflow(
         self,
+        name: str,
         workflow: Union[api_models.Workflow, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update an existing workflow in the database.
 
-        :param workflow:    The workflow object with the new data.
-        :param db_session:  The session to use.
+        :param name:       The name of the workflow to update.
+        :param workflow:   The workflow object with the new data.
+        :param db_session: The session to use.
 
-        :return:    The updated workflow.
+        :return: The updated workflow.
         """
         logger.debug(f"Updating workflow: {workflow}")
         if isinstance(workflow, dict):
             workflow = api_models.Workflow.from_dict(workflow)
-        return self._update(db_session, db.Workflow, workflow, uid=workflow.uid)
+        return self._update(
+            db_session, db.Workflow, workflow, name=name, uid=workflow.uid
+        )
 
     def delete_workflow(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -1061,9 +1083,9 @@ class SqlClient:
         """
         Delete a workflow from the database.
 
-        :param name:        The name of the workflow to delete.
-        :param db_session:  The session to use.
-        :param kwargs:      Additional keyword arguments to filter the workflow.
+        :param name:       The name of the workflow to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the workflow.
         """
         logger.debug(f"Deleting workflow: name={name}")
         self._delete(db_session, db.Workflow, name=name, **kwargs)
@@ -1082,16 +1104,16 @@ class SqlClient:
         """
         List workflows from the database.
 
-        :param name:            The name to filter the workflows by.
-        :param owner_id:        The owner to filter the workflows by.
-        :param version:         The version to filter the workflows by.
-        :param project_id:      The project to filter the workflows by.
-        :param workflow_type:   The workflow type to filter the workflows by.
-        :param labels_match:    The labels to match, filter the workflows by labels.
-        :param output_mode:     The output mode.
-        :param db_session:      The session to use.
+        :param name:          The name to filter the workflows by.
+        :param owner_id:      The owner to filter the workflows by.
+        :param version:       The version to filter the workflows by.
+        :param project_id:    The project to filter the workflows by.
+        :param workflow_type: The workflow type to filter the workflows by.
+        :param labels_match:  The labels to match, filter the workflows by labels.
+        :param output_mode:   The output mode.
+        :param db_session:    The session to use.
 
-        :return:    The list of workflows.
+        :return: The list of workflows.
         """
         logger.debug(
             f"Getting workflows: name={name}, owner_id={owner_id}, version={version}, project_id={project_id},"
@@ -1125,10 +1147,10 @@ class SqlClient:
         """
         Create a new session in the database.
 
-        :param session:     The chat session object to create.
-        :param db_session:  The session to use.
+        :param session:    The chat session object to create.
+        :param db_session: The session to use.
 
-        :return:    The created session.
+        :return: The created session.
         """
         logger.debug(f"Creating session: {session}")
         if isinstance(session, dict):
@@ -1146,13 +1168,13 @@ class SqlClient:
         """
         Get a session from the database.
 
-        :param name:        The name of the session to get.
-        :param uid:         The ID of the session to get.
-        :param user_id:     The UID of the user to get the last session for.
-        :param db_session:  The DB session to use.
-        :param kwargs:      Additional keyword arguments to filter the session.
+        :param name:       The name of the session to get.
+        :param uid:        The ID of the session to get.
+        :param user_id:    The UID of the user to get the last session for.
+        :param db_session: The DB session to use.
+        :param kwargs:     Additional keyword arguments to filter the session.
 
-        :return:    The requested session.
+        :return: The requested session.
         """
         logger.debug(f"Getting session: name={name}, uid={uid}, user_id={user_id}")
         if uid:
@@ -1168,19 +1190,21 @@ class SqlClient:
 
     def update_session(
         self,
+        name: str,
         session: Union[api_models.ChatSession, dict],
         db_session: sqlalchemy.orm.Session = None,
     ):
         """
         Update a session in the database.
 
-        :param session:     The session object with the new data.
-        :param db_session:  The DB session to use.
+        :param name:       The name of the session to update.
+        :param session:    The session object with the new data.
+        :param db_session: The DB session to use.
 
-        :return:    The updated chat session.
+        :return: The updated chat session.
         """
         logger.debug(f"Updating chat session: {session}")
-        return self._update(db_session, db.Session, session, uid=session.uid)
+        return self._update(db_session, db.Session, session, name=name, uid=session.uid)
 
     def delete_session(
         self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
@@ -1188,9 +1212,9 @@ class SqlClient:
         """
         Delete a session from the database.
 
-        :param name:        The name of the session to delete.
-        :param db_session:  The DB session to use.
-        :param kwargs:      Additional keyword arguments to filter the session.
+        :param name:       The name of the session to delete.
+        :param db_session: The DB session to use.
+        :param kwargs:     Additional keyword arguments to filter the session.
         """
         logger.debug(f"Deleting session: name={name}")
         self._delete(db_session, db.Session, name=name, **kwargs)
@@ -1208,15 +1232,15 @@ class SqlClient:
         """
         List sessions from the database.
 
-        :param name:            The name to filter the chat sessions by.
-        :param user_id:         The user ID to filter the chat sessions by.
-        :param workflow_id:     The workflow ID to filter the chat sessions by.
-        :param created_after:   The date to filter the chat sessions by.
-        :param last:            The number of last chat sessions to return.
-        :param output_mode:     The output mode.
-        :param db_session:      The DB session to use.
+        :param name:          The name to filter the chat sessions by.
+        :param user_id:       The user ID to filter the chat sessions by.
+        :param workflow_id:   The workflow ID to filter the chat sessions by.
+        :param created_after: The date to filter the chat sessions by.
+        :param last:          The number of last chat sessions to return.
+        :param output_mode:   The output mode.
+        :param db_session:    The DB session to use.
 
-        :return:    The list of chat sessions.
+        :return: The list of chat sessions.
         """
         logger.debug(
             f"Getting chat sessions: user_id={user_id}, workflow_id={workflow_id} created>{created_after},"

@@ -32,11 +32,11 @@ def create_dataset(
     """
     Create a new dataset in the database.
 
-    :param project_name:    The name of the project to create the dataset in.
-    :param dataset:         The dataset to create.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to create the dataset in.
+    :param dataset:      The dataset to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_dataset(dataset=dataset, db_session=db_session)
@@ -59,13 +59,13 @@ def get_dataset(
     """
     Get a dataset from the database.
 
-    :param project_name:    The name of the project to get the dataset from.
-    :param name:            The name of the dataset to get.
-    :param uid:             The name of the dataset to get.
-    :param version:         The version of the dataset to get.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to get the dataset from.
+    :param name:         The name of the dataset to get.
+    :param uid:          The name of the dataset to get.
+    :param version:      The version of the dataset to get.
+    :param db_session:   The database session.
 
-    :return:    The dataset from the database.
+    :return: The dataset from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -101,12 +101,12 @@ def update_dataset(
     """
     Update a dataset in the database.
 
-    :param project_name:    The name of the project to update the dataset in.
-    :param dataset:         The dataset to update.
-    :param name:            The name of the dataset to update.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to update the dataset in.
+    :param dataset:      The dataset to update.
+    :param name:         The name of the dataset to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :returThe response from the database.
     """
     try:
         data = client.update_dataset(name=name, dataset=dataset, db_session=db_session)
@@ -129,13 +129,13 @@ def delete_dataset(
     """
     Delete a dataset from the database.
 
-    :param project_name:    The name of the project to delete the dataset from.
-    :param name:            The name of the dataset to delete.
-    :param uid:             The UID of the dataset to delete.
-    :param version:         The version of the dataset to delete.
-    :param db_session:      The database session.
+    :param project_name: The name of the project to delete the dataset from.
+    :param name:         The name of the dataset to delete.
+    :param uid:          The UID of the dataset to delete.
+    :param version:      The version of the dataset to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
@@ -171,16 +171,16 @@ def list_datasets(
     """
     List datasets in the database.
 
-    :param project_name:    The name of the project to list the datasets from.
-    :param name:            The name to filter by.
-    :param version:         The version to filter by.
-    :param task:            The task to filter by.
-    :param labels:          The labels to filter by.
-    :param mode:            The output mode.
-    :param db_session:      The database session.
-    :param auth:            The authentication information.
+    :param project_name: The name of the project to list the datasets from.
+    :param name:         The name to filter by.
+    :param version:      The version to filter by.
+    :param task:         The task to filter by.
+    :param labels:       The labels to filter by.
+    :param mode:         The output mode.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
     project_id = client.get_project(

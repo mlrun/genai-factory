@@ -29,10 +29,10 @@ def create_user(
     """
     Create a new user in the database.
 
-    :param user:        The user to create.
-    :param db_session:  The database session.
+    :param user:       The user to create.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_user(user=user, db_session=db_session)
@@ -53,17 +53,15 @@ def get_user(
     """
     Get a user from the database.
 
-    :param name:        The name of the user to get.
-    :param email:       The email address to get the user by if the name is not provided.
-    :param uid:         The UID of the user to get.
-    :param db_session:  The database session.
+    :param name:       The name of the user to get.
+    :param email:      The email address to get the user by if the name is not provided.
+    :param uid:        The UID of the user to get.
+    :param db_session: The database session.
 
-    :return:    The user from the database.
+    :return: The user from the database.
     """
     try:
-        data = client.get_user(
-            name=name, email=email, uid=uid, db_session=db_session
-        )
+        data = client.get_user(name=name, email=email, uid=uid, db_session=db_session)
         if data is None:
             return APIResponse(
                 success=False,
@@ -86,31 +84,29 @@ def update_user(
     """
     Update a user in the database.
 
-    :param user:        The user to update.
-    :param name:        The name of the user to update.
-    :param db_session:  The database session.
+    :param user:       The user to update.
+    :param name:       The name of the user to update.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_user(user=user, db_session=db_session)
+        data = client.update_user(name=name, user=user, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(success=False, error=f"Failed to update user {name}: {e}")
 
 
 @router.delete("/users/{name}")
-def delete_user(
-    name: str, uid: str = None, db_session=Depends(get_db)
-) -> APIResponse:
+def delete_user(name: str, uid: str = None, db_session=Depends(get_db)) -> APIResponse:
     """
     Delete a user from the database.
 
-    :param name:        The name of the user to delete.
-    :param uid:         The UID of the user to delete.
-    :param db_session:  The database session.
+    :param name:       The name of the user to delete.
+    :param uid:        The UID of the user to delete.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         client.delete_user(name=name, uid=uid, db_session=db_session)
@@ -130,13 +126,13 @@ def list_users(
     """
     List users in the database.
 
-    :param name:        The name to filter by.
-    :param email:       The email address to filter by.
-    :param full_name:   The full name to filter by.
-    :param mode:        The output mode.
-    :param db_session:  The database session.
+    :param name:       The name to filter by.
+    :param email:      The email address to filter by.
+    :param full_name:  The full name to filter by.
+    :param mode:       The output mode.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.list_users(

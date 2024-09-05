@@ -132,8 +132,6 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     :param version:     Version of the document
     :param data_source: Data source name
     :param from_file:   Take the document paths from the file
-
-    :return:    None
     """
     db_session = client.get_db_session()
     project = client.get_project(project_name=project, db_session=db_session)
@@ -206,15 +204,13 @@ def infer(
     """
     Run a chat query on the data source
 
-    :param question:        The question to ask
-    :param project:         The project name
-    :param workflow_name:   The workflow name
-    :param filter:          Filter Key value pair
-    :param data_source:     Data source name
-    :param user:            The name of the user
-    :param session:         The session name
-
-    :return:    None
+    :param question:      The question to ask
+    :param project:       The project name
+    :param workflow_name: The workflow name
+    :param filter:        Filter Key value pair
+    :param data_source:   Data source name
+    :param user:          The name of the user
+    :param session:       The session name
     """
     db_session = client.get_db_session()
 
@@ -270,10 +266,8 @@ def list_users(user, email):
     """
     List all the users in the database
 
-    :param user:    username filter
-    :param email:   email filter
-
-    :return:    None
+    :param user:  Username filter
+    :param email: Email filter
     """
     click.echo("Running List Users")
 
@@ -294,13 +288,11 @@ def list_data_sources(owner, project, version, source_type, metadata):
     """
     List all the data sources in the database
 
-    :param owner:       owner filter
-    :param project:     project filter
-    :param version:     version filter
-    :param source_type: data source type filter
-    :param metadata:    metadata filter (labels)
-
-    :return:    None
+    :param owner:       Owner filter
+    :param project:     Project filter
+    :param version:     Version filter
+    :param source_type: Data source type filter
+    :param metadata:    Metadata filter (labels)
     """
     click.echo("Running List Collections")
     if owner:
@@ -333,14 +325,12 @@ def update_data_source(name, project, owner, description, source_type, labels):
     """
     Create or update a data source in the database
 
-    :param name:        data source name
-    :param project:     project name
-    :param owner:       owner name
-    :param description: data source description
-    :param source_type: type of data source
-    :param labels:      metadata labels
-
-    :return:    None
+    :param name:        Data source name
+    :param project:     Project name
+    :param owner:       Owner name
+    :param description: Data source description
+    :param source_type: Type of data source
+    :param labels:      Metadata labels
     """
     click.echo("Running Create or Update Collection")
     labels = fill_params(labels)
@@ -387,11 +377,9 @@ def list_sessions(user, last, created):
     """
     List chat sessions
 
-    :param user:    username filter
-    :param last:    last n sessions
-    :param created: created after date
-
-    :return:    None
+    :param user:    Username filter
+    :param last:    Last n sessions
+    :param created: Created after date
     """
     click.echo("Running List Sessions")
 
@@ -408,9 +396,9 @@ def sources_to_text(sources) -> str:
     """
     Convert a list of sources to a text string.
 
-    :param sources: list of sources
+    :param sources: List of sources
 
-    :return:    text string
+    :return: Text string
     """
     if not sources:
         return ""
@@ -423,9 +411,9 @@ def sources_to_md(sources) -> str:
     """
     Convert a list of sources to a markdown string.
 
-    :param sources: list of sources
+    :param sources: List of sources
 
-    :return:    markdown string
+    :return: Markdown string
     """
     if not sources:
         return ""
@@ -441,9 +429,9 @@ def get_title(metadata) -> str:
     """
     Get the title from the metadata.
 
-    :param metadata:    metadata dictionary
+    :param metadata: Metadata dictionary
 
-    :return:    title string
+    :return: Title string
     """
     if "chunk" in metadata:
         return f"{metadata.get('title', '')}-{metadata['chunk']}"
@@ -456,10 +444,10 @@ def fill_params(params, params_dict=None) -> dict:
     """
     Fill the parameters dictionary from a list of key=value strings.
 
-    :param params:      list of key=value strings
-    :param params_dict: dictionary to fill
+    :param params:      List of key=value strings
+    :param params_dict: Dictionary to fill
 
-    :return:    filled dictionary
+    :return: Filled dictionary
     """
     params_dict = params_dict or {}
     for param in params:
@@ -479,9 +467,9 @@ def format_table_results(table_results):
     """
     Format the table results as a printed table.
 
-    :param table_results:   table results dictionary
+    :param table_results: Table results dictionary
 
-    :return:    formatted table string
+    :return: Formatted table string
     """
     return tabulate(table_results, headers="keys", tablefmt="fancy_grid")
 

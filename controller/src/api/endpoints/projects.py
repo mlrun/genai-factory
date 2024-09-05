@@ -31,10 +31,10 @@ def create_project(
     """
     Create a new project in the database.
 
-    :param project:     The project to create.
-    :param db_session:  The database session.
+    :param project:    The project to create.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
         data = client.create_project(project=project, db_session=db_session)
@@ -52,12 +52,12 @@ def get_project(
     """
     Get a project from the database.
 
-    :param name: The name of the project to get.
-    :param uid:     The UID of the project to get.
-    :param version: The version of the project to get.
-    :param db_session:   The database session.
+    :param name:       The name of the project to get.
+    :param uid:        The UID of the project to get.
+    :param version:    The version of the project to get.
+    :param db_session: The database session.
 
-    :return:    The project from the database.
+    :return: The project from the database.
     """
     uid, version = parse_version(uid=uid, version=version)
     try:
@@ -73,28 +73,26 @@ def get_project(
         return APIResponse(success=False, error=f"Failed to get project {name}: {e}")
 
 
-@router.put("/projects/{project_name}")
+@router.put("/projects/{name}")
 def update_project(
     project: Project,
-    project_name: str,
+    name: str,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a project in the database.
 
-    :param project:         The project to update.
-    :param project_name:    The name of the project to update.
-    :param db_session:      The database session.
+    :param project:    The project to update.
+    :param name:       The name of the project to update.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_project(project=project, db_session=db_session)
+        data = client.update_project(name=name, project=project, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
-        return APIResponse(
-            success=False, error=f"Failed to update project {project_name}: {e}"
-        )
+        return APIResponse(success=False, error=f"Failed to update project {name}: {e}")
 
 
 @router.delete("/projects/{name}")
@@ -104,12 +102,12 @@ def delete_project(
     """
     Delete a project from the database.
 
-    :param name:        The name of the project to delete.
-    :param uid:         The UID of the project to delete.
-    :param version:     The version of the project to delete.
-    :param db_session:  The database session.
+    :param name:       The name of the project to delete.
+    :param uid:        The UID of the project to delete.
+    :param version:    The version of the project to delete.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     uid, version = parse_version(uid=uid, version=version)
     try:
@@ -132,13 +130,13 @@ def list_projects(
     """
     List projects in the database.
 
-    :param name:        The name of the project to filter by.
-    :param owner_name:  The name of the owner to filter by.
-    :param labels:      The labels to filter by.
-    :param mode:        The output mode.
-    :param db_session:  The database session.
+    :param name:       The name of the project to filter by.
+    :param owner_name: The name of the owner to filter by.
+    :param labels:     The labels to filter by.
+    :param mode:       The output mode.
+    :param db_session: The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     if owner_name is not None:
         owner_id = client.get_user(user_name=owner_name, db_session=db_session).uid
