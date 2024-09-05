@@ -15,6 +15,7 @@
 # main file with cli commands using python click library
 # include two click commands: 1. data ingestion (using the data loader), 2. query (using the agent)
 import json
+from typing import Optional
 
 import click
 import yaml
@@ -135,9 +136,9 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     """
     db_session = client.get_db_session()
     project = client.get_project(project_name=project, db_session=db_session)
-    data_source = client.list_data_sources(
+    data_source = client.get_data_source(
         project_id=project.uid, name=data_source, db_session=db_session
-    )[0]
+    )
 
     # Create document from path:
     document = Document(
@@ -216,9 +217,9 @@ def infer(
 
     project = client.get_project(project_name=project, db_session=db_session)
     # Getting the workflow:
-    workflow = client.list_workflows(
+    workflow = client.get_workflow(
         project_id=project.uid, name=workflow_name, db_session=db_session
-    )[0]
+    )
     path = workflow.get_infer_path()
 
     query = QueryItem(
@@ -332,41 +333,24 @@ def update_data_source(name, project, owner, description, source_type, labels):
     :param source_type: Type of data source
     :param labels:      Metadata labels
     """
+    owner = owner or "guest"
     click.echo("Running Create or Update Collection")
     labels = fill_params(labels)
 
     db_session = client.get_db_session()
-    # check if the collection exists, if it does, update it, otherwise create it
     project = client.get_project(project_name=project, db_session=db_session)
-    data_source = client.list_data_sources(
-        project_id=project.uid,
-        data_source_name=name,
-        db_session=db_session,
-    )
 
-    if data_source is not None:
-        client.update_data_source(
-            db_session=db_session,
-            collection=DataSource(
-                project_id=project.uid,
-                name=name,
-                description=description,
-                data_source_type=source_type,
-                labels=labels,
-            ),
-        ).with_raise()
-    else:
-        client.create_data_source(
-            db_session=db_session,
-            data_source=DataSource(
-                project_id=project.uid,
-                name=name,
-                description=description,
-                owner_name=owner,
-                data_source_type=source_type,
-                labels=labels,
-            ),
-        ).with_raise()
+    client.update_data_source(
+        db_session=db_session,
+        collection=DataSource(
+            project_id=project.uid,
+            name=name,
+            description=description,
+            data_source_type=source_type,
+            labels=labels,
+            owner_id=client.get_user(username=owner).uid,
+        ),
+    ).with_raise()
 
 
 @click.command("sessions")
@@ -440,7 +424,7 @@ def get_title(metadata) -> str:
     return metadata.get("title", "")
 
 
-def fill_params(params, params_dict=None) -> dict:
+def fill_params(params, params_dict=None) -> Optional[dict]:
     """
     Fill the parameters dictionary from a list of key=value strings.
 
