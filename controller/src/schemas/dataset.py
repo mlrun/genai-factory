@@ -23,5 +23,5 @@ class Dataset(BaseWithVerMetadata):
     task: str
     path: str
     project_id: str
-    sources: Optional[List[str]]
-    producer: Optional[str]
+    sources: Optional[List[str]] = None
+    producer: Optional[str] = None

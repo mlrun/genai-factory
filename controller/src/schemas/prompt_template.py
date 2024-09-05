@@ -23,4 +23,4 @@ class PromptTemplate(BaseWithVerMetadata):
 
     text: str
     project_id: str
-    arguments: Optional[List[str]]
+    arguments: Optional[List[str]] = None

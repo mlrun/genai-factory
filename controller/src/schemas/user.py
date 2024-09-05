@@ -22,7 +22,7 @@ class User(BaseWithMetadata):
     _top_level_fields = ["email", "full_name"]
 
     email: str
-    full_name: Optional[str]
-    features: Optional[dict[str, str]]
-    policy: Optional[dict[str, str]]
-    is_admin: Optional[bool] = False
+    full_name: Optional[str] = None
+    features: Optional[dict[str, str]] = None
+    policy: Optional[dict[str, str]] = None
+    is_admin: bool = False

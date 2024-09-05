@@ -147,11 +147,11 @@ class Base(BaseModel):
 
 class BaseWithMetadata(Base):
     name: str
-    uid: Optional[str]
-    description: Optional[str]
-    labels: Optional[Dict[str, Union[str, None]]]
-    created: Optional[Union[str, datetime]]
-    updated: Optional[Union[str, datetime]]
+    uid: Optional[str] = None
+    description: Optional[str] = None
+    labels: Optional[Dict[str, Union[str, None]]] = None
+    created: Optional[Union[str, datetime]] = None
+    updated: Optional[Union[str, datetime]] = None
 
 
 class BaseWithOwner(BaseWithMetadata):
@@ -159,13 +159,13 @@ class BaseWithOwner(BaseWithMetadata):
 
 
 class BaseWithVerMetadata(BaseWithOwner):
-    version: Optional[str] = ""
+    version: str = ""
 
 
 class APIResponse(BaseModel):
     success: bool
-    data: Optional[Union[list, Type[BaseModel], dict]]
-    error: Optional[str]
+    data: Optional[Union[list, Type[BaseModel], dict]] = None
+    error: Optional[str] = None
 
     def with_raise(self, format=None) -> "APIResponse":
         if not self.success:

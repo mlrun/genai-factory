@@ -30,7 +30,7 @@ class Model(BaseWithVerMetadata):
     model_type: ModelType
     base_model: str
     project_id: str
-    task: Optional[str]
-    path: Optional[str]
-    producer: Optional[str]
-    deployment: Optional[str]
+    task: Optional[str] = None
+    path: Optional[str] = None
+    producer: Optional[str] = None
+    deployment: Optional[str] = None

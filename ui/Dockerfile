@@ -1,4 +1,4 @@
-# Copyright 2023 Iguazio
+# Copyright 2024 Iguazio
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
+FROM node:18-alpine
 
-from controller.src.schemas.base import BaseWithVerMetadata
+WORKDIR /app
 
+COPY package.json package-lock.json ./
 
-class Document(BaseWithVerMetadata):
-    _top_level_fields = ["path", "origin"]
-    path: str
-    project_id: str
-    origin: Optional[str] = None
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+RUN npm install -g serve
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-l", "3000"]

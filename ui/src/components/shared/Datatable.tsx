@@ -1,9 +1,24 @@
+// Copyright 2024 Iguazio
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { selectedRowAtom } from '@atoms/index'
 import { Box, useColorMode } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
-import { DataRow } from '@shared/types'
-import { useMemo, useState } from 'react'
+import { User } from '@shared/types'
+import { useAtom } from 'jotai'
+import { useEffect, useState } from 'react'
 import DataTable, { Alignment, TableColumn, createTheme } from 'react-data-table-component'
-import FilterComponent from './Filter'
 
 createTheme(
   'dark',
@@ -23,68 +38,86 @@ createTheme(
       button: 'rgba(0,0,0,.54)',
       hover: 'rgba(0,0,0,.08)',
       disabled: 'rgba(0,0,0,.12)'
+    },
+    context: {
+      background: colors.gray800
     }
   },
   'light'
 )
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: DataRow<any>[]
+  data: Partial<any>[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: TableColumn<DataRow<any>>[]
+  columns: TableColumn<Partial<any>>[]
   title: string
-  expandableRows?: boolean
+  contextActions: JSX.Element
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSelectedRowChange?: (e: any) => void
+  subheaderComponent?: React.ReactNode
+  filterText: string
+  user?: User
+  toggleClearRows: boolean
+  onOpenDrawer: () => void
 }
 
-const DataTableComponent = ({ data, columns, title, expandableRows }: Props) => {
-  const [filterText, setFilterText] = useState('')
-  const [resetPaginationToggle, setResetPaginationToggle] = useState(false)
-  const filteredItems = data.filter(
-    item =>
-      (item.data.name && item.data.name.toLowerCase().includes(filterText.toLowerCase())) ||
-      (item.data.email && item.data.email.toLowerCase().includes(filterText.toLowerCase())) ||
-      (item.data.role && item.data.role.toLowerCase().includes(filterText.toLowerCase())) ||
-      (item.data.user && item.data.user.toLowerCase().includes(filterText.toLowerCase()))
-  )
-
-  const subHeaderComponentMemo = useMemo(() => {
-    const handleClear = () => {
-      if (filterText) {
-        setResetPaginationToggle(!resetPaginationToggle)
-        setFilterText('')
-      }
-    }
-
-    return (
-      <FilterComponent
-        onFilter={(e: React.ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
-        onClear={handleClear}
-        filterText={filterText}
-      />
-    )
-  }, [filterText, resetPaginationToggle])
+const DataTableComponent = ({
+  data,
+  columns,
+  title,
+  contextActions,
+  onSelectedRowChange,
+  subheaderComponent,
+  filterText,
+  onOpenDrawer,
+  toggleClearRows
+}: Props) => {
   const { colorMode } = useColorMode()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ExpandedComponent = ({ data }: any) => <pre>{JSON.stringify(data, null, 2)}</pre>
+  const [, setSelectedRow] = useAtom<any>(selectedRowAtom)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data)
+
+  useEffect(() => {
+    if (data) {
+      setFilteredItems(
+        data.filter(
+          item =>
+            (item.name && item.name.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.email && item.email.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.full_name && item.full_name.toLowerCase().includes(filterText.toLowerCase()))
+        )
+      )
+    }
+  }, [filterText, data])
+
   return (
-    <Box boxShadow="md" borderRadius="md">
-      <DataTable
-        expandableRowsComponent={ExpandedComponent}
-        expandableRows={expandableRows}
-        title={title}
-        theme={colorMode}
-        columns={columns}
-        data={filteredItems}
-        pagination
-        paginationResetDefaultPage={resetPaginationToggle}
-        subHeader
-        subHeaderComponent={subHeaderComponentMemo}
-        persistTableHead
-        subHeaderAlign={Alignment.LEFT}
-        selectableRows
-        onSelectedRowsChange={e => console.log(e.selectedRows)}
-      />
-    </Box>
+    <>
+      <Box boxShadow="md" borderRadius="md">
+        <DataTable
+          title={title}
+          theme={colorMode}
+          columns={columns}
+          data={filteredItems}
+          progressPending={!filteredItems?.length}
+          pagination
+          subHeader
+          subHeaderComponent={subheaderComponent}
+          persistTableHead
+          subHeaderAlign={Alignment.RIGHT}
+          selectableRows
+          onSelectedRowsChange={onSelectedRowChange}
+          contextActions={contextActions}
+          highlightOnHover
+          pointerOnHover
+          clearSelectedRows={toggleClearRows}
+          onRowClicked={row => {
+            setSelectedRow(row)
+            onOpenDrawer()
+          }}
+        />
+      </Box>
+    </>
   )
 }
 

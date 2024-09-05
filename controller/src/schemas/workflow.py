@@ -32,10 +32,10 @@ class Workflow(BaseWithVerMetadata):
 
     workflow_type: WorkflowType
     project_id: str
-    deployment: Optional[str]
-    workflow_function: Optional[str]
-    configuration: Optional[dict]
-    graph: Optional[List[dict]]
+    deployment: Optional[str] = None
+    workflow_function: Optional[str] = None
+    configuration: Optional[dict] = None
+    graph: Optional[List[dict]] = None
 
     def get_infer_path(self):
         if self.deployment is None:
