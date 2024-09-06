@@ -13,18 +13,23 @@
 // limitations under the License.
 
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons'
-import { Flex, IconButton, Input } from '@chakra-ui/react'
+import { Flex, IconButton, Input, useToast } from '@chakra-ui/react'
 import Client from '@services/Api'
-import { messagesAtom, sessionIdAtom } from 'atoms'
+import { canSendMessageAtom, messagesAtom, sessionIdAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
 
 const Message = () => {
   const [inputValue, setInputValue] = useState('')
+
   const [sessionId] = useAtom(sessionIdAtom)
   const [, setMessages] = useAtom(messagesAtom)
+  const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom)
+
+  const toast = useToast()
 
   const submitMessage = async () => {
+    setCanSendMessage(false)
     setMessages(prevMessages => {
       const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
       return [...safeMessages, { role: 'Human', content: inputValue, sources: [] }]
@@ -40,9 +45,21 @@ const Message = () => {
       question: inputValue,
       session_id: sessionId,
       data_source: 'default'
+    }).then(res => {
+      if (res.error) {
+        toast({
+          title: 'An unexpected error occured',
+          description: res.error,
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        })
+        setCanSendMessage(false)
+        return res
+      }
+      setCanSendMessage(true)
+      return res
     })
-
-    console.log('RESULT', result)
 
     setMessages(prevMessages => {
       const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
@@ -71,9 +88,9 @@ const Message = () => {
         placeholder="Send message..."
         value={inputValue}
         onChange={e => setInputValue(e.target.value)}
-        onKeyDown={handleKeyPress}
+        onKeyDown={e => canSendMessage && handleKeyPress(e)}
       />
-      <IconButton aria-label="Send" icon={<ArrowUpIcon />} onClick={handleClick} />
+      <IconButton isDisabled={!canSendMessage} aria-label="Send" icon={<ArrowUpIcon />} onClick={handleClick} />
     </Flex>
   )
 }

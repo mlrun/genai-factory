@@ -28,7 +28,7 @@ import {
 import Client from '@services/Api'
 import { colors } from '@shared/theme'
 import { Session } from '@shared/types/session'
-import { isTypingAtom, messagesAtom, sessionIdAtom, usernameAtom } from 'atoms'
+import { canSendMessageAtom, isTypingAtom, messagesAtom, sessionIdAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -51,6 +51,7 @@ const ChatSessionList = (props: Props) => {
   const [isEditing, setIsEditing] = useState(false)
   const [description, setDescription] = useState('')
   const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
+  const [, setCanSendMessage] = useAtom(canSendMessageAtom)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const { colorMode } = useColorMode()
@@ -68,6 +69,7 @@ const ChatSessionList = (props: Props) => {
     props.setNew(false)
     setIsTyping(false)
     setMessages(session.history!)
+    setCanSendMessage(true)
     navigate(`/chat/${session.uid}`)
   }
 
