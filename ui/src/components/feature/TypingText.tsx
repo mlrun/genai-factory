@@ -20,7 +20,7 @@ interface TypingTextProps {
   speed?: number // typing speed in ms per character
 }
 
-const TypingText: React.FC<TypingTextProps> = ({ text, speed = 16 }) => {
+const TypingText: React.FC<TypingTextProps> = ({ text, speed = 12 }) => {
   const [displayedText, setDisplayedText] = useState('')
 
   useEffect(() => {

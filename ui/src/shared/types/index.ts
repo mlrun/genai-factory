@@ -64,3 +64,10 @@ export type User = {
   full_name?: string;
 }
 
+
+export type APIResponse = {
+  //eslint-disable-next-line
+  data: any[]
+  success: boolean
+  error: string
+}

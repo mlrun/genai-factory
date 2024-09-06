@@ -78,7 +78,7 @@ const ChatHistoryTable = () => {
           },
           {
             page: 'Chat Histories',
-            url: '/chat-histories'
+            url: '/histories'
           }
         ]}
       />
@@ -90,6 +90,8 @@ const ChatHistoryTable = () => {
         columns={columns as TableColumn<Partial<ChatHistory>>[]}
         contextActions={contextActions}
         onSelectedRowChange={e => setSelectedRows(e.selectedRows)}
+        toggleClearRows={false}
+        onOpenDrawer={() => {}}
       />
     </Flex>
   )

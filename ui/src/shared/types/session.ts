@@ -12,23 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isTypingAtom } from '@atoms/index'
-import { useAtom } from 'jotai'
-import React from 'react'
-import Markdown from 'react-markdown'
-import TypingText from './TypingText'
+import { ChatHistory } from "."
 
-interface ChatMessageProps {
-  message: string
+
+export type Session = {
+  uid?: string
+  name: string
+  description: string
+  labels: { [key: string]: string }
+  owner_id?: string
+  workflow_id?: string
+  history?: ChatHistory[]
+  created?: string
 }
-
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  const [isTyping] = useAtom(isTypingAtom)
-
-  if (isTyping) {
-    return <TypingText text={message} />
-  }
-  return <Markdown>{message}</Markdown>
-}
-
-export default ChatMessage

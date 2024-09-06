@@ -34,7 +34,7 @@ function App() {
       element: <UsersTablePage />
     },
     {
-      path: '/admin/chat-histories',
+      path: '/admin/histories',
       element: <ChatHistoriesTablePage />
     },
 

@@ -17,18 +17,9 @@ import { User } from '@shared/types';
 import { atom } from 'jotai';
 
 export const usersAtom = atom<User[]>([]);
-
 export const usersLoadingAtom = atom<boolean>(false);
-
 export const usersErrorAtom = atom<string | null>(null);
 
-export const fetchUsersAtom = atom(
-  async (get) => {
-    get(usersLoadingAtom);
-    const users = await Client.getUsers();
-    return users.data;
-  }
-);
 
 export const usersWithFetchAtom = atom(
   (get) => get(usersAtom),
@@ -42,6 +33,26 @@ export const usersWithFetchAtom = atom(
       set(usersErrorAtom, 'Failed to fetch users');
     } finally {
       set(usersLoadingAtom, false);
+    }
+  }
+);
+
+export const publicUserAtom = atom<User>({});
+export const userLoadingAtom = atom<boolean>(false);
+export const userErrorAtom = atom<string | null>(null);
+
+export const userWithFetchAtom = atom(
+  (get) => get(publicUserAtom),
+  async (_get, set, username: string) => {
+    set(userLoadingAtom, true);
+    set(userErrorAtom, null);
+    try {
+      const user = await Client.getUser(username);
+      set(publicUserAtom, user.data);
+    } catch (error) {
+      set(userErrorAtom, 'Failed to fetch user');
+    } finally {
+      set(userLoadingAtom, false);
     }
   }
 );
