@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { usersAtom, usersWithFetchAtom } from '@atoms/apiAtoms'
 import { selectedRowAtom } from '@atoms/index'
+import { usersAtom, usersWithFetchAtom } from '@atoms/users'
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import {
   Button,

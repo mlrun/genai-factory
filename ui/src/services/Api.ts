@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import { User } from '@shared/types';
+import { Session } from '@shared/types/session';
+import { Query } from '@shared/types/workflow';
 import axios, { AxiosResponse } from 'axios';
 
 
@@ -44,36 +46,12 @@ class ApiClient {
     return null;
   }
 
-  async listSessions(username?: string, mode?: string, last?: number) {
+  async getUsers() {
     try {
-      const response = await this.client.get('/sessions', {
-        params: { last: last, username: username, mode: mode || 'short' }
-      })
+      const response = await this.client.get(`/users`)
       return this.handleResponse(response)
     } catch (error) {
-      return this.handleError(error as Error)
-    }
-  }
-
-  async getSession(id?: string, username?: string) {
-    try {
-      const response = await this.client.get(`/session/${id || '$last'}`, {
-        headers: { 'x-username': username || 'guest' }
-      })
-      return this.handleResponse(response)
-    } catch (error) {
-      return this.handleError(error as Error)
-    }
-  }
-
-  async getUsers(username?: string) {
-    try {
-      const response = await this.client.get(`/users`, {
-        headers: { 'x-username': username || 'guest' }
-      })
-      return this.handleResponse(response)
-    } catch (error) {
-      return this.handleError(error as Error)
+      this.handleError(error as Error)
     }
   }
 
@@ -113,14 +91,56 @@ class ApiClient {
     }
   }
 
-  async submitQuery(id: string, question: string, username?: string) {
+  async getSessions(username?: string) {
+    try {
+      const response = await this.client.get(`/users/${username}/sessions`)
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
+  async getSession(username: string, id: string,) {
+    try {
+      const response = await this.client.get(`users/${username}/sessions/${id}`)
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
+  async createSession(username: string, session: Session) {
+    try {
+      const response = await this.client.post(`users/${username}/sessions`, session)
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
+  async updateSession(username: string, session: Session) {
+    try {
+      const response = await this.client.put(`/users/${username}/sessions/${session.name}`, session)
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
+  async deleteSession(username: string, session: Session) {
+    try {
+      const response = await this.client.delete(`/users/${username}/sessions/${session.uid}`)
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
+  async inferWorkflow(projectId: string, workflowId: string, query: Query) {
     try {
       const response = await this.client.post(
-        '/pipeline/default/run',
-        { session_id: id, question: question },
-        {
-          headers: { 'x-username': username || 'guest' }
-        }
+        `/projects/${projectId}/workflows/${workflowId}/infer`,
+        query
       )
       return this.handleResponse(response)
     } catch (error) {

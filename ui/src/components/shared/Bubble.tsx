@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { ChatIcon, CopyIcon } from '@chakra-ui/icons'
-import { Box, Flex, IconButton, useColorMode, useToast } from '@chakra-ui/react'
+import { Flex, IconButton, Spinner, useColorMode, useToast } from '@chakra-ui/react'
 import ChatMessage from '@components/feature/ChatMessage'
 import { colors } from '@shared/theme'
 import { Source } from '@shared/types'
@@ -29,12 +29,13 @@ type Props = {
 const Bubble = (props: Props) => {
   const { colorMode } = useColorMode()
   const toast = useToast()
+
   return (
     <Flex gap={10} flexDirection={'column'}>
       {props.bot == 'AI' ? (
         <Flex role={'group'} alignItems={'baseline'} gap={4}>
-          <Flex></Flex>
           <ChatIcon />
+          <Flex>{!props.content && <Spinner size={'sm'} />}</Flex>
           <Flex textAlign={'left'} marginY={2} maxW={'66%'}>
             {!!props.content && <ChatMessage message={props.content} />}
           </Flex>
@@ -71,8 +72,6 @@ const Bubble = (props: Props) => {
           </Flex>
         </Flex>
       )}
-
-      <Box className="help-text"></Box>
     </Flex>
   )
 }

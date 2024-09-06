@@ -15,32 +15,39 @@
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons'
 import { Flex, IconButton, Input } from '@chakra-ui/react'
 import Client from '@services/Api'
-import { ChatHistory } from '@shared/types'
-import { sessionIdAtom, usernameAtom } from 'atoms'
+import { messagesAtom, sessionIdAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
-type Props = {
-  setter: React.Dispatch<React.SetStateAction<ChatHistory[]>>
-}
-const Message = ({ setter }: Props) => {
+
+const Message = () => {
   const [inputValue, setInputValue] = useState('')
-  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
-  const [username, setUsername] = useAtom(usernameAtom)
+  const [sessionId] = useAtom(sessionIdAtom)
+  const [, setMessages] = useAtom(messagesAtom)
 
   const submitMessage = async () => {
-    setter(prevMessages => [...prevMessages, { role: 'Human', content: inputValue, sources: [] }])
+    setMessages(prevMessages => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
+      return [...safeMessages, { role: 'Human', content: inputValue, sources: [] }]
+    })
     setInputValue('')
-    setTimeout(function () {
-      const lastBubble = document.getElementsByClassName('help-text').length - 1
-      document.getElementsByClassName('help-text')[lastBubble].scrollIntoView(false)
-    }, 50)
 
-    setter(prevMessages => [...prevMessages, { role: 'AI', content: '...', sources: [] }])
-    const result = await Client.submitQuery(sessionId, inputValue, username)
-    setter(prevMessages => [
-      ...prevMessages.slice(0, -1),
-      { role: 'AI', content: result.answer, sources: result.sources }
-    ])
+    setMessages(prevMessages => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
+      return [...safeMessages, { role: 'AI', content: '', sources: [] }]
+    })
+
+    const result = await Client.inferWorkflow('default', '1dfd7fc7c4024501850e3541abc3ed9f', {
+      question: inputValue,
+      session_id: sessionId,
+      data_source: 'default'
+    })
+
+    console.log('RESULT', result)
+
+    setMessages(prevMessages => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
+      return [...safeMessages.slice(0, -1), { role: 'AI', content: result.data.data.answer, sources: result.sources }]
+    })
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -66,12 +73,6 @@ const Message = ({ setter }: Props) => {
         onChange={e => setInputValue(e.target.value)}
         onKeyDown={handleKeyPress}
       />
-      {/* <div
-        className="icon-button mic-icon"
-        onClick={event => {
-          return (event.target as HTMLElement).classList.toggle('selected')
-        }}
-      ></div> */}
       <IconButton aria-label="Send" icon={<ArrowUpIcon />} onClick={handleClick} />
     </Flex>
   )

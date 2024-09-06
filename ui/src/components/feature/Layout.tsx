@@ -14,7 +14,7 @@
 
 import { Box, Flex, Menu, MenuItem } from '@chakra-ui/react'
 import useAuth from '@hooks/useAuth'
-import { userAtom, usernameAtom } from 'atoms'
+import { userWithTokenAtom, usernameAtom } from 'atoms'
 import { motion as m } from 'framer-motion'
 import { useAtom } from 'jotai'
 import React, { ReactNode } from 'react'
@@ -28,8 +28,8 @@ type LayoutProps = {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [username, setUsername] = useAtom(usernameAtom)
-  const [user, setUser] = useAtom(userAtom)
+  const [username] = useAtom(usernameAtom)
+  const [user] = useAtom(userWithTokenAtom)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { logout } = useAuth()
@@ -51,12 +51,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Flex justifyContent={'space-between'}>
           <Box display={{ base: 'none', md: 'flex' }}>
             <Sidebar>
-              {pathname.includes('chat/') ? (
+              {pathname.includes('chat') ? (
                 <Chatbar />
               ) : (
                 <Menu>
                   <MenuItem onClick={() => navigate('/admin/users')}>Users</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/chat-histories')}>Chat Histories</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/histories')}>Chat Histories</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/datasets')}>Datasets</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/documents')}>Documents</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/pipelines')}>Pipelines</MenuItem>

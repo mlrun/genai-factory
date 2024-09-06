@@ -13,12 +13,14 @@
 // limitations under the License.
 
 import Logo from '@assets/mlrun.png'
-import { adminAtom, conversationsAtom, userAtom, usernameAtom } from '@atoms/index'
+import { adminAtom, publicUserAtom, usernameAtom } from '@atoms/index'
+import { sessionsAtom, sessionsWithFetchAtom } from '@atoms/sessions'
 import { Box, Button, Flex, FormControl, FormLabel, Image, Input, Switch, useColorMode } from '@chakra-ui/react'
 import useAuth from '@hooks/useAuth'
+import Client from '@services/Api'
 import { colors } from '@shared/theme'
 import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
@@ -26,28 +28,36 @@ const Login = () => {
   const { colorMode } = useColorMode()
   const [username, setUsername] = useAtom(usernameAtom)
   const [admin, setAdmin] = useAtom(adminAtom)
-  const [chatHistory, setChatHistory] = useAtom(conversationsAtom)
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
-  const [user, setUser] = useAtom(userAtom)
+  const [, setPublicUser] = useAtom(publicUserAtom)
+  const [sessions] = useAtom(sessionsAtom)
+  const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
 
-  useEffect(() => {
-    if (user) {
-      navigate('/chat')
-    }
-  }, [navigate])
-
-  const submitFunc = (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
+  const submitFunc = async (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
     event.preventDefault()
     setIsLoading(true)
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsLoading(false)
+      setUsername(username)
       login(username, password, admin)
+      await Client.getUser(username).then(res => {
+        if (res) {
+          setPublicUser(res.data)
+        }
+      })
       if (admin) {
         navigate('/admin/users')
       } else {
-        navigate(`/chat/${chatHistory.length ? chatHistory[0].name : ''}`)
+        navigate(`/chat`)
+        await fetchSessions(username).then(() => {
+          if (sessions.length) {
+            navigate(`/chat/${sessions[0].uid}`)
+          } else {
+            navigate(`/chat`)
+          }
+        })
       }
     }, 1000)
   }

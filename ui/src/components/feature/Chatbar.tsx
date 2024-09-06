@@ -12,73 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Flex, useColorMode } from '@chakra-ui/react'
+import { selectedSessionAtom, sessionsWithFetchAtom } from '@atoms/sessions'
+import { publicUserAtom, userWithFetchAtom } from '@atoms/users'
+import { AddIcon } from '@chakra-ui/icons'
+import { Button, Flex, useColorMode } from '@chakra-ui/react'
 import Client from '@services/Api'
 import { colors } from '@shared/theme'
-import { ChatHistory } from '@shared/types'
 import { generateSessionId } from '@shared/utils'
-import { conversationsAtom, sessionIdAtom, usernameAtom } from 'atoms'
+import { sessionIdAtom, userWithTokenAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
-import ChatHistoryList from './ChatHistoryList'
+import { useLocation, useNavigate } from 'react-router-dom'
+import ChatSessionList from './ChatSessionList'
 
 const Chatbar = () => {
-  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
-  const [username, setUsername] = useAtom(usernameAtom)
-  const [history, setHistory] = useAtom<ChatHistory[]>(conversationsAtom)
-  const [isNew, setIsNew] = useState(true)
+  const [, setSessionId] = useAtom(sessionIdAtom)
+  const [username] = useAtom(usernameAtom)
+  const [user] = useAtom(userWithTokenAtom)
+  const [, setIsNew] = useState(true)
   const { colorMode } = useColorMode()
+  const [publicUser] = useAtom(publicUserAtom)
+  const [, setSelectedSession] = useAtom(selectedSessionAtom)
+
+  const [, fetchPublicUser] = useAtom(userWithFetchAtom)
+  const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
+
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    fetchSessions(user?.username)
+    fetchPublicUser(user?.username as string)
+  }, [fetchPublicUser, fetchSessions, user])
+
+  useEffect(() => {
+    if (pathname.includes('chat')) {
+      setSessionId(pathname.split('chat/')[1])
+    }
+  }, [pathname])
 
   const newChat = async () => {
-    const sid = generateSessionId()
-    setIsNew(true)
-    setSessionId(sid)
-  }
-
-  const fetchSessions = async () => {
     try {
-      const sessions = await Client.listSessions(username)
-      console.log(sessions)
-      if (isNew) {
-        if (sessions.length === 0 || sessions[0].name !== sessionId) {
-          sessions.unshift({ name: sessionId, description: '* New chat' })
-        }
-      }
-      setHistory(sessions)
+      await Client.createSession(username, {
+        name: generateSessionId(),
+        description: '* New Chat',
+        labels: {},
+        workflow_id: '1dfd7fc7c4024501850e3541abc3ed9f',
+        owner_id: publicUser.uid
+      }).then(res => {
+        setSessionId(res.data.uid)
+        setSelectedSession(res.data)
+        navigate(`/chat/${res.data.uid}`)
+      })
+      await fetchSessions(username)
     } catch (error) {
-      console.error('Failed to fetch sessions for:', username, error)
-      setHistory([{ name: sessionId, description: '* New chat', content: '', role: 'user', sources: [] }])
+      console.error('Failed to create session:', error)
     }
   }
-
-  useEffect(() => {
-    fetchSessions()
-  }, [sessionId])
-
-  useEffect(() => {
-    async function updateUser() {
-      if (username) {
-        const sessions = await Client.listSessions(username, 'names', 1)
-        if (sessions.length > 0) {
-          setSessionId(sessions[0])
-          setIsNew(false)
-          await fetchSessions()
-        } else {
-          await newChat()
-        }
-      }
-    }
-    updateUser()
-  }, [username])
 
   return (
     <Flex gap={8} bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight} flexDirection={'column'}>
-      <ChatHistoryList history={history} setNew={setIsNew} />
-      <Box>
-        <Button width={'100%'} onClick={newChat}>
-          New Chat
+      <ChatSessionList setNew={setIsNew} />
+      <Flex justify={'center'}>
+        <Button width={'30%'} onClick={newChat} iconSpacing={2} leftIcon={<AddIcon />}>
+          New
         </Button>
-      </Box>
+      </Flex>
     </Flex>
   )
 }
