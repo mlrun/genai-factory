@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { sessionsAtom } from '@atoms/sessions'
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons'
 import { Flex, IconButton, Input, useToast } from '@chakra-ui/react'
 import Client from '@services/Api'
@@ -25,7 +26,7 @@ const Message = () => {
   const [sessionId] = useAtom(sessionIdAtom)
   const [, setMessages] = useAtom(messagesAtom)
   const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom)
-
+  const [sessions] = useAtom(sessionsAtom)
   const toast = useToast()
 
   const submitMessage = async () => {
@@ -41,7 +42,8 @@ const Message = () => {
       return [...safeMessages, { role: 'AI', content: '', sources: [] }]
     })
 
-    const result = await Client.inferWorkflow('default', '1dfd7fc7c4024501850e3541abc3ed9f', {
+    const workflowId = sessions.find(session => session.uid === sessionId)?.workflow_id
+    const result = await Client.inferWorkflow('default', workflowId ?? 'default', {
       question: inputValue,
       session_id: sessionId,
       data_source: 'default'
