@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { User } from '@shared/types';
+import { Project } from '@shared/types/project';
 import { Session } from '@shared/types/session';
 import { Query } from '@shared/types/workflow';
 import axios, { AxiosResponse } from 'axios';
@@ -45,6 +46,8 @@ class ApiClient {
     console.error('Request failed:', error.message);
     return null;
   }
+
+  // USERS
 
   async getUsers() {
     try {
@@ -91,6 +94,8 @@ class ApiClient {
     }
   }
 
+  // SESSIONS
+
   async getSessions(username?: string) {
     try {
       const response = await this.client.get(`/users/${username}/sessions`)
@@ -136,6 +141,20 @@ class ApiClient {
     }
   }
 
+  // WORKFLOWS
+
+  async getWorkflow(projectId: string, workflowId: string, query: Query) {
+    try {
+      const response = await this.client.post(
+        `/projects/${projectId}/workflows/${workflowId}`, // is it project ID or name?
+        query
+      )
+      return this.handleResponse(response)
+    } catch (error) {
+      return this.handleError(error as Error)
+    }
+  }
+
   async inferWorkflow(projectId: string, workflowId: string, query: Query) {
     try {
       const response = await this.client.post(
@@ -147,10 +166,62 @@ class ApiClient {
       return this.handleError(error as Error)
     }
   }
+
+  // PROJECTS
+
+  async getProjects(params?: { name?: string; owner_name?: string; mode?: string; labels?: string[] }) {
+    try {
+      const response = await this.client.get(`/projects`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getProject(projectName: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createProject(project: Project) {
+    try {
+      const response = await this.client.post(`/projects`, project);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateProject(project: Project) {
+    try {
+      const response = await this.client.put(`/projects/${project.name}`, project);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
+  async deleteProject(projectName: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
+
+
 }
 
 function getClient() {
-  return new ApiClient() // Return the real client here
+  return new ApiClient()
 }
 
 const Client = getClient()

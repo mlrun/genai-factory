@@ -85,7 +85,9 @@ const DataTableComponent = ({
           item =>
             (item.name && item.name.toLowerCase().includes(filterText.toLowerCase())) ||
             (item.email && item.email.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.full_name && item.full_name.toLowerCase().includes(filterText.toLowerCase()))
+            (item.full_name && item.full_name.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.description && item.description.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.version && item.version.toLowerCase().includes(filterText.toLowerCase()))
         )
       )
     }
@@ -99,7 +101,7 @@ const DataTableComponent = ({
           theme={colorMode}
           columns={columns}
           data={filteredItems}
-          progressPending={!filteredItems?.length}
+          // progressPending={!filteredItems?.length}
           pagination
           subHeader
           subHeaderComponent={subheaderComponent}

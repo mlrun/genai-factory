@@ -18,6 +18,7 @@ import { Provider as JotaiProvider } from 'jotai'
 import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
 import { LoginPage } from 'pages/LoginPage'
+import { ProjectsTablePage } from 'pages/ProjectsTablePage'
 import { UsersTablePage } from 'pages/UsersTablePage'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
@@ -33,6 +34,7 @@ function App() {
       path: '/admin/users',
       element: <UsersTablePage />
     },
+    { path: '/admin/projects', element: <ProjectsTablePage /> },
     {
       path: '/admin/histories',
       element: <ChatHistoriesTablePage />
