@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChatIcon, CopyIcon } from '@chakra-ui/icons'
+import { isMessageErrorAtom } from '@atoms/index'
+import { ChatIcon, CheckCircleIcon, CopyIcon } from '@chakra-ui/icons'
 import { Flex, IconButton, Spinner, useColorMode, useToast } from '@chakra-ui/react'
 import ChatMessage from '@components/feature/ChatMessage'
 import { colors } from '@shared/theme'
 import { Source } from '@shared/types'
+import { useAtom } from 'jotai'
 import Markdown from 'react-markdown'
 
 type Props = {
@@ -26,31 +28,37 @@ type Props = {
   sources: Source[]
 }
 
-const Bubble = (props: Props) => {
+const Bubble = ({ bot, content }: Props) => {
+  const [isMessageError] = useAtom(isMessageErrorAtom)
   const { colorMode } = useColorMode()
   const toast = useToast()
 
   return (
     <Flex gap={10} flexDirection={'column'}>
-      {props.bot == 'AI' ? (
+      {bot == 'AI' ? (
         <Flex role={'group'} alignItems={'baseline'} gap={4}>
           <ChatIcon />
-          <Flex>{!props.content && <Spinner size={'sm'} />}</Flex>
+          <Flex>{!content && !isMessageError && <Spinner size={'sm'} />}</Flex>
           <Flex textAlign={'left'} marginY={2} maxW={'66%'}>
-            {!!props.content && <ChatMessage message={props.content} />}
+            {!!content && <ChatMessage message={content} />}
           </Flex>
           <IconButton
             display={'none'}
             _groupHover={{ display: 'block' }}
             icon={<CopyIcon />}
             onClick={() => {
-              navigator.clipboard.writeText(props.content)
+              navigator.clipboard.writeText(content)
               toast({
-                title: 'Copied',
+                title: 'Message copied',
                 description: '',
                 status: 'success',
                 duration: 3000,
-                position: 'bottom'
+                position: 'bottom',
+                icon: (
+                  <Flex align={'center'}>
+                    <CheckCircleIcon />
+                  </Flex>
+                )
               })
             }}
             aria-label={'copy'}
@@ -68,7 +76,7 @@ const Bubble = (props: Props) => {
             bg={colorMode === 'dark' ? colors.gray700 : colors.gray200}
             flexWrap={'wrap'}
           >
-            <Markdown>{props.content}</Markdown>
+            <Markdown>{content}</Markdown>
           </Flex>
         </Flex>
       )}

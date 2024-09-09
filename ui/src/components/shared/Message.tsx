@@ -16,7 +16,7 @@ import { sessionsAtom } from '@atoms/sessions'
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons'
 import { Flex, IconButton, Input, useToast } from '@chakra-ui/react'
 import Client from '@services/Api'
-import { canSendMessageAtom, messagesAtom, sessionIdAtom } from 'atoms'
+import { canSendMessageAtom, isMessageErrorAtom, messagesAtom, sessionIdAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
 
@@ -27,6 +27,8 @@ const Message = () => {
   const [, setMessages] = useAtom(messagesAtom)
   const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom)
   const [sessions] = useAtom(sessionsAtom)
+  const [, setIsMessageError] = useAtom(isMessageErrorAtom)
+
   const toast = useToast()
 
   const submitMessage = async () => {
@@ -49,6 +51,7 @@ const Message = () => {
       data_source: 'default'
     }).then(res => {
       if (res.error) {
+        setIsMessageError(true)
         toast({
           title: 'An unexpected error occured',
           description: res.error,

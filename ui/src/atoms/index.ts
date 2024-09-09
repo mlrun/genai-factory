@@ -27,6 +27,7 @@ export const publicUserAtom = atom<User>({});
 export const usernameAtom = atom<string>('');
 export const isTypingAtom = atom<boolean>(false);
 export const canSendMessageAtom = atom<boolean>(true);
+export const isMessageErrorAtom = atom<boolean>(false);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const selectedRowAtom = atom<any>({});
