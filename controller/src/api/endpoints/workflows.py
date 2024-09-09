@@ -223,10 +223,10 @@ def list_workflows(
         )
 
 
-@router.post("/workflows/{uid}/infer")
+@router.post("/workflows/{name}/infer")
 def infer_workflow(
     project_name: str,
-    uid: str,
+    name: str,
     query: QueryItem,
     db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
@@ -235,7 +235,7 @@ def infer_workflow(
     Run application workflow.
 
     :param project_name: The name of the project to run the workflow in.
-    :param uid:          The UID of the workflow to run.
+    :param name:         The name of the workflow to run.
     :param query:        The query to run.
     :param db_session:   The database session.
     :param auth:         The authentication information.
@@ -247,31 +247,27 @@ def infer_workflow(
         project_name=project_name, db_session=db_session
     ).uid
     workflow = client.get_workflow(
-        project_id=project_id, uid=uid, db_session=db_session
+        project_id=project_id, name=name, db_session=db_session
     )
+    if workflow is None:
+        return APIResponse(
+            success=False, error=f"Workflow with name = {name} not found"
+        )
     path = workflow.get_infer_path()
 
-    if query.session_id:
-        # Get session by id:
-        session = client.get_session(uid=query.session_id, db_session=db_session)
+    if query.session_name:
+        # Get session by name:
+        session = client.get_session(name=query.session_name, db_session=db_session)
         if session is None:
-            # If not id found, get session by name:
-            session_name = query.session_id
-            session = client.list_sessions(name=session_name, db_session=db_session)
-            # If not name found, create a new session:
-            if session:
-                session = session[0]
-            else:
-                session = client.create_session(
-                    session=ChatSession(
-                        name=session_name,
-                        workflow_id=uid,
-                        owner_id=client.get_user(
-                            user_name=auth.username, db_session=db_session
-                        ).uid,
-                    ),
-                )
-        query.session_id = session.uid
+            client.create_session(
+                session=ChatSession(
+                    name=query.session_name,
+                    workflow_id=workflow.uid,
+                    owner_id=client.get_user(
+                        user_name=auth.username, db_session=db_session
+                    ).uid,
+                ),
+            )
     # Prepare the data to send to the application's workflow
     data = {
         "item": query.dict(),
@@ -290,5 +286,5 @@ def infer_workflow(
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to infer workflow {uid} in project {project_name}: {e}",
+            error=f"Failed to infer workflow {name} in project {project_name}: {e}",
         )

@@ -22,7 +22,7 @@ from controller.src.schemas.base import BaseWithOwner
 
 class QueryItem(BaseModel):
     question: str
-    session_id: Optional[str] = None
+    session_name: Optional[str] = None
     filter: Optional[List[Tuple[str, str]]] = None
     data_source: Optional[str] = None
 
