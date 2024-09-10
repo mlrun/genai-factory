@@ -18,6 +18,7 @@ import { Provider as JotaiProvider } from 'jotai'
 import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
 import { DataSourceTablePage } from 'pages/DataSourcesTablePage'
+import { DatasetsTablePage } from 'pages/DatasetsTablePage'
 import { LoginPage } from 'pages/LoginPage'
 import { ProjectsTablePage } from 'pages/ProjectsTablePage'
 import { UsersTablePage } from 'pages/UsersTablePage'
@@ -37,6 +38,7 @@ function App() {
     },
     { path: '/admin/projects', element: <ProjectsTablePage /> },
     { path: '/admin/data-sources', element: <DataSourceTablePage /> },
+    { path: '/admin/datasets', element: <DatasetsTablePage /> },
     {
       path: '/admin/histories',
       element: <ChatHistoriesTablePage />

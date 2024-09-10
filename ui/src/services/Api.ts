@@ -14,6 +14,7 @@
 
 import { User } from '@shared/types';
 import { DataSource } from '@shared/types/dataSource';
+import { Dataset } from '@shared/types/dataset';
 import { Project } from '@shared/types/project';
 import { Session } from '@shared/types/session';
 import { Query } from '@shared/types/workflow';
@@ -218,15 +219,14 @@ class ApiClient {
 
   // DATASOURCES
 
-  async createDataSource(projectName: string, dataSource: DataSource) {
+  async getDataSources(projectName: string, params?: { name?: string; version?: string; data_source_type?: string; labels?: string[]; mode?: string }) {
     try {
-      const response = await this.client.post(`/projects/${projectName}/data_sources`, dataSource);
+      const response = await this.client.get(`/projects/${projectName}/data_sources`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
 
   async getDataSource(projectName: string, uid: string) {
     try {
@@ -237,6 +237,14 @@ class ApiClient {
     }
   }
 
+  async createDataSource(projectName: string, dataSource: DataSource) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/data_sources`, dataSource);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
 
   async updateDataSource(projectName: string, dataSource: DataSource) {
     try {
@@ -257,20 +265,57 @@ class ApiClient {
     }
   }
 
-
-  async getDataSources(projectName: string, params?: { name?: string; version?: string; data_source_type?: string; labels?: string[]; mode?: string }) {
+  // eslint-disable-next-line
+  async ingestDocument(projectName: string, uid: string, ingestData: { loader: string; path: string; metadata?: any; version?: string; from_file: boolean }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/data_sources`, { params });
+      const response = await this.client.post(`/projects/${projectName}/data_sources/${uid}/ingest`, ingestData);
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
     }
   }
 
-  // eslint-disable-next-line
-  async ingestDocument(projectName: string, uid: string, ingestData: { loader: string; path: string; metadata?: any; version?: string; from_file: boolean }) {
+  // DATASETS
+
+  async getDatasets(projectName: string, params?: { name?: string; version?: string; task?: string; labels?: string[]; mode?: string }) {
     try {
-      const response = await this.client.post(`/projects/${projectName}/data_sources/${uid}/ingest`, ingestData);
+      const response = await this.client.get(`/projects/${projectName}/datasets`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getDataset(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/datasets/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createDataset(projectName: string, dataset: Dataset) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/datasets`, dataset);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateDataset(projectName: string, dataset: Dataset) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/datasets/${dataset.name}`, dataset);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteDataset(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/datasets/${uid}`);
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);

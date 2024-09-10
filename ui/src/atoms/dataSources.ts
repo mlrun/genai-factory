@@ -25,11 +25,11 @@ export const dataSourcesErrorAtom = atom<string | null>(null);
 
 export const dataSourcesWithFetchAtom = atom(
   (get) => get(dataSourcesAtom),
-  async (_get, set, username) => {
+  async (_get, set, projectName) => {
     set(dataSourcesLoadingAtom, true);
     set(dataSourcesErrorAtom, null);
     try {
-      const dataSources = await Client.getDataSources(username as string);
+      const dataSources = await Client.getDataSources(projectName as string);
       const sortedDataSources = dataSources.data.sort((a: DataSource, b: DataSource) => {
         const dateA = new Date(a.created as string);
         const dateB = new Date(b.created as string);
