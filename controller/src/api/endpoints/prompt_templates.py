@@ -182,7 +182,8 @@ def list_prompts(
 
     :return: The response from the database.
     """
-    owner_id = client.get_user(user_name=auth.username, db_session=db_session).uid
+    owner = client.get_user(user_name=auth.username, db_session=db_session)
+    owner_id = getattr(owner, "uid", None)
     project_id = client.get_project(
         project_name=project_name, db_session=db_session
     ).uid
