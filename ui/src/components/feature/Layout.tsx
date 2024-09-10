@@ -59,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <MenuItem onClick={() => navigate('/admin/projects')}>Projects</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/data-sources')}>Data Sources</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/datasets')}>Datasets</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/pipelines')}>Pipelines</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/models')}>Models</MenuItem>
                 </Menu>
               )}
             </Sidebar>

@@ -15,6 +15,7 @@
 import { User } from '@shared/types';
 import { DataSource } from '@shared/types/dataSource';
 import { Dataset } from '@shared/types/dataset';
+import { Model } from '@shared/types/model';
 import { Project } from '@shared/types/project';
 import { Session } from '@shared/types/session';
 import { Query } from '@shared/types/workflow';
@@ -316,6 +317,53 @@ class ApiClient {
   async deleteDataset(projectName: string, uid: string) {
     try {
       const response = await this.client.delete(`/projects/${projectName}/datasets/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // MODELS
+
+  async getModels(projectName: string, params?: { name?: string; version?: string; model_type?: string; labels?: string[]; mode?: string }) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/models`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getModel(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/models/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createModel(projectName: string, model: Model) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/models`, model);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateModel(projectName: string, model: Model) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/models/${model.name}`, model);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteModel(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/models/${uid}`);
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
