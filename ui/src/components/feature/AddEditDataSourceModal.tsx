@@ -26,7 +26,7 @@ import {
   ModalHeader,
   ModalOverlay
 } from '@chakra-ui/react'
-import { DataSource, DataSourceType } from '@shared/types/datasource'
+import { DataSource, DataSourceType } from '@shared/types/dataSource'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 

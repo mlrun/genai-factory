@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Client from '@services/Api';
-import { DataSource, DataSourceType } from '@shared/types/datasource';
+import { DataSource, DataSourceType } from '@shared/types/dataSource';
 import { atom } from 'jotai';
 
 export const dataSourcesAtom = atom<DataSource[]>([]);

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { User } from '@shared/types';
-import { DataSource } from '@shared/types/datasource';
+import { DataSource } from '@shared/types/dataSource';
 import { Project } from '@shared/types/project';
 import { Session } from '@shared/types/session';
 import { Query } from '@shared/types/workflow';
