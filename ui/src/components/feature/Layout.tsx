@@ -49,17 +49,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Flex direction={'column'}>
         <TopBar user={username} onLoginChange={changeLogin} />
         <Flex justifyContent={'space-between'}>
-          <Box display={{ base: 'none', md: 'flex' }}>
+          <Box display={{ md: 'flex' }}>
             <Sidebar>
               {pathname.includes('chat') ? (
                 <Chatbar />
               ) : (
                 <Menu>
                   <MenuItem onClick={() => navigate('/admin/users')}>Users</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/histories')}>Chat Histories</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/projects')}>Projects</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/data-sources')}>Data Sources</MenuItem>
                   <MenuItem onClick={() => navigate('/admin/datasets')}>Datasets</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/documents')}>Documents</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/pipelines')}>Pipelines</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin/models')}>Models</MenuItem>
                 </Menu>
               )}
             </Sidebar>

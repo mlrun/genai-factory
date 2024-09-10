@@ -17,7 +17,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider as JotaiProvider } from 'jotai'
 import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
+import { DataSourceTablePage } from 'pages/DataSourcesTablePage'
+import { DatasetsTablePage } from 'pages/DatasetsTablePage'
 import { LoginPage } from 'pages/LoginPage'
+import { ModelsTablePage } from 'pages/ModelsTablePage'
+import { ProjectsTablePage } from 'pages/ProjectsTablePage'
 import { UsersTablePage } from 'pages/UsersTablePage'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
@@ -33,6 +37,10 @@ function App() {
       path: '/admin/users',
       element: <UsersTablePage />
     },
+    { path: '/admin/projects', element: <ProjectsTablePage /> },
+    { path: '/admin/data-sources', element: <DataSourceTablePage /> },
+    { path: '/admin/datasets', element: <DatasetsTablePage /> },
+    { path: '/admin/models', element: <ModelsTablePage /> },
     {
       path: '/admin/histories',
       element: <ChatHistoriesTablePage />
