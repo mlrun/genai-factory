@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { User } from '@shared/types';
+import { DataSource } from '@shared/types/datasource';
 import { Project } from '@shared/types/project';
 import { Session } from '@shared/types/session';
 import { Query } from '@shared/types/workflow';
@@ -215,10 +216,68 @@ class ApiClient {
     }
   }
 
+  // DATASOURCES
+
+  async createDataSource(projectName: string, dataSource: DataSource) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/data_sources`, dataSource);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
 
 
+  async getDataSource(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/data_sources/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
 
+
+  async updateDataSource(projectName: string, dataSource: DataSource) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/data_sources/${dataSource.name}`, dataSource);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
+  async deleteDataSource(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/data_sources/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
+  async getDataSources(projectName: string, params?: { name?: string; version?: string; data_source_type?: string; labels?: string[]; mode?: string }) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/data_sources`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // eslint-disable-next-line
+  async ingestDocument(projectName: string, uid: string, ingestData: { loader: string; path: string; metadata?: any; version?: string; from_file: boolean }) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/data_sources/${uid}/ingest`, ingestData);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
 }
+
 
 function getClient() {
   return new ApiClient()
