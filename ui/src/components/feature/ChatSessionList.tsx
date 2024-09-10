@@ -117,7 +117,19 @@ const ChatSessionList = (props: Props) => {
   }
 
   return (
-    <Flex width={72} flexFlow={'column'} gap={4} alignItems={'flex-start'}>
+    <Flex
+      sx={{
+        '::-webkit-scrollbar': {
+          display: 'none'
+        }
+      }}
+      overflow={'scroll'}
+      width={72}
+      maxHeight={'680px'}
+      flexFlow={'column'}
+      gap={4}
+      alignItems={'flex-start'}
+    >
       <Flex width={'100%'} justifyContent={'space-between'} direction="column" gap={2}>
         {sessions.map((session, index) => (
           <Flex gap={4} justifyContent={'space-between'} alignItems={'space-between'} key={index}>
@@ -131,14 +143,14 @@ const ChatSessionList = (props: Props) => {
               bg={
                 colorMode === 'dark'
                   ? pathname.includes(session.uid as string)
-                    ? colors.mint
-                    : colors.gray700
+                    ? colors.gray700
+                    : colors.gray800
                   : pathname.includes(session.uid as string)
-                    ? colors.mint
-                    : colors.gray300
+                    ? colors.gray400
+                    : colors.gray200
               }
-              _hover={{ bg: colors.mintDark }}
-              _active={{ bg: colors.mintLight }}
+              _hover={{ bg: colorMode === 'dark' ? colors.gray700 : colors.gray400 }}
+              _active={{ bg: colors.gray600 }}
               onClick={() => {
                 selectChat(session)
                 setSessionId(session.uid as string)

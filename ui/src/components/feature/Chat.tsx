@@ -50,7 +50,18 @@ const Chat = () => {
       flexGrow={1}
       height="calc(100vh - 92px)"
     >
-      <Flex justifyContent="flex-start" flexGrow={1} flexDirection="column" paddingBottom="92px" overflowY="scroll">
+      <Flex
+        sx={{
+          '::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }}
+        justifyContent="flex-start"
+        flexGrow={1}
+        flexDirection="column"
+        paddingBottom="92px"
+        overflowY="scroll"
+      >
         {messages?.map((message, index) => (
           <Bubble
             key={index}

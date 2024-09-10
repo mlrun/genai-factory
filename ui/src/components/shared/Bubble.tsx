@@ -36,33 +36,47 @@ const Bubble = ({ bot, content }: Props) => {
   return (
     <Flex gap={10} flexDirection={'column'}>
       {bot == 'AI' ? (
-        <Flex role={'group'} alignItems={'baseline'} gap={4}>
-          <ChatIcon />
+        <Flex role={'group'} alignItems={'flex-start'} gap={4}>
+          <ChatIcon marginTop={2} />
           <Flex>{!content && !isMessageError && <Spinner size={'sm'} />}</Flex>
-          <Flex textAlign={'left'} marginY={2} maxW={'66%'}>
-            {!!content && <ChatMessage message={content} />}
-          </Flex>
-          <IconButton
-            display={'none'}
-            _groupHover={{ display: 'block' }}
-            icon={<CopyIcon />}
-            onClick={() => {
-              navigator.clipboard.writeText(content)
-              toast({
-                title: 'Message copied',
-                description: '',
-                status: 'success',
-                duration: 3000,
-                position: 'bottom',
-                icon: (
-                  <Flex align={'center'}>
-                    <CheckCircleIcon />
-                  </Flex>
-                )
-              })
-            }}
-            aria-label={'copy'}
-          />
+          {!!content && (
+            <>
+              <Flex
+                padding={4}
+                borderRadius={6}
+                bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}
+                textAlign={'left'}
+                marginY={2}
+                maxW={'66%'}
+              >
+                <ChatMessage message={content} />
+              </Flex>
+              <IconButton
+                marginTop={2}
+                _hover={{ bg: colorMode === 'dark' ? colors.gray700 : colors.gray200 }}
+                bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}
+                display={'none'}
+                _groupHover={{ display: 'block' }}
+                icon={<CopyIcon />}
+                onClick={() => {
+                  navigator.clipboard.writeText(content)
+                  toast({
+                    title: 'Message copied',
+                    description: '',
+                    status: 'success',
+                    duration: 3000,
+                    position: 'bottom',
+                    icon: (
+                      <Flex align={'center'}>
+                        <CheckCircleIcon />
+                      </Flex>
+                    )
+                  })
+                }}
+                aria-label={'copy'}
+              />
+            </>
+          )}
         </Flex>
       ) : (
         <Flex justifyContent={'flex-end'}>
