@@ -422,8 +422,8 @@ class SqlClient:
             filters.append(db.Project.version == version)
         return self._list(
             session=db_session,
-            db_class=db.User,
-            api_class=api_models.User,
+            db_class=db.Project,
+            api_class=api_models.Project,
             output_mode=output_mode,
             labels_match=labels_match,
             filters=filters,
