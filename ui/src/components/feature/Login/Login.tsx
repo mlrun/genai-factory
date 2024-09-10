@@ -31,35 +31,70 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
-  const [, setPublicUser] = useAtom(publicUserAtom)
+  const [publicUser, setPublicUser] = useAtom(publicUserAtom)
   const [sessions] = useAtom(sessionsAtom)
   const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
 
   const submitFunc = async (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
     event.preventDefault()
     setIsLoading(true)
-    setTimeout(async () => {
-      setIsLoading(false)
-      setUsername(username)
+
+    try {
       login(username, password, admin)
-      await Client.getUser(username).then(res => {
-        if (res) {
-          setPublicUser(res.data)
-        }
-      })
+
+      const userResponse = await Client.getUser(username)
+      if (userResponse && userResponse.data) {
+        setPublicUser(userResponse.data)
+      }
+
       if (admin) {
         navigate('/admin/users')
       } else {
-        navigate(`/chat`)
-        await fetchSessions(username).then(() => {
-          if (sessions.length) {
-            navigate(`/chat/${sessions[0].uid}`)
-          } else {
-            navigate(`/chat`)
-          }
-        })
+        await handleUserNavigation()
       }
-    }, 1000)
+    } catch (error) {
+      console.error('Error during submission:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUserNavigation = async () => {
+    navigate(`/chat`)
+
+    try {
+      await fetchSessions(username)
+
+      if (sessions.length) {
+        navigate(`/chat/${sessions[0].uid}`)
+      } else {
+        await createNewSession()
+      }
+    } catch (error) {
+      console.error('Error fetching sessions:', error)
+    }
+  }
+
+  const createNewSession = async () => {
+    try {
+      const sessionData = {
+        name: 'default',
+        description: '* New Chat',
+        workflow_id: 'default',
+        labels: {},
+        owner_id: publicUser?.uid || ''
+      }
+
+      const newSessionResponse = await Client.createSession(username, sessionData)
+
+      if (!newSessionResponse.error) {
+        navigate(`/chat/${newSessionResponse.data.uid}`)
+      } else {
+        console.error('Error creating session:', newSessionResponse.error)
+      }
+    } catch (error) {
+      console.error('Error creating new session:', error)
+    }
   }
 
   return (
