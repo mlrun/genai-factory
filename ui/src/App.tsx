@@ -19,6 +19,7 @@ import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
 import { DataSourceTablePage } from 'pages/DataSourcesTablePage'
 import { DatasetsTablePage } from 'pages/DatasetsTablePage'
+import { DocumentsTablePage } from 'pages/DocumentsTablePage'
 import { LoginPage } from 'pages/LoginPage'
 import { ModelsTablePage } from 'pages/ModelsTablePage'
 import { ProjectsTablePage } from 'pages/ProjectsTablePage'
@@ -41,6 +42,7 @@ function App() {
     { path: '/admin/data-sources', element: <DataSourceTablePage /> },
     { path: '/admin/datasets', element: <DatasetsTablePage /> },
     { path: '/admin/models', element: <ModelsTablePage /> },
+    { path: '/admin/documents', element: <DocumentsTablePage /> },
     {
       path: '/admin/histories',
       element: <ChatHistoriesTablePage />

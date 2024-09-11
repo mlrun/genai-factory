@@ -15,6 +15,7 @@
 import { User } from '@shared/types';
 import { DataSource } from '@shared/types/dataSource';
 import { Dataset } from '@shared/types/dataset';
+import { Document } from '@shared/types/document';
 import { Model } from '@shared/types/model';
 import { Project } from '@shared/types/project';
 import { Session } from '@shared/types/session';
@@ -369,8 +370,53 @@ class ApiClient {
       return this.handleError(error);
     }
   }
-}
 
+  // DOCUMENTS
+
+  async getDocuments(projectName: string, params?: { name?: string; version?: string; labels?: string[]; mode?: string }) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/documents`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+  async getDocument(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/documents/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createDocument(projectName: string, document: Document) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/documents`, document);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateDocument(projectName: string, document: Document) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/documents/${document.name}`, document);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteDocument(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/documents/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+}
 
 function getClient() {
   return new ApiClient()
