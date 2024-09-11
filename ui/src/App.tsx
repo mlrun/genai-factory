@@ -23,6 +23,7 @@ import { DocumentsTablePage } from 'pages/DocumentsTablePage'
 import { LoginPage } from 'pages/LoginPage'
 import { ModelsTablePage } from 'pages/ModelsTablePage'
 import { ProjectsTablePage } from 'pages/ProjectsTablePage'
+import { PromptTemplatesTablePage } from 'pages/PromptTemplatesTablePage'
 import { UsersTablePage } from 'pages/UsersTablePage'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
@@ -43,6 +44,7 @@ function App() {
     { path: '/admin/datasets', element: <DatasetsTablePage /> },
     { path: '/admin/models', element: <ModelsTablePage /> },
     { path: '/admin/documents', element: <DocumentsTablePage /> },
+    { path: '/admin/prompt-templates', element: <PromptTemplatesTablePage /> },
     {
       path: '/admin/histories',
       element: <ChatHistoriesTablePage />

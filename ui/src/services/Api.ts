@@ -18,6 +18,7 @@ import { Dataset } from '@shared/types/dataset';
 import { Document } from '@shared/types/document';
 import { Model } from '@shared/types/model';
 import { Project } from '@shared/types/project';
+import { PromptTemplate } from '@shared/types/promptTemplate';
 import { Session } from '@shared/types/session';
 import { Query } from '@shared/types/workflow';
 import axios, { AxiosResponse } from 'axios';
@@ -416,6 +417,55 @@ class ApiClient {
       return this.handleError(error);
     }
   }
+
+  // PROMPT TEMPLATES
+
+  async getPromptTemplates(projectName: string, params?: { name?: string; version?: string; labels?: string[]; mode?: string }) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/prompt_templates`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getPromptTemplate(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/prompt_templates/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createPromptTemplate(projectName: string, promptTemplate: PromptTemplate) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/prompt_templates`, promptTemplate);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updatePromptTemplate(projectName: string, promptTemplate: PromptTemplate) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/prompt_templates/${promptTemplate.name}`, promptTemplate);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deletePromptTemplate(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/prompt_templates/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
 }
 
 function getClient() {
