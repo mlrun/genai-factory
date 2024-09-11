@@ -14,17 +14,18 @@
 
 export type Workflow = {
   name: string
-  uid: string
-  description: string
-  labels: { [key: string]: string }
+  uid?: string
+  description?: string
+  labels?: { [key: string]: string }
   owner_id: string
-  version: string
+  version?: string
   project_id: string
   workflow_type: WorkflowType
   deployment: string
-  workflow_function: string
-  configuration: { [key: string]: string }
-  graph: { [key: string]: string }
+  workflow_function?: string
+  configuration?: { [key: string]: string }
+  graph?: { [key: string]: string }
+  created?: string
 }
 
 

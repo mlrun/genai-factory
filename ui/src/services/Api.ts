@@ -20,7 +20,7 @@ import { Model } from '@shared/types/model';
 import { Project } from '@shared/types/project';
 import { PromptTemplate } from '@shared/types/promptTemplate';
 import { Session } from '@shared/types/session';
-import { Query } from '@shared/types/workflow';
+import { Query, Workflow } from '@shared/types/workflow';
 import axios, { AxiosResponse } from 'axios';
 
 
@@ -148,15 +148,49 @@ class ApiClient {
 
   // WORKFLOWS
 
-  async getWorkflow(projectId: string, workflowId: string, query: Query) {
+
+  async getWorkflows(projectName: string, params?: { name?: string; version?: string; workflow_type?: string; labels?: string[]; mode?: string }) {
     try {
-      const response = await this.client.post(
-        `/projects/${projectId}/workflows/${workflowId}`, // is it project ID or name?
-        query
-      )
-      return this.handleResponse(response)
+      const response = await this.client.get(`/projects/${projectName}/workflows`, { params });
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
+    }
+  }
+
+  async getWorkflow(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/workflows/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createWorkflow(projectName: string, workflow: Workflow) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/workflows`, workflow);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateWorkflow(projectName: string, workflow: Workflow) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/workflows/${workflow.name}`, workflow);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteWorkflow(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/workflows/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
     }
   }
 
