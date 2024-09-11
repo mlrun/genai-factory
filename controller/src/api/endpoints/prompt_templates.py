@@ -16,9 +16,9 @@ from typing import List, Optional, Tuple
 
 from fastapi import APIRouter, Depends
 
+from _common.schemas import APIResponse, OutputMode, PromptTemplate
 from controller.src.api.utils import AuthInfo, get_auth_user, get_db
 from controller.src.db import client
-from controller.src.schemas import APIResponse, OutputMode, PromptTemplate
 
 router = APIRouter(prefix="/projects/{project_name}")
 

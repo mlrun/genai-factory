@@ -17,7 +17,7 @@ from typing import List, Optional, Tuple
 
 from pydantic import BaseModel
 
-from controller.src.schemas.base import BaseWithOwner
+from _common.schemas.base import BaseWithOwner
 
 
 class QueryItem(BaseModel):

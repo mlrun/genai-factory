@@ -20,10 +20,7 @@ import click
 import yaml
 from tabulate import tabulate
 
-from controller.src.api.utils import _send_to_application
-from controller.src.config import config
-from controller.src.db import client
-from controller.src.schemas import (
+from _common.schemas import (
     DataSource,
     Document,
     Project,
@@ -31,6 +28,9 @@ from controller.src.schemas import (
     User,
     Workflow,
 )
+from controller.src.api.utils import _send_to_application
+from controller.src.config import config
+from controller.src.db import client
 
 
 @click.group()

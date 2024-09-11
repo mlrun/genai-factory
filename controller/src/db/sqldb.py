@@ -283,7 +283,7 @@ class DataSource(VersionedOwnerBaseSchema):
 
     :arg  project_id:       The project's id.
     :arg  data_source_type: The type of the data source.
-                            Can be one of the values in controller.src.schemas.data_source.DataSourceType.
+                            Can be one of the values in _common.schemas.data_source.DataSourceType.
     """
 
     # Columns:
@@ -386,7 +386,7 @@ class Model(VersionedOwnerBaseSchema):
     The Model table which is used to define models for the project.
 
     :arg  project_id:       The project's id.
-    :arg  model_type:       The type of the model. Can be one of the values in controller.src.schemas.model.ModelType.
+    :arg  model_type:       The type of the model. Can be one of the values in _common.schemas.model.ModelType.
     :arg  task:             The task of the model. For example, "classification", "text-generation", etc.
     """
 
@@ -570,7 +570,7 @@ class Workflow(VersionedOwnerBaseSchema):
 
     :arg project_id:    The project's id.
     :arg workflow_type: The type of the workflow.
-                        Can be one of the values in controller.src.schemas.workflow.WorkflowType.
+                        Can be one of the values in _common.schemas.workflow.WorkflowType.
     """
 
     # Columns:

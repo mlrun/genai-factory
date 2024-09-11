@@ -17,14 +17,7 @@ from typing import List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Depends
 
-from controller.src.api.utils import (
-    AuthInfo,
-    _send_to_application,
-    get_auth_user,
-    get_db,
-)
-from controller.src.db import client
-from controller.src.schemas import (
+from _common.schemas import (
     APIResponse,
     ChatSession,
     OutputMode,
@@ -32,6 +25,13 @@ from controller.src.schemas import (
     Workflow,
     WorkflowType,
 )
+from controller.src.api.utils import (
+    AuthInfo,
+    _send_to_application,
+    get_auth_user,
+    get_db,
+)
+from controller.src.db import client
 
 router = APIRouter(prefix="/projects/{project_name}")
 

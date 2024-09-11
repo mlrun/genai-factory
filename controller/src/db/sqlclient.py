@@ -19,8 +19,8 @@ from typing import List, Type, Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
+import _common.schemas as api_models
 import controller.src.db.sqldb as db
-import controller.src.schemas as api_models
 from controller.src.config import logger
 
 

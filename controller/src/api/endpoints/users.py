@@ -14,9 +14,9 @@
 
 from fastapi import APIRouter, Depends
 
+from _common.schemas import APIResponse, OutputMode, User
 from controller.src.api.utils import get_db
 from controller.src.db import client
-from controller.src.schemas import APIResponse, OutputMode, User
 
 router = APIRouter()
 

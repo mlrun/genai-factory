@@ -17,6 +17,13 @@ from typing import List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Depends
 
+from _common.schemas import (
+    APIResponse,
+    DataSource,
+    DataSourceType,
+    Document,
+    OutputMode,
+)
 from controller.src.api.utils import (
     AuthInfo,
     _send_to_application,
@@ -24,13 +31,6 @@ from controller.src.api.utils import (
     get_db,
 )
 from controller.src.db import client
-from controller.src.schemas import (
-    APIResponse,
-    DataSource,
-    DataSourceType,
-    Document,
-    OutputMode,
-)
 
 router = APIRouter(prefix="/projects/{project_name}")
 

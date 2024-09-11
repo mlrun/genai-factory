@@ -17,8 +17,9 @@ from enum import Enum
 from typing import List, Optional
 
 import storey
-from mlrun.genai.schemas import Conversation
-from mlrun.genai.schemas.base import BaseWithVerMetadata
+
+from _common.schemas import Conversation
+from _common.schemas.base import BaseWithVerMetadata
 
 
 class WorkflowType(str, Enum):
