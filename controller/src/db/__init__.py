@@ -14,7 +14,7 @@
 
 from controller.src.config import config
 
-from .sqlclient import SqlClient
+from controller.src.db.sqlclient import SqlClient
 
 client = None
 
