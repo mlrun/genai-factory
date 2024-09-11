@@ -15,8 +15,8 @@
 from langchain_core.prompts.prompt import PromptTemplate
 
 from _common.schemas import WorkflowEvent
-from application.chains.base import ChainRunner
-from application.config import get_llm, logger
+from application.src.chains.base import ChainRunner
+from application.src.config import get_llm, logger
 
 _refine_prompt_template = """
 You are a helpful AI assistant, given the following conversation and a follow up request,

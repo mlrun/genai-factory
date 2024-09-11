@@ -17,8 +17,8 @@ from langchain_core.callbacks.base import BaseCallbackHandler
 from langchain_core.prompts import PromptTemplate
 
 from _common.schemas import WorkflowEvent
-from application.chains.base import ChainRunner
-from application.config import get_llm, get_vector_db, logger
+from application.src.chains.base import ChainRunner
+from application.src.config import get_llm, get_vector_db, logger
 
 
 class DocumentCallbackHandler(BaseCallbackHandler):

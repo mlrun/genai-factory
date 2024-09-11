@@ -17,9 +17,9 @@ from mlrun import serving
 from mlrun.utils import get_caller_globals
 
 from _common.schemas import APIDictResponse
-from application.client import client
-from application.config import config as default_config
-from application.sessions import get_session_store
+from application.src.client import client
+from application.src.config import config as default_config
+from application.src.sessions import get_session_store
 
 
 class AppServer:

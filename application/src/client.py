@@ -18,7 +18,7 @@ import requests
 from mlrun.utils.helpers import dict_to_json
 
 from _common.schemas import ChatSession, Project, Workflow
-from application.config import config, logger
+from application.src.config import config, logger
 
 
 class Client:

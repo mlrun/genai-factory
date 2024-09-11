@@ -19,9 +19,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from _common.schemas import Document, QueryItem, Workflow
-from application.client import Client
-from application.config import config
-from application.data.doc_loader import get_data_loader, get_loader_obj
+from application.src.client import Client
+from application.src.config import config
+from application.src.data.doc_loader import get_data_loader, get_loader_obj
 
 app = FastAPI()
 

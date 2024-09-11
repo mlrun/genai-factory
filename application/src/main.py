@@ -19,12 +19,12 @@ import sys
 import click
 import uvicorn
 
-from application.api import router
-from application.chains.base import HistorySaver, SessionLoader
-from application.chains.refine import RefineQuery
-from application.chains.retrieval import MultiRetriever
-from application.config import config, username
-from application.workflows import AppServer
+from application.src.api import router
+from application.src.chains.base import HistorySaver, SessionLoader
+from application.src.chains.refine import RefineQuery
+from application.src.chains.retrieval import MultiRetriever
+from application.src.config import config, username
+from application.src.workflows import AppServer
 
 default_graph = [
     SessionLoader(),

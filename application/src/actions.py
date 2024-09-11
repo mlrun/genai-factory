@@ -18,8 +18,8 @@ import openai
 from pydantic import BaseModel
 
 from _common.schemas import APIResponse
-from application.config import config, logger
-from application.data.doc_loader import get_data_loader, get_loader_obj
+from application.src.config import config, logger
+from application.src.data.doc_loader import get_data_loader, get_loader_obj
 
 
 class IngestItem(BaseModel):

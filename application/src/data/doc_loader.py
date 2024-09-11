@@ -27,8 +27,8 @@ from langchain_community.document_loaders import (
 )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from application.config import AppConfig, get_vector_db, logger
-from application.data.web_loader import SmartWebLoader
+from application.src.config import AppConfig, get_vector_db, logger
+from application.src.data.web_loader import SmartWebLoader
 
 LOADER_MAPPING = {
     ".csv": (CSVLoader, {}),

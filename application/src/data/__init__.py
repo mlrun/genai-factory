@@ -11,14 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Optional
-
-from controller.src.schemas.base import BaseWithVerMetadata
-
-
-class Document(BaseWithVerMetadata):
-    _top_level_fields = ["path", "origin"]
-    path: str
-    project_id: str
-    origin: Optional[str] = None

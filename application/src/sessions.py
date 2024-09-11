@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from _common.schemas import ChatSession, WorkflowEvent
-from application.client import Client
-from application.client import client as default_client
+from application.src.client import Client
+from application.src.client import client as default_client
 
 
 class SessionStore:
