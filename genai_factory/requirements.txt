@@ -1,0 +1,7 @@
+langchain_community
+langchain_openai
+langchain_huggingface
+pymilvus
+langchain-milvus
+chromadb==0.5.3
+mlrun==1.6.0
