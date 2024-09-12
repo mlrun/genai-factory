@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import { isTypingAtom } from '@atoms/index'
+import ChakraUIRenderer from 'chakra-ui-markdown-renderer'
 import { useAtom } from 'jotai'
 import React from 'react'
-import Markdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import TypingText from './TypingText'
 
 interface ChatMessageProps {
@@ -28,7 +29,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   if (isTyping) {
     return <TypingText text={message} />
   }
-  return <Markdown>{message}</Markdown>
+  return (
+    <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
+      {message}
+    </ReactMarkdown>
+  )
 }
 
 export default ChatMessage
