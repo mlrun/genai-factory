@@ -15,10 +15,12 @@
 import { User } from '@shared/types';
 import { DataSource } from '@shared/types/dataSource';
 import { Dataset } from '@shared/types/dataset';
+import { Document } from '@shared/types/document';
 import { Model } from '@shared/types/model';
 import { Project } from '@shared/types/project';
+import { PromptTemplate } from '@shared/types/promptTemplate';
 import { Session } from '@shared/types/session';
-import { Query } from '@shared/types/workflow';
+import { Query, Workflow } from '@shared/types/workflow';
 import axios, { AxiosResponse } from 'axios';
 
 
@@ -146,15 +148,49 @@ class ApiClient {
 
   // WORKFLOWS
 
-  async getWorkflow(projectId: string, workflowId: string, query: Query) {
+
+  async getWorkflows(projectName: string, params?: { name?: string; version?: string; workflow_type?: string; labels?: string[]; mode?: string }) {
     try {
-      const response = await this.client.post(
-        `/projects/${projectId}/workflows/${workflowId}`, // is it project ID or name?
-        query
-      )
-      return this.handleResponse(response)
+      const response = await this.client.get(`/projects/${projectName}/workflows`, { params });
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
+    }
+  }
+
+  async getWorkflow(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/workflows/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createWorkflow(projectName: string, workflow: Workflow) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/workflows`, workflow);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateWorkflow(projectName: string, workflow: Workflow) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/workflows/${workflow.name}`, workflow);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteWorkflow(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/workflows/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
     }
   }
 
@@ -369,8 +405,102 @@ class ApiClient {
       return this.handleError(error);
     }
   }
-}
 
+  // DOCUMENTS
+
+  async getDocuments(projectName: string, params?: { name?: string; version?: string; labels?: string[]; mode?: string }) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/documents`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+  async getDocument(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/documents/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createDocument(projectName: string, document: Document) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/documents`, document);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateDocument(projectName: string, document: Document) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/documents/${document.name}`, document);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteDocument(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/documents/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // PROMPT TEMPLATES
+
+  async getPromptTemplates(projectName: string, params?: { name?: string; version?: string; labels?: string[]; mode?: string }) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/prompt_templates`, { params });
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getPromptTemplate(projectName: string, uid: string) {
+    try {
+      const response = await this.client.get(`/projects/${projectName}/prompt_templates/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createPromptTemplate(projectName: string, promptTemplate: PromptTemplate) {
+    try {
+      const response = await this.client.post(`/projects/${projectName}/prompt_templates`, promptTemplate);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updatePromptTemplate(projectName: string, promptTemplate: PromptTemplate) {
+    try {
+      const response = await this.client.put(`/projects/${projectName}/prompt_templates/${promptTemplate.name}`, promptTemplate);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deletePromptTemplate(projectName: string, uid: string) {
+    try {
+      const response = await this.client.delete(`/projects/${projectName}/prompt_templates/${uid}`);
+      return this.handleResponse(response);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
+}
 
 function getClient() {
   return new ApiClient()

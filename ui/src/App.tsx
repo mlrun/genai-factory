@@ -19,10 +19,13 @@ import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
 import { DataSourceTablePage } from 'pages/DataSourcesTablePage'
 import { DatasetsTablePage } from 'pages/DatasetsTablePage'
+import { DocumentsTablePage } from 'pages/DocumentsTablePage'
 import { LoginPage } from 'pages/LoginPage'
 import { ModelsTablePage } from 'pages/ModelsTablePage'
 import { ProjectsTablePage } from 'pages/ProjectsTablePage'
+import { PromptTemplatesTablePage } from 'pages/PromptTemplatesTablePage'
 import { UsersTablePage } from 'pages/UsersTablePage'
+import { WorkflowsTablePage } from 'pages/WorkflowsTablePage'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
 function App() {
@@ -41,6 +44,9 @@ function App() {
     { path: '/admin/data-sources', element: <DataSourceTablePage /> },
     { path: '/admin/datasets', element: <DatasetsTablePage /> },
     { path: '/admin/models', element: <ModelsTablePage /> },
+    { path: '/admin/documents', element: <DocumentsTablePage /> },
+    { path: '/admin/prompt-templates', element: <PromptTemplatesTablePage /> },
+    { path: '/admin/workflows', element: <WorkflowsTablePage /> },
     {
       path: '/admin/histories',
       element: <ChatHistoriesTablePage />

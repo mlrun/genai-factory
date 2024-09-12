@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export type Workflow = {
+
+
+
+export type PromptTemplate = {
   name: string
   uid?: string
   description?: string
@@ -20,26 +23,7 @@ export type Workflow = {
   owner_id: string
   version?: string
   project_id: string
-  workflow_type: WorkflowType
-  deployment: string
-  workflow_function?: string
-  configuration?: { [key: string]: string }
-  graph?: { [key: string]: string }
+  text: string
+  arguments: string[]
   created?: string
-}
-
-
-export enum WorkflowType {
-  INGESTION = 'ingestion',
-  APPLICATION = 'application',
-  DATA_PROCESSING = 'data-processing',
-  TRAINING = 'training',
-  EVALUATION = 'evaluation',
-  DEPLOYMENT = 'deployment'
-}
-
-export type Query = {
-  question: string
-  session_id: string
-  data_source: string
 }
