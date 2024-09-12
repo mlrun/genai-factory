@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChatIcon, CopyIcon } from '@chakra-ui/icons'
-import { Box, Flex, IconButton, useColorMode, useToast } from '@chakra-ui/react'
+import { isMessageErrorAtom } from '@atoms/index'
+import { ChatIcon, CheckCircleIcon, CopyIcon } from '@chakra-ui/icons'
+import { Flex, IconButton, Spinner, useColorMode, useToast } from '@chakra-ui/react'
 import ChatMessage from '@components/feature/ChatMessage'
 import { colors } from '@shared/theme'
 import { Source } from '@shared/types'
+import { useAtom } from 'jotai'
 import Markdown from 'react-markdown'
 
 type Props = {
@@ -26,34 +28,55 @@ type Props = {
   sources: Source[]
 }
 
-const Bubble = (props: Props) => {
+const Bubble = ({ bot, content }: Props) => {
+  const [isMessageError] = useAtom(isMessageErrorAtom)
   const { colorMode } = useColorMode()
   const toast = useToast()
+
   return (
     <Flex gap={10} flexDirection={'column'}>
-      {props.bot == 'AI' ? (
-        <Flex role={'group'} alignItems={'baseline'} gap={4}>
-          <Flex></Flex>
-          <ChatIcon />
-          <Flex textAlign={'left'} marginY={2} maxW={'66%'}>
-            {!!props.content && <ChatMessage message={props.content} />}
-          </Flex>
-          <IconButton
-            display={'none'}
-            _groupHover={{ display: 'block' }}
-            icon={<CopyIcon />}
-            onClick={() => {
-              navigator.clipboard.writeText(props.content)
-              toast({
-                title: 'Copied',
-                description: '',
-                status: 'success',
-                duration: 3000,
-                position: 'bottom'
-              })
-            }}
-            aria-label={'copy'}
-          />
+      {bot == 'AI' ? (
+        <Flex role={'group'} alignItems={'flex-start'} gap={4}>
+          <ChatIcon marginTop={2} />
+          <Flex>{!content && !isMessageError && <Spinner size={'sm'} />}</Flex>
+          {!!content && (
+            <>
+              <Flex
+                padding={4}
+                borderRadius={6}
+                bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}
+                textAlign={'left'}
+                marginY={2}
+                maxW={'66%'}
+              >
+                <ChatMessage message={content} />
+              </Flex>
+              <IconButton
+                marginTop={2}
+                _hover={{ bg: colorMode === 'dark' ? colors.gray700 : colors.gray200 }}
+                bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}
+                display={'none'}
+                _groupHover={{ display: 'block' }}
+                icon={<CopyIcon />}
+                onClick={() => {
+                  navigator.clipboard.writeText(content)
+                  toast({
+                    title: 'Message copied',
+                    description: '',
+                    status: 'success',
+                    duration: 3000,
+                    position: 'bottom',
+                    icon: (
+                      <Flex align={'center'}>
+                        <CheckCircleIcon />
+                      </Flex>
+                    )
+                  })
+                }}
+                aria-label={'copy'}
+              />
+            </>
+          )}
         </Flex>
       ) : (
         <Flex justifyContent={'flex-end'}>
@@ -67,12 +90,10 @@ const Bubble = (props: Props) => {
             bg={colorMode === 'dark' ? colors.gray700 : colors.gray200}
             flexWrap={'wrap'}
           >
-            <Markdown>{props.content}</Markdown>
+            <Markdown>{content}</Markdown>
           </Flex>
         </Flex>
       )}
-
-      <Box className="help-text"></Box>
     </Flex>
   )
 }

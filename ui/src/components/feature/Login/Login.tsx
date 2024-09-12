@@ -13,12 +13,14 @@
 // limitations under the License.
 
 import Logo from '@assets/mlrun.png'
-import { adminAtom, conversationsAtom, userAtom, usernameAtom } from '@atoms/index'
+import { adminAtom, publicUserAtom, usernameAtom } from '@atoms/index'
+import { sessionsAtom, sessionsWithFetchAtom } from '@atoms/sessions'
 import { Box, Button, Flex, FormControl, FormLabel, Image, Input, Switch, useColorMode } from '@chakra-ui/react'
 import useAuth from '@hooks/useAuth'
+import Client from '@services/Api'
 import { colors } from '@shared/theme'
 import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
@@ -26,30 +28,73 @@ const Login = () => {
   const { colorMode } = useColorMode()
   const [username, setUsername] = useAtom(usernameAtom)
   const [admin, setAdmin] = useAtom(adminAtom)
-  const [chatHistory, setChatHistory] = useAtom(conversationsAtom)
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
-  const [user, setUser] = useAtom(userAtom)
+  const [publicUser, setPublicUser] = useAtom(publicUserAtom)
+  const [sessions] = useAtom(sessionsAtom)
+  const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
 
-  useEffect(() => {
-    if (user) {
-      navigate('/chat')
-    }
-  }, [navigate])
-
-  const submitFunc = (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
+  const submitFunc = async (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
     event.preventDefault()
     setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
+
+    try {
       login(username, password, admin)
+
+      const userResponse = await Client.getUser(username)
+      if (userResponse && userResponse.data) {
+        setPublicUser(userResponse.data)
+      }
+
       if (admin) {
         navigate('/admin/users')
       } else {
-        navigate(`/chat/${chatHistory.length ? chatHistory[0].name : ''}`)
+        await handleUserNavigation()
       }
-    }, 1000)
+    } catch (error) {
+      console.error('Error during submission:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUserNavigation = async () => {
+    navigate(`/chat`)
+
+    try {
+      await fetchSessions(username)
+
+      if (sessions.length) {
+        navigate(`/chat/${sessions[0].uid}`)
+      } else {
+        await createNewSession()
+      }
+    } catch (error) {
+      console.error('Error fetching sessions:', error)
+    }
+  }
+
+  const createNewSession = async () => {
+    try {
+      const sessionData = {
+        name: 'default',
+        description: '* New Chat',
+        workflow_id: 'default',
+        labels: {},
+        owner_id: publicUser?.uid || ''
+      }
+
+      const newSessionResponse = await Client.createSession(username, sessionData)
+
+      if (!newSessionResponse.error) {
+        navigate(`/chat/${newSessionResponse.data.uid}`)
+      } else {
+        console.error('Error creating session:', newSessionResponse.error)
+      }
+    } catch (error) {
+      console.error('Error creating new session:', error)
+    }
   }
 
   return (

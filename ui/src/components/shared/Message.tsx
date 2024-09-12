@@ -12,35 +12,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { sessionsAtom } from '@atoms/sessions'
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons'
-import { Flex, IconButton, Input } from '@chakra-ui/react'
+import { Flex, IconButton, Input, useToast } from '@chakra-ui/react'
 import Client from '@services/Api'
-import { ChatHistory } from '@shared/types'
-import { sessionIdAtom, usernameAtom } from 'atoms'
+import { canSendMessageAtom, isMessageErrorAtom, messagesAtom, sessionIdAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
-type Props = {
-  setter: React.Dispatch<React.SetStateAction<ChatHistory[]>>
-}
-const Message = ({ setter }: Props) => {
+
+const Message = () => {
   const [inputValue, setInputValue] = useState('')
-  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
-  const [username, setUsername] = useAtom(usernameAtom)
+
+  const [sessionId] = useAtom(sessionIdAtom)
+  const [, setMessages] = useAtom(messagesAtom)
+  const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom)
+  const [sessions] = useAtom(sessionsAtom)
+  const [, setIsMessageError] = useAtom(isMessageErrorAtom)
+
+  const toast = useToast()
 
   const submitMessage = async () => {
-    setter(prevMessages => [...prevMessages, { role: 'Human', content: inputValue, sources: [] }])
+    setCanSendMessage(false)
+    setMessages(prevMessages => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
+      return [...safeMessages, { role: 'Human', content: inputValue, sources: [] }]
+    })
     setInputValue('')
-    setTimeout(function () {
-      const lastBubble = document.getElementsByClassName('help-text').length - 1
-      document.getElementsByClassName('help-text')[lastBubble].scrollIntoView(false)
-    }, 50)
 
-    setter(prevMessages => [...prevMessages, { role: 'AI', content: '...', sources: [] }])
-    const result = await Client.submitQuery(sessionId, inputValue, username)
-    setter(prevMessages => [
-      ...prevMessages.slice(0, -1),
-      { role: 'AI', content: result.answer, sources: result.sources }
-    ])
+    setMessages(prevMessages => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
+      return [...safeMessages, { role: 'AI', content: '', sources: [] }]
+    })
+
+    const workflowId = sessions.find(session => session.uid === sessionId)?.workflow_id
+    const result = await Client.inferWorkflow('default', workflowId ?? 'default', {
+      question: inputValue,
+      session_id: sessionId,
+      data_source: 'default'
+    }).then(res => {
+      if (res.error) {
+        setIsMessageError(true)
+        toast({
+          title: 'An unexpected error occured',
+          description: res.error,
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        })
+        setCanSendMessage(false)
+        return res
+      }
+      setCanSendMessage(true)
+      return res
+    })
+
+    setMessages(prevMessages => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
+      return [...safeMessages.slice(0, -1), { role: 'AI', content: result.data.data.answer, sources: result.sources }]
+    })
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -64,15 +93,9 @@ const Message = ({ setter }: Props) => {
         placeholder="Send message..."
         value={inputValue}
         onChange={e => setInputValue(e.target.value)}
-        onKeyDown={handleKeyPress}
+        onKeyDown={e => canSendMessage && handleKeyPress(e)}
       />
-      {/* <div
-        className="icon-button mic-icon"
-        onClick={event => {
-          return (event.target as HTMLElement).classList.toggle('selected')
-        }}
-      ></div> */}
-      <IconButton aria-label="Send" icon={<ArrowUpIcon />} onClick={handleClick} />
+      <IconButton isDisabled={!canSendMessage} aria-label="Send" icon={<ArrowUpIcon />} onClick={handleClick} />
     </Flex>
   )
 }

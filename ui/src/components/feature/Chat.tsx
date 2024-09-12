@@ -17,54 +17,64 @@ import Bubble from '@components/shared/Bubble'
 import Message from '@components/shared/Message'
 import Client from '@services/Api'
 import { ChatHistory } from '@shared/types'
-import { messagesAtom, sessionIdAtom } from 'atoms'
+import { messagesAtom, sessionIdAtom, usernameAtom } from 'atoms'
 import { useAtom } from 'jotai'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 const Chat = () => {
   const [messages, setMessages] = useAtom<ChatHistory[]>(messagesAtom)
-  const [sessionId, setSessionId] = useAtom(sessionIdAtom)
+  const [sessionId] = useAtom(sessionIdAtom)
+  const [username] = useAtom(usernameAtom)
 
   useEffect(() => {
     async function fetchData() {
-      console.log('getting session:', sessionId)
-      if (!sessionId) {
-        setMessages([])
-        return
-      }
-      const chatSession = await Client.getSession(sessionId)
-      console.log('session resp:', chatSession)
-      if (chatSession) {
-        setMessages(chatSession.history)
-      } else {
-        setMessages([])
-      }
+      await Client.getSession(username, sessionId)
     }
     fetchData()
-  }, [sessionId, setMessages])
+  }, [sessionId, setMessages, username])
+
+  const lastMessageRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [messages, setMessages])
 
   return (
     <Flex
-      marginX={{ sm: '5%', lg: '25%' }}
+      paddingX={{ xl: '25%', md: '10%' }}
       paddingBottom={4}
       flexDir={'column'}
       justifyContent={'space-between'}
       flexGrow={1}
       height="calc(100vh - 92px)"
     >
-      <Flex justifyContent="flex-start" flexGrow={1} flexDirection="column" paddingBottom="92px" overflowY="scroll">
-        {messages?.map((chatHistory, index) => (
+      <Flex
+        sx={{
+          '::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }}
+        justifyContent="flex-start"
+        flexGrow={1}
+        flexDirection="column"
+        paddingBottom="92px"
+        overflowY="scroll"
+      >
+        {messages?.map((message, index) => (
           <Bubble
             key={index}
-            content={chatHistory.content}
-            bot={chatHistory.role}
-            sources={chatHistory.sources}
-            html={chatHistory.html as string}
+            content={message.content}
+            bot={message.role}
+            sources={message.sources}
+            html={message.html as string}
           />
         ))}
+        <Box height={'2px'} ref={lastMessageRef} />
       </Flex>
       <Box>
-        <Message setter={setMessages} />
+        <Message />
       </Box>
     </Flex>
   )

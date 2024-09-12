@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isTypingAtom } from '@atoms/index'
+import { useAtom } from 'jotai'
 import React from 'react'
+import Markdown from 'react-markdown'
 import TypingText from './TypingText'
 
 interface ChatMessageProps {
@@ -20,7 +23,12 @@ interface ChatMessageProps {
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  return <TypingText text={message} />
+  const [isTyping] = useAtom(isTypingAtom)
+
+  if (isTyping) {
+    return <TypingText text={message} />
+  }
+  return <Markdown>{message}</Markdown>
 }
 
 export default ChatMessage
