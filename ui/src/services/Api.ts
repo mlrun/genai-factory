@@ -23,7 +23,6 @@ import { Session } from '@shared/types/session';
 import { Query, Workflow } from '@shared/types/workflow';
 import axios, { AxiosResponse } from 'axios';
 
-
 class ApiClient {
   private client
 
@@ -46,26 +45,25 @@ class ApiClient {
     }
   }
 
-  // eslint-disable-next-line
+  //eslint-disable-next-line
   private handleError(error: any) {
     console.error('Request failed:', error.message);
     return null;
   }
 
   // USERS
-
-  async getUsers() {
+  async getUsers(params?: { name?: string; email?: string; full_name?: string; mode?: string }) {
     try {
-      const response = await this.client.get(`/users`)
-      return this.handleResponse(response)
+      const response = await this.client.get(`/users`, { params });
+      return this.handleResponse(response);
     } catch (error) {
-      this.handleError(error as Error)
+      this.handleError(error);
     }
   }
 
-  async getUser(username: string) {
+  async getUser(username: string, params?: { email?: string; uid?: string }) {
     try {
-      const response = await this.client.get(`/users/${username}`);
+      const response = await this.client.get(`/users/${username}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -90,9 +88,9 @@ class ApiClient {
     }
   }
 
-  async deleteUser(username: string) {
+  async deleteUser(username: string, params?: { uid?: string }) {
     try {
-      const response = await this.client.delete(`/users/${username}`);
+      const response = await this.client.delete(`/users/${username}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -100,55 +98,52 @@ class ApiClient {
   }
 
   // SESSIONS
-
-  async getSessions(username?: string) {
+  async getSessions(username: string, params?: { name?: string; last?: number; created?: string; workflow_id?: string; mode?: string }) {
     try {
-      const response = await this.client.get(`/users/${username}/sessions`)
-      return this.handleResponse(response)
+      const response = await this.client.get(`/users/${username}/sessions`, { params });
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      this.handleError(error);
     }
   }
 
-  async getSession(username: string, id: string,) {
+  async getSession(username: string, name: string, params?: { uid?: string }) {
     try {
-      const response = await this.client.get(`users/${username}/sessions/${id}`)
-      return this.handleResponse(response)
+      const response = await this.client.get(`users/${username}/sessions/${name}`, { params });
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
     }
   }
 
   async createSession(username: string, session: Session) {
     try {
-      const response = await this.client.post(`users/${username}/sessions`, session)
-      return this.handleResponse(response)
+      const response = await this.client.post(`users/${username}/sessions`, session);
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
     }
   }
 
   async updateSession(username: string, session: Session) {
     try {
-      const response = await this.client.put(`/users/${username}/sessions/${session.name}`, session)
-      return this.handleResponse(response)
+      const response = await this.client.put(`/users/${username}/sessions/${session.name}`, session);
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
     }
   }
 
-  async deleteSession(username: string, session: Session) {
+  async deleteSession(username: string, name: string, params?: { uid?: string }) {
     try {
-      const response = await this.client.delete(`/users/${username}/sessions/${session.uid}`)
-      return this.handleResponse(response)
+      const response = await this.client.delete(`/users/${username}/sessions/${name}`, { params });
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
     }
   }
 
   // WORKFLOWS
-
-
   async getWorkflows(projectName: string, params?: { name?: string; version?: string; workflow_type?: string; labels?: string[]; mode?: string }) {
     try {
       const response = await this.client.get(`/projects/${projectName}/workflows`, { params });
@@ -158,9 +153,9 @@ class ApiClient {
     }
   }
 
-  async getWorkflow(projectName: string, uid: string) {
+  async getWorkflow(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/workflows/${uid}`);
+      const response = await this.client.get(`/projects/${projectName}/workflows/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -185,29 +180,25 @@ class ApiClient {
     }
   }
 
-  async deleteWorkflow(projectName: string, uid: string) {
+  async deleteWorkflow(projectName: string, name: string, params?: { uid?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}/workflows/${uid}`);
+      const response = await this.client.delete(`/projects/${projectName}/workflows/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
     }
   }
 
-  async inferWorkflow(projectId: string, workflowId: string, query: Query) {
+  async inferWorkflow(projectName: string, workflowName: string, query: Query) {
     try {
-      const response = await this.client.post(
-        `/projects/${projectId}/workflows/${workflowId}/infer`,
-        query
-      )
-      return this.handleResponse(response)
+      const response = await this.client.post(`/projects/${projectName}/workflows/${workflowName}/infer`, query);
+      return this.handleResponse(response);
     } catch (error) {
-      return this.handleError(error as Error)
+      return this.handleError(error);
     }
   }
 
   // PROJECTS
-
   async getProjects(params?: { name?: string; owner_name?: string; mode?: string; labels?: string[] }) {
     try {
       const response = await this.client.get(`/projects`, { params });
@@ -217,9 +208,9 @@ class ApiClient {
     }
   }
 
-  async getProject(projectName: string) {
+  async getProject(projectName: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}`);
+      const response = await this.client.get(`/projects/${projectName}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -244,10 +235,9 @@ class ApiClient {
     }
   }
 
-
-  async deleteProject(projectName: string) {
+  async deleteProject(projectName: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}`);
+      const response = await this.client.delete(`/projects/${projectName}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -255,7 +245,6 @@ class ApiClient {
   }
 
   // DATASOURCES
-
   async getDataSources(projectName: string, params?: { name?: string; version?: string; data_source_type?: string; labels?: string[]; mode?: string }) {
     try {
       const response = await this.client.get(`/projects/${projectName}/data_sources`, { params });
@@ -265,9 +254,9 @@ class ApiClient {
     }
   }
 
-  async getDataSource(projectName: string, uid: string) {
+  async getDataSource(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/data_sources/${uid}`);
+      const response = await this.client.get(`/projects/${projectName}/data_sources/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -292,10 +281,9 @@ class ApiClient {
     }
   }
 
-
-  async deleteDataSource(projectName: string, uid: string) {
+  async deleteDataSource(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}/data_sources/${uid}`);
+      const response = await this.client.delete(`/projects/${projectName}/data_sources/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -303,9 +291,9 @@ class ApiClient {
   }
 
   // eslint-disable-next-line
-  async ingestDocument(projectName: string, uid: string, ingestData: { loader: string; path: string; metadata?: any; version?: string; from_file: boolean }) {
+  async ingestDocument(projectName: string, name: string, ingestData: { loader: string; path: string; metadata?: any; version?: string; from_file: boolean }) {
     try {
-      const response = await this.client.post(`/projects/${projectName}/data_sources/${uid}/ingest`, ingestData);
+      const response = await this.client.post(`/projects/${projectName}/data_sources/${name}/ingest`, ingestData);
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -313,7 +301,6 @@ class ApiClient {
   }
 
   // DATASETS
-
   async getDatasets(projectName: string, params?: { name?: string; version?: string; task?: string; labels?: string[]; mode?: string }) {
     try {
       const response = await this.client.get(`/projects/${projectName}/datasets`, { params });
@@ -323,9 +310,9 @@ class ApiClient {
     }
   }
 
-  async getDataset(projectName: string, uid: string) {
+  async getDataset(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/datasets/${uid}`);
+      const response = await this.client.get(`/projects/${projectName}/datasets/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -350,9 +337,9 @@ class ApiClient {
     }
   }
 
-  async deleteDataset(projectName: string, uid: string) {
+  async deleteDataset(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}/datasets/${uid}`);
+      const response = await this.client.delete(`/projects/${projectName}/datasets/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -360,7 +347,6 @@ class ApiClient {
   }
 
   // MODELS
-
   async getModels(projectName: string, params?: { name?: string; version?: string; model_type?: string; labels?: string[]; mode?: string }) {
     try {
       const response = await this.client.get(`/projects/${projectName}/models`, { params });
@@ -370,9 +356,9 @@ class ApiClient {
     }
   }
 
-  async getModel(projectName: string, uid: string) {
+  async getModel(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/models/${uid}`);
+      const response = await this.client.get(`/projects/${projectName}/models/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -397,9 +383,9 @@ class ApiClient {
     }
   }
 
-  async deleteModel(projectName: string, uid: string) {
+  async deleteModel(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}/models/${uid}`);
+      const response = await this.client.delete(`/projects/${projectName}/models/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -407,7 +393,6 @@ class ApiClient {
   }
 
   // DOCUMENTS
-
   async getDocuments(projectName: string, params?: { name?: string; version?: string; labels?: string[]; mode?: string }) {
     try {
       const response = await this.client.get(`/projects/${projectName}/documents`, { params });
@@ -416,9 +401,10 @@ class ApiClient {
       return this.handleError(error);
     }
   }
-  async getDocument(projectName: string, uid: string) {
+
+  async getDocument(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/documents/${uid}`);
+      const response = await this.client.get(`/projects/${projectName}/documents/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -443,9 +429,9 @@ class ApiClient {
     }
   }
 
-  async deleteDocument(projectName: string, uid: string) {
+  async deleteDocument(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}/documents/${uid}`);
+      const response = await this.client.delete(`/projects/${projectName}/documents/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -453,7 +439,6 @@ class ApiClient {
   }
 
   // PROMPT TEMPLATES
-
   async getPromptTemplates(projectName: string, params?: { name?: string; version?: string; labels?: string[]; mode?: string }) {
     try {
       const response = await this.client.get(`/projects/${projectName}/prompt_templates`, { params });
@@ -463,9 +448,9 @@ class ApiClient {
     }
   }
 
-  async getPromptTemplate(projectName: string, uid: string) {
+  async getPromptTemplate(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.get(`/projects/${projectName}/prompt_templates/${uid}`);
+      const response = await this.client.get(`/projects/${projectName}/prompt_templates/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
@@ -490,16 +475,14 @@ class ApiClient {
     }
   }
 
-  async deletePromptTemplate(projectName: string, uid: string) {
+  async deletePromptTemplate(projectName: string, name: string, params?: { uid?: string; version?: string }) {
     try {
-      const response = await this.client.delete(`/projects/${projectName}/prompt_templates/${uid}`);
+      const response = await this.client.delete(`/projects/${projectName}/prompt_templates/${name}`, { params });
       return this.handleResponse(response);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
-
 }
 
 function getClient() {

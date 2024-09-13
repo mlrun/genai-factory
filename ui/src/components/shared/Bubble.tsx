@@ -36,12 +36,13 @@ const Bubble = ({ bot, content }: Props) => {
   return (
     <Flex gap={10} flexDirection={'column'}>
       {bot == 'AI' ? (
-        <Flex role={'group'} alignItems={'flex-start'} gap={4}>
+        <Flex maxW={'800px'} role={'group'} alignItems={'flex-start'} gap={4}>
           <ChatIcon marginTop={2} />
           <Flex>{!content && !isMessageError && <Spinner size={'sm'} />}</Flex>
           {!!content && (
             <>
               <Flex
+                direction={'column'}
                 padding={4}
                 borderRadius={6}
                 bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}

@@ -48,7 +48,7 @@ const WorkflowsTable: React.FC = () => {
     description: '',
     owner_id: '',
     project_id: '',
-    workflow_type: WorkflowType.DEPLOYMENT,
+    workflow_type: WorkflowType.APPLICATION,
     deployment: ''
   })
   const [filterText, setFilterText] = useState('')
@@ -154,7 +154,7 @@ const WorkflowsTable: React.FC = () => {
               description: '',
               owner_id: '',
               project_id: '',
-              workflow_type: WorkflowType.DEPLOYMENT,
+              workflow_type: WorkflowType.APPLICATION,
               deployment: ''
             })
             onModalOpen()

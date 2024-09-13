@@ -35,7 +35,7 @@ export enum WorkflowType {
   DATA_PROCESSING = 'data-processing',
   TRAINING = 'training',
   EVALUATION = 'evaluation',
-  DEPLOYMENT = 'deployment'
+  // DEPLOYMENT = 'deployment'
 }
 
 export type Query = {
