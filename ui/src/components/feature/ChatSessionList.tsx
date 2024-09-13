@@ -75,7 +75,7 @@ const ChatSessionList = (props: Props) => {
 
   const deleteSession = async () => {
     try {
-      await Client.deleteSession(username, selectedSession).then(res => {
+      await Client.deleteSession(username, selectedSession.name).then(res => {
         if (!res.error) {
           toast({
             title: 'Session deleted',
