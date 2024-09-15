@@ -74,14 +74,14 @@ class BaseSchema(Base):
     Base class for all tables.
     We use this class to define common columns and methods for all tables.
 
-    :arg uid:           unique identifier for each entry.
-    :arg name:          entry's name.
-    :arg description:   The entry's description.
+    :arg uid:         Unique identifier for each entry.
+    :arg name:        Entry's name.
+    :arg description: The entry's description.
 
     The following columns are automatically added to each table:
     - created: The entry's creation date.
     - updated: The entry's last update date.
-    - spec: A dictionary to store additional information.
+    - spec:    A dictionary to store additional information.
     """
 
     __abstract__ = True
@@ -194,8 +194,8 @@ class User(BaseSchema):
     """
     The User table which is used to define users.
 
-    :arg full_name:  The user's full name.
-    :arg email:      The user's email.
+    :arg full_name: The user's full name.
+    :arg email:     The user's email.
     """
 
     # Columns:
@@ -341,8 +341,8 @@ class Dataset(VersionedOwnerBaseSchema):
     """
     The Dataset table which is used to define datasets for the project.
 
-    :arg  project_id:       The project's id.
-    :arg  task:             The task of the dataset.
+    :arg  project_id: The project's id.
+    :arg  task:       The task of the dataset.
     """
 
     # Columns:
@@ -385,9 +385,9 @@ class Model(VersionedOwnerBaseSchema):
     """
     The Model table which is used to define models for the project.
 
-    :arg  project_id:       The project's id.
-    :arg  model_type:       The type of the model. Can be one of the values in genai_factory.schemas.model.ModelType.
-    :arg  task:             The task of the model. For example, "classification", "text-generation", etc.
+    :arg  project_id: The project's id.
+    :arg  model_type: The type of the model. Can be one of the values in genai_factory.schemas.model.ModelType.
+    :arg  task:       The task of the model. For example, "classification", "text-generation", etc.
     """
 
     # Columns:
@@ -449,7 +449,7 @@ class PromptTemplate(VersionedOwnerBaseSchema):
     The PromptTemplate table which is used to define prompt templates for the project.
     Each prompt template is associated with a model.
 
-    :arg project_id:         The project's id.
+    :arg project_id: The project's id.
     """
 
     # Columns:
@@ -504,9 +504,9 @@ class Document(VersionedOwnerBaseSchema):
     """
     The Document table which is used to define documents for the project. The documents are ingested into data sources.
 
-    :arg project_id:     The project's id.
-    :arg path:           The path to the document. Can be a remote file or a web page.
-    :arg origin:         The origin location of the document.
+    :arg project_id: The project's id.
+    :arg path:       The path to the document. Can be a remote file or a web page.
+    :arg origin:     The origin location of the document.
     """
 
     # Columns:
@@ -615,7 +615,7 @@ class Session(OwnerBaseSchema):
     """
     The Chat Session table which is used to define chat sessions of an application workflow per user.
 
-    :arg workflow_id:    The workflow's id.
+    :arg workflow_id: The workflow's id.
     """
 
     # Columns:
