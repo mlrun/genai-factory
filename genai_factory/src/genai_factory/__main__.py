@@ -14,13 +14,14 @@
 #
 # main file with cli commands using python click library
 
+import importlib.util
 import os
 import pathlib
 
 import click
 import dotenv
 
-from genai_factory import WorkflowServerConfig, workflow_server
+from genai_factory import WorkflowServerConfig
 from genai_factory.api import router
 
 # Load the environment variables:
@@ -91,11 +92,21 @@ def run(
         else:
             config = WorkflowServerConfig()
 
-    # Set the configuration:
-    workflow_server.set_config(config=config)
-
     # Importing the workflows server instance:
     click.echo(f"Importing workflows server from: {workflows_path}")
+
+    # import workflow_server from given path:
+
+    # Load the module from the file path
+    spec = importlib.util.spec_from_file_location("workflow_server", workflows_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # Access the variable from the module
+    workflow_server = module.workflow_server
+
+    # Set the configuration:
+    workflow_server.set_config(config=config)
 
     # Retrieve the desired object from the module
     click.echo(f"Running workflows using a '{runner}' runner...")
