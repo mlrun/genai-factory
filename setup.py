@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 def get_requirements():
@@ -23,7 +23,8 @@ def get_requirements():
 setup(
     name="genai-factory",
     version="0.1",
-    packages=["genai_factory"],
+    packages=find_packages(where="genai_factory/src"),  # Point to the src directory
+    package_dir={"": "genai_factory/src"},  # Map the root to src directory
     install_requires=get_requirements(),
     entry_points={"console_scripts": ["genai-factory=genai_factory.__main__:main"]},
 )
