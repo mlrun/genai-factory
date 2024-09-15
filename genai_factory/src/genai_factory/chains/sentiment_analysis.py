@@ -12,7 +12,7 @@
 
 from transformers import pipeline
 
-from base import ChainRunner
+from genai_factory.chains.base import ChainRunner
 
 
 class SentimentAnalysisStep(ChainRunner):
@@ -58,9 +58,9 @@ class SentimentAnalysisStep(ChainRunner):
 
         :return: The processed event with the sentiment analysis result.
         """
-        transcription = event.query
+        query = event.query
         sentiment = self.sentiment_classifier(
-            transcription
+            query
         )  # Is a list of dictionaries (in tested examples)
         return {
             "answer": sentiment[0]["label"],
