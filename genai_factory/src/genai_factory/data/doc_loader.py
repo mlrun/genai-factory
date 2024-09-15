@@ -27,9 +27,9 @@ from langchain_community.document_loaders import (
 )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from genai_factory.workflows import logger
 from genai_factory.config import WorkflowServerConfig, get_vector_db
 from genai_factory.data.web_loader import SmartWebLoader
+from genai_factory.workflows import logger
 
 LOADER_MAPPING = {
     ".csv": (CSVLoader, {}),

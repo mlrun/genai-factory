@@ -16,13 +16,13 @@ from setuptools import setup
 
 
 def get_requirements():
-    with open('genai_factory/requirements.txt') as f:
+    with open("genai_factory/requirements.txt") as f:
         return f.read().splitlines()
 
 
 setup(
-    name='genai-factory',
-    version='0.1',
+    name="genai-factory",
+    version="0.1",
     packages=["genai_factory"],
     install_requires=get_requirements(),
     entry_points={"console_scripts": ["genai-factory=genai_factory.__main__:main"]},
