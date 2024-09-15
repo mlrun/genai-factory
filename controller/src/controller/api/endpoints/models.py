@@ -16,7 +16,7 @@ from typing import List, Optional, Tuple
 
 from fastapi import APIRouter, Depends
 
-from controller.api.utils import AuthInfo, get_auth_user, get_db
+from controller.api.utils import AuthInfo, get_auth_user, get_db, parse_version
 from controller.db import client
 from genai_factory.schemas import APIResponse, Model, OutputMode
 
@@ -27,19 +27,19 @@ router = APIRouter(prefix="/projects/{project_name}")
 def create_model(
     project_name: str,
     model: Model,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Create a new model in the database.
 
-    :param project_name:    The name of the project to create the model in.
-    :param model:           The model to create.
-    :param session:         The database session.
+    :param project_name: The name of the project to create the model in.
+    :param model:        The model to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.create_model(model=model, session=session)
+        data = client.create_model(model=model, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -48,71 +48,107 @@ def create_model(
         )
 
 
-@router.get("/models/{uid}")
-def get_model(project_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.get("/models/{name}")
+def get_model(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Get a model from the database.
 
-    :param project_name:    The name of the project to get the model from.
-    :param uid:             The UID of the model to get.
-    :param session:         The database session.
+    :param project_name: The name of the project to get the model from.
+    :param name:         The name of the model to get.
+    :param uid:          The UID of the model to get.
+    :param version:      The version of the model to get.
+    :param db_session:   The database session.
 
-    :return:    The model from the database.
+    :return: The model from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
+    uid, version = parse_version(uid, version)
     try:
-        data = client.get_model(project_id=project_id, uid=uid, session=session)
+        data = client.get_model(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         if data is None:
-            return APIResponse(success=False, error=f"Model with uid = {uid} not found")
+            return APIResponse(
+                success=False, error=f"Model with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to get model {uid} in project {project_name}: {e}",
+            error=f"Failed to get model {name} in project {project_name}: {e}",
         )
 
 
-@router.put("/models/{model_name}")
+@router.put("/models/{name}")
 def update_model(
     project_name: str,
     model: Model,
-    model_name: str,
-    session=Depends(get_db),
+    name: str,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a model in the database.
 
-    :param project_name:    The name of the project to update the model in.
-    :param model:           The model to update.
-    :param model_name:      The name of the model to update.
-    :param session:         The database session.
+    :param project_name: The name of the project to update the model in.
+    :param model:        The model to update.
+    :param name:         The name of the model to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_model(model=model, session=session)
+        data = client.update_model(name=name, model=model, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update model {model.name} in project {project_name}: {e}",
+            error=f"Failed to update model {name} in project {project_name}: {e}",
         )
 
 
-@router.delete("/models/{uid}")
-def delete_model(project_name: str, uid: str, session=Depends(get_db)) -> APIResponse:
+@router.delete("/models/{name}")
+def delete_model(
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
+) -> APIResponse:
     """
     Delete a model from the database.
 
-    :param project_name:    The name of the project to delete the model from.
-    :param uid:             The ID of the model to delete.
-    :param session:         The database session.
+    :param project_name: The name of the project to delete the model from.
+    :param name:         The name of the model to delete.
+    :param uid:          The ID of the model to delete.
+    :param version:      The version of the model to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
+    uid, version = parse_version(uid, version)
     try:
-        client.delete_model(project_id=project_id, uid=uid, session=session)
+        client.delete_model(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         return APIResponse(success=True)
     except Exception as e:
         return APIResponse(
@@ -129,25 +165,28 @@ def list_models(
     model_type: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.DETAILS,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
     List models in the database.
 
-    :param project_name:    The name of the project to list the models from.
-    :param name:            The name to filter by.
-    :param version:         The version to filter by.
-    :param model_type:      The model type to filter by.
-    :param labels:          The labels to filter by.
-    :param mode:            The output mode.
-    :param session:         The database session.
-    :param auth:            The authentication information.
+    :param project_name: The name of the project to list the models from.
+    :param name:         The name to filter by.
+    :param version:      The version to filter by.
+    :param model_type:   The model type to filter by.
+    :param labels:       The labels to filter by.
+    :param mode:         The output mode.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
-    owner_id = client.get_user(user_name=auth.username, session=session).uid
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    owner = client.get_user(user_name=auth.username, db_session=db_session)
+    owner_id = getattr(owner, "uid", None)
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_models(
             project_id=project_id,
@@ -157,7 +196,7 @@ def list_models(
             model_type=model_type,
             labels_match=labels,
             output_mode=mode,
-            session=session,
+            db_session=db_session,
         )
         return APIResponse(success=True, data=data)
     except Exception as e:

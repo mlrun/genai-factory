@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import requests
 from fastapi import Header, Request
@@ -62,7 +62,7 @@ def _send_to_application(
     :param auth:    The authentication information to use. If provided, the username will be added to the headers.
     :param kwargs:  Additional keyword arguments to pass in the request function. For example, headers, params, etc.
 
-    :return:        The JSON response from the application.
+    :return: The JSON response from the application.
     """
     if config.application_url not in path:
         url = f"{config.application_url}/api/{path}"
@@ -88,3 +88,22 @@ def _send_to_application(
     else:
         # If the request failed, raise an exception
         response.raise_for_status()
+
+
+def parse_version(uid: str = None, version: str = None) -> Tuple[str, str]:
+    """
+    Parse the version string from the uid if uid = uid:version. Otherwise, return the version as is.
+
+    :param uid:     The UID string.
+    :param version: The version string to parse.
+
+    :return: The UID and version strings.
+    """
+    if uid and ":" in uid:
+        uid, version_from_uid = uid.split(":")
+        if version_from_uid and version:
+            raise ValueError(
+                "Version cannot be specified in both the UID and the version parameter."
+            )
+        version = version_from_uid
+    return uid, version
