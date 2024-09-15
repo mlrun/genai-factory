@@ -17,7 +17,7 @@ from typing import Union
 import requests
 from mlrun.utils.helpers import dict_to_json
 
-from genai_factory import logger
+from genai_factory.workflows import logger
 from genai_factory.schemas import ChatSession, DataSource, Project, User, Workflow
 
 

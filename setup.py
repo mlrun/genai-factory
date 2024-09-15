@@ -12,7 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from genai_factory.workflows.workflow import Workflow
-from genai_factory.workflows.workflow_server import WorkflowServer, logger
+from setuptools import setup
 
-workflow_server = WorkflowServer()
+
+def get_requirements():
+    with open('genai_factory/requirements.txt') as f:
+        return f.read().splitlines()
+
+
+setup(
+    name='genai-factory',
+    version='0.1',
+    packages=["genai_factory"],
+    install_requires=get_requirements(),
+    entry_points={"console_scripts": ["genai-factory=genai_factory.__main__:main"]},
+)

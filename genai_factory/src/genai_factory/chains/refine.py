@@ -14,7 +14,7 @@
 
 from langchain_core.prompts.prompt import PromptTemplate
 
-from genai_factory import logger
+from genai_factory.workflows import logger
 from genai_factory.chains.base import ChainRunner
 from genai_factory.config import get_llm
 from genai_factory.schemas import WorkflowEvent
