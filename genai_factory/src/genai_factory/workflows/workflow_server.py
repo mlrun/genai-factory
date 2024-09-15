@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+from urllib.parse import urlparse
+
+import uvicorn
 
 from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
@@ -47,6 +50,7 @@ class WorkflowServer:
 
     def set_config(self, config: WorkflowServerConfig):
         self._config = config
+        self._controller_client()
         self._session_store = SessionStore(self._config)
         for workflow in self._workflows.values():
             workflow._server = None
@@ -63,7 +67,7 @@ class WorkflowServer:
         # Check if workflow already exists:
         if name in self._workflows:
             raise ValueError(f"The workflow '{name}' was already added to this server.")
-        workflow = Workflow(
+        self._workflows[name] = Workflow(
             name=name,
             workflow_type=workflow_type,
             skeleton=graph,
@@ -73,16 +77,14 @@ class WorkflowServer:
             description=description,
             labels=labels,
         )
-        self._workflows[name] = workflow
 
     def run_workflow(self, name: str, event):
         # Get the workflow object:
         if name not in self._workflows:
             raise ValueError(f"workflow {name} not found")
-        workflow = self._workflows[name]
 
         # Run the workflow:
-        return workflow.run(event)
+        return self._workflows[name].run(event)
 
     def _build(self):
         logger.info("Building workflows")
@@ -137,4 +139,5 @@ class WorkflowServer:
         if router:
             router.add_event_handler("startup", self.api_startup)
             app.include_router(router)
-        return app
+        url = urlparse(self._config.deployment_url)
+        uvicorn.run(app, host=url.hostname, port=url.port)

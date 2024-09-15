@@ -26,10 +26,10 @@ from genai_factory.api import router
 
 # Load the environment variables:
 _ROOT_PATH = pathlib.Path(__file__).parent.parent.parent
-dotenv.load_dotenv(os.environ.get("MLRUN_GENAI_ENV_PATH", str(_ROOT_PATH / ".env")))
-_USER_NAME = os.environ.get("MLRUN_GENAI_USER_NAME", "")
+dotenv.load_dotenv(os.environ.get("GENAI_FACTORY_ENV_PATH", str(_ROOT_PATH / ".env")))
+_USER_NAME = os.environ.get("GENAI_FACTORY_USER_NAME", "")
 _IS_LOCAL_CONFIG = os.environ.get(
-    "MLRUN_GENAI_IS_LOCAL_CONFIG", "0"
+    "GENAI_FACTORY_IS_LOCAL_CONFIG", "0"
 ).lower().strip() in [
     "true",
     "1",
@@ -42,11 +42,10 @@ def cli():
     pass
 
 
-@click.command(help="Run a workflows server initialized in a given path.")
+@click.command(help="Run a GenAI Factory workflows deployment script.")
 @click.argument(
     "workflows-path",
     type=click.Path(exists=True, path_type=pathlib.Path),
-    # help="Path to the workflow file"
 )
 @click.option(
     "-c",
@@ -56,16 +55,16 @@ def cli():
     "server instance in code, and via path from environment variable.",
 )
 @click.option(
-    "-r",
-    "--runner",
+    "-d",
+    "--deployer",
     type=click.Choice(choices=["fastapi", "nuclio"]),
     default="fastapi",
-    help="How to run the workflow/s.",
+    help="How to deploy the workflow server with the added workflows in the given script.",
 )
 def run(
     workflows_path: pathlib.Path,
     config_path: pathlib.Path,
-    runner: str,
+    deployer: str,
 ):
     """
     Run given workflows from file.
@@ -77,7 +76,7 @@ def run(
                            1. Command config
                            2. Env file config
                            3. Workflow server manual set config
-    :param runner:         The runner to use, default is fastapi.
+    :param deployer:       The deployer to use, default is fastapi.
     """
     # Load the configuration if given:
     if config_path:
@@ -90,7 +89,7 @@ def run(
         elif _IS_LOCAL_CONFIG:
             config = WorkflowServerConfig.local_config()
         else:
-            config = WorkflowServerConfig()
+            config = None  # The user count on the default config, or he set it manually in the script.
 
     # Importing the workflows server instance:
     click.echo(f"Importing workflows server from: {workflows_path}")
@@ -106,10 +105,11 @@ def run(
     workflow_server = module.workflow_server
 
     # Set the configuration:
-    workflow_server.set_config(config=config)
+    if config:
+        workflow_server.set_config(config=config)
 
     # Retrieve the desired object from the module
-    click.echo(f"Running workflows using a '{runner}' runner...")
+    click.echo(f"Running workflows using a '{deployer}' runner...")
     workflow_server.deploy(router=router)
 
 

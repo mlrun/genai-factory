@@ -5,3 +5,4 @@ pymilvus
 langchain-milvus
 # chromadb==0.5.3
 mlrun==1.6.0
+uvicorn==0.30.6

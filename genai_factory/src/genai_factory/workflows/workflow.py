@@ -71,20 +71,22 @@ class Workflow:
         return self._config.workflows_kwargs.get(self._name, {})
 
     def build(self):
-        config = self.get_config()
+        steps_config = self._config.workflows_kwargs.get(self._name, {}).get(
+            "steps", {}
+        )
         if isinstance(self._skeleton, list):
             self._graph = mlrun_serving.states.RootFlowStep()
             last_step = self._graph
             for step in self._skeleton:
                 if isinstance(step, dict):
                     step_name = step.get("name", step["class_name"])
-                    if step_name in config["steps"]:
-                        step.update(config["steps"][step_name])
+                    if step_name in steps_config["steps"]:
+                        step.update(steps_config["steps"][step_name])
                     last_step = last_step.to(**step)
                 else:
                     step_name = step.name
-                    if step_name in config["steps"]:
-                        step.class_args = config["steps"][step_name]
+                    if step_name in steps_config["steps"]:
+                        step.class_args = steps_config["steps"][step_name]
                     last_step = last_step.to(step)
             last_step.respond()
             return
@@ -92,10 +94,11 @@ class Workflow:
         # Skeleton is a graph dictionary:
         self._graph = mlrun_serving.states.RootFlowStep.from_dict(self._skeleton)
         for step in self._graph:
-            if step.name in config["steps"]:
-                step.class_args = config["steps"][step.name]
+            if step.name in steps_config["steps"]:
+                step.class_args = steps_config["steps"][step.name]
 
-    def get_server(self) -> mlrun_serving.GraphServer:
+    @property
+    def server(self) -> mlrun_serving.GraphServer:
         if self._server is None:
             namespace = get_caller_globals()
             server = mlrun_serving.create_graph_server(
@@ -127,7 +130,7 @@ class Workflow:
 
     def run(self, event, db_session=None):
         # todo: pass sql db_session to steps via context or event
-        server = self.get_server()
+        server = self.server
         try:
             resp = server.test("", body=event)
         except Exception as e:
