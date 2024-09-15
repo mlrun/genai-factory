@@ -19,9 +19,9 @@ import pathlib
 
 import click
 import dotenv
-from mlrun.genai.api import router
 
 from genai_factory import WorkflowServerConfig, workflow_server
+from genai_factory.api import router
 
 # Load the environment variables:
 _ROOT_PATH = pathlib.Path(__file__).parent.parent.parent
