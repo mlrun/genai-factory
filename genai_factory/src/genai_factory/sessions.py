@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from genai_factory.client import Client
-from genai_factory.client import client as default_client
 from genai_factory.schemas import ChatSession, WorkflowEvent
 
 
@@ -41,11 +38,3 @@ class SessionStore:
                 username=event.username,
                 history=event.conversation.to_list(),
             )
-
-
-def get_session_store(config=None):
-    if config:
-        client = Client(base_url=config.api_url)
-    else:
-        client = default_client
-    return SessionStore(client=client)

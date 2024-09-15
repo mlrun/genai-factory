@@ -16,8 +16,6 @@ import os
 from enum import Enum
 from typing import List, Optional
 
-import storey
-
 from genai_factory.schemas import Conversation
 from genai_factory.schemas.base import BaseWithVerMetadata
 
@@ -44,9 +42,6 @@ class Workflow(BaseWithVerMetadata):
         if self.deployment is None:
             return None
         return os.path.join(self.deployment, "infer")
-
-    def add_graph(self, graph: List[storey.Flow]):
-        self.graph = [step.to_dict() for step in graph]
 
 
 class WorkflowEvent:

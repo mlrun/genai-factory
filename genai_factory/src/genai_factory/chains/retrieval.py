@@ -16,8 +16,9 @@ from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesCha
 from langchain_core.callbacks.base import BaseCallbackHandler
 from langchain_core.prompts import PromptTemplate
 
+from genai_factory import logger
 from genai_factory.chains.base import ChainRunner
-from genai_factory.config import get_llm, get_vector_db, logger
+from genai_factory.config import get_llm, get_vector_db
 from genai_factory.schemas import WorkflowEvent
 
 

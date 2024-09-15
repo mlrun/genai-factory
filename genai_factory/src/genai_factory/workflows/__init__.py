@@ -11,11 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
 
-from genai_factory.config import WorkflowServerConfig
-from genai_factory.workflows import Workflow, WorkflowServer, workflow_server
+from genai_factory.workflows.workflow import Workflow
+from genai_factory.workflows.workflow_server import WorkflowServer
 
-# Initialize the MLRun-GenAI logger:
-logger = logging.getLogger("mlrun-genai-factory")
-logger.addHandler(logging.StreamHandler())
+workflow_server = WorkflowServer()

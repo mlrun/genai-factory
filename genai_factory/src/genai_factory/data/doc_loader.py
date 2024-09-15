@@ -27,7 +27,8 @@ from langchain_community.document_loaders import (
 )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from genai_factory.config import AppConfig, get_vector_db, logger
+from genai_factory import logger
+from genai_factory.config import WorkflowServerConfig, get_vector_db
 from genai_factory.data.web_loader import SmartWebLoader
 
 LOADER_MAPPING = {
@@ -68,7 +69,7 @@ class DataLoader:
         data_loader.load(loader, metadata={"xx": "web"})
     """
 
-    def __init__(self, config: AppConfig, vector_store=None):
+    def __init__(self, config: WorkflowServerConfig, vector_store=None):
         self.vector_store = vector_store
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=config.chunk_size, chunk_overlap=config.chunk_overlap
@@ -125,7 +126,7 @@ class DataLoader:
 
 
 def get_data_loader(
-    config: AppConfig,
+    config: WorkflowServerConfig,
     data_source_name: str = None,
     database_kwargs: dict = None,
 ) -> DataLoader:

@@ -18,8 +18,7 @@ from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from genai_factory.client import Client
-from genai_factory.config import config
+from genai_factory import workflow_server
 from genai_factory.data.doc_loader import get_data_loader, get_loader_obj
 from genai_factory.schemas import Document, QueryItem, Workflow
 
@@ -37,8 +36,6 @@ app.add_middleware(
 
 # Create a router with a prefix
 router = APIRouter(prefix="/api")
-
-client = Client(base_url=config.api_url)
 
 
 class AuthInfo(BaseModel):
@@ -70,7 +67,7 @@ async def ingest(
 ):
     """Ingest documents into the vector database"""
     data_loader = get_data_loader(
-        config=config,
+        config=workflow_server.config,
         data_source_name=data_source_name,
         database_kwargs=database_kwargs,
     )

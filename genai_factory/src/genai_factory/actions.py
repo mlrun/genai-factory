@@ -17,7 +17,7 @@ from typing import List, Optional, Tuple
 import openai
 from pydantic import BaseModel
 
-from genai_factory.config import config, logger
+from genai_factory import logger, workflow_server
 from genai_factory.data.doc_loader import get_data_loader, get_loader_obj
 from genai_factory.schemas import APIResponse
 
@@ -35,7 +35,7 @@ def ingest(collection_name, item: IngestItem):
         f"Running Data Ingestion: collection_name={collection_name}, path={item.path}, loader={item.loader}"
     )
     data_loader = get_data_loader(
-        config,
+        config=workflow_server.config,
         data_source_name=collection_name,
     )
     loader_obj = get_loader_obj(item.path, loader_type=item.loader)

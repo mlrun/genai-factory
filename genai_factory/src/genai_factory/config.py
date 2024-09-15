@@ -11,29 +11,61 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import importlib
-import logging
 import os
-from pathlib import Path
+import pathlib
+from typing import Union
 
-import dotenv
 import yaml
 from pydantic import BaseModel
 
-root_path = Path(__file__).parent.parent.parent
-dotenv.load_dotenv(os.environ.get("AGENT_ENV_PATH", str(root_path / ".env")))
-default_data_path = os.environ.get("AGENT_DATA_PATH", str(root_path / "data"))
 
+class WorkflowServerConfig(BaseModel):
+    """
+    Workflows server configuration. Through this configuration, you can set the connection to the GenAI Factory
+    controller and initialize the workflows with different settings.
+    """
 
-class AppConfig(BaseModel):
-    """Configuration for the agent."""
+    controller_url: str = "http://localhost:8001"
+    """
+    URL of the controller API. Default: http://localhost:8001.
+    """
 
-    api_url: str = "http://localhost:8001"  # url of the controller API
+    controller_username: str = "admin"
+    """
+    Username to use for the controller API. Default: admin.
+    """
+
+    project_name: str = "default"
+    """
+    MLRun project name to use for the workflows. Default: default.
+    """
+
     verbose: bool = True
-    log_level: str = "DEBUG"
-    use_local_db: bool = True
+    """
+    Whether to print verbose logs. Default: True.
+    """
 
+    log_level: str = "INFO"
+    """
+    The log level. Default: INFO.
+    """
+
+    deployment_url: str = "http://localhost:8000"
+    """
+    URL to use for the workflows server deployment API. Default: http://localhost:8000.
+    """
+
+    workflows_kwargs: dict[str, dict] = {}
+    """
+    Keyword arguments for each step's initialization in a workflow. Expecting a dictionary of per workflow name to step 
+    configurations:: 
+
+        step_kwargs = config.workflows_kwargs[workflow_name]["steps"][step_name]
+    """
+
+    # TODO: All following configurations should be per workflow and attached to a step
+    # TODO: KEEP DEFAULTS FOR CONVENIENCE
     chunk_size: int = 1024
     chunk_overlap: int = 20
 
@@ -53,21 +85,6 @@ class AppConfig(BaseModel):
         "connection_args": {"address": "localhost:19530"},
     }
 
-    workflow_deployment: dict = {
-        "host": "localhost",
-        "port": 8000,
-    }
-
-    # Workflow kwargs
-    workflow_args: dict = {}
-
-    def infer_path(self, workflow_name: str):
-        if self.workflow_deployment:
-            host = self.workflow_deployment.get("host", "localhost")
-            port = self.workflow_deployment.get("port", 8000)
-            return f"http://{host}:{port}/api/workflows/{workflow_name}"
-        return ""
-
     def default_collection(self):
         return self.default_vector_store.get("collection_name", "default")
 
@@ -75,43 +92,26 @@ class AppConfig(BaseModel):
         print(yaml.dump(self.dict()))
 
     @classmethod
-    def load_from_yaml(cls, path: str):
+    def from_yaml(cls, path: Union[str, pathlib.Path]) -> "WorkflowServerConfig":
         with open(path, "r") as f:
             data = yaml.safe_load(f)
         return cls.parse_obj(data)
 
     @classmethod
-    def local_config(cls):
+    def local_config(cls) -> "WorkflowServerConfig":
         """Create a local config for testing oe local deployment."""
         config = cls()
         config.verbose = True
         config.default_vector_store = {
             "class_name": "chroma",
             "collection_name": "default",
-            "persist_directory": str((Path(default_data_path) / "chroma").absolute()),
+            "persist_directory": str(
+                (
+                    pathlib.Path(os.environ["MLRUN_GENAI_LOCAL_CHROMA"]) / "chroma"
+                ).absolute()
+            ),
         }
         return config
-
-
-username = os.environ.get("GENAI_USER_NAME", "")
-is_local_config = os.environ.get("IS_LOCAL_CONFIG", "0").lower().strip() in [
-    "true",
-    "1",
-]
-config_path = os.environ.get("AGENT_CONFIG_PATH")
-
-if config_path:
-    config = AppConfig.load_from_yaml(config_path)
-elif is_local_config:
-    config = AppConfig.local_config()
-else:
-    config = AppConfig()
-
-logger = logging.getLogger("llmagent")
-logger.setLevel(config.log_level.upper())
-logger.addHandler(logging.StreamHandler())
-logger.info("Logger initialized...")
-# logger.info(f"Using config:\n {yaml.dump(config.model_dump())}")
 
 
 embeddings_shortcuts = {
@@ -130,19 +130,19 @@ llm_shortcuts = {
 }
 
 
-def get_embedding_function(config: AppConfig, embeddings_args: dict = None):
+def get_embedding_function(config: WorkflowServerConfig, embeddings_args: dict = None):
     return get_object_from_dict(
         embeddings_args or config.embeddings, embeddings_shortcuts
     )
 
 
-def get_llm(config: AppConfig, llm_args: dict = None):
+def get_llm(config: WorkflowServerConfig, llm_args: dict = None):
     """Get a language model instance."""
     return get_object_from_dict(llm_args or config.default_llm, llm_shortcuts)
 
 
 def get_vector_db(
-    config: AppConfig,
+    config: WorkflowServerConfig,
     collection_name: str = None,
     vector_store_args: dict = None,
 ):
