@@ -15,6 +15,7 @@
 # main file with cli commands using python click library
 # include two click commands: 1. data ingestion (using the data loader), 2. query (using the agent)
 import json
+from typing import Optional
 
 import click
 import yaml
@@ -29,7 +30,6 @@ from genai_factory.schemas import (
     Project,
     QueryItem,
     User,
-    Workflow,
 )
 
 
@@ -45,7 +45,7 @@ def initdb():
     Initialize the database tables (delete old tables).
     """
     click.echo("Running Init DB")
-    session = client.get_db_session()
+    db_session = client.get_db_session()
     client.create_tables(True)
 
     # Create admin user:
@@ -57,7 +57,7 @@ def initdb():
             full_name="Guest User",
             is_admin=True,
         ),
-        session=session,
+        db_session=db_session,
     ).uid
 
     # Create project:
@@ -68,7 +68,7 @@ def initdb():
             description="Default Project",
             owner_id=user_id,
         ),
-        session=session,
+        db_session=db_session,
     ).uid
 
     # Create data source:
@@ -81,23 +81,9 @@ def initdb():
             project_id=project_id,
             data_source_type="vector",
         ),
-        session=session,
+        db_session=db_session,
     )
-
-    # Create Workflow:
-    click.echo("Creating default workflow")
-    client.create_workflow(
-        Workflow(
-            name="default",
-            description="Default Workflow",
-            owner_id=user_id,
-            project_id=project_id,
-            workflow_type="application",
-            deployment="http://localhost:8000/api/workflows/default",
-        ),
-        session=session,
-    )
-    session.close()
+    db_session.close()
 
 
 @click.command("config")
@@ -132,14 +118,12 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     :param version:     Version of the document
     :param data_source: Data source name
     :param from_file:   Take the document paths from the file
-
-    :return:    None
     """
-    session = client.get_db_session()
-    project = client.get_project(project_name=project, session=session)
-    data_source = client.list_data_sources(
-        project_id=project.uid, name=data_source, session=session
-    )[0]
+    db_session = client.get_db_session()
+    project = client.get_project(project_name=project, db_session=db_session)
+    data_source = client.get_data_source(
+        project_id=project.uid, name=data_source, db_session=db_session
+    )
 
     # Create document from path:
     document = Document(
@@ -153,7 +137,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     # Add document to the database:
     response = client.create_document(
         document=document,
-        session=session,
+        db_session=db_session,
     )
     document = response.to_dict(to_datestr=True)
 
@@ -206,23 +190,21 @@ def infer(
     """
     Run a chat query on the data source
 
-    :param question:        The question to ask
-    :param project:         The project name
-    :param workflow_name:   The workflow name
-    :param filter:          Filter Key value pair
-    :param data_source:     Data source name
-    :param user:            The name of the user
-    :param session:         The session name
-
-    :return:    None
+    :param question:      The question to ask
+    :param project:       The project name
+    :param workflow_name: The workflow name
+    :param filter:        Filter Key value pair
+    :param data_source:   Data source name
+    :param user:          The name of the user
+    :param session:       The session name
     """
     db_session = client.get_db_session()
 
-    project = client.get_project(project_name=project, session=db_session)
+    project = client.get_project(project_name=project, db_session=db_session)
     # Getting the workflow:
-    workflow = client.list_workflows(
-        project_id=project.uid, name=workflow_name, session=db_session
-    )[0]
+    workflow = client.get_workflow(
+        project_id=project.uid, name=workflow_name, db_session=db_session
+    )
     path = workflow.get_infer_path()
 
     query = QueryItem(
@@ -270,10 +252,8 @@ def list_users(user, email):
     """
     List all the users in the database
 
-    :param user:    username filter
-    :param email:   email filter
-
-    :return:    None
+    :param user:  Username filter
+    :param email: Email filter
     """
     click.echo("Running List Users")
 
@@ -294,13 +274,11 @@ def list_data_sources(owner, project, version, source_type, metadata):
     """
     List all the data sources in the database
 
-    :param owner:       owner filter
-    :param project:     project filter
-    :param version:     version filter
-    :param source_type: data source type filter
-    :param metadata:    metadata filter (labels)
-
-    :return:    None
+    :param owner:       Owner filter
+    :param project:     Project filter
+    :param version:     Version filter
+    :param source_type: Data source type filter
+    :param metadata:    Metadata filter (labels)
     """
     click.echo("Running List Collections")
     if owner:
@@ -333,50 +311,31 @@ def update_data_source(name, project, owner, description, source_type, labels):
     """
     Create or update a data source in the database
 
-    :param name:        data source name
-    :param project:     project name
-    :param owner:       owner name
-    :param description: data source description
-    :param source_type: type of data source
-    :param labels:      metadata labels
-
-    :return:    None
+    :param name:        Data source name
+    :param project:     Project name
+    :param owner:       Owner name
+    :param description: Data source description
+    :param source_type: Type of data source
+    :param labels:      Metadata labels
     """
+    owner = owner or "guest"
     click.echo("Running Create or Update Collection")
     labels = fill_params(labels)
 
-    session = client.get_db_session()
-    # check if the collection exists, if it does, update it, otherwise create it
-    project = client.get_project(project_name=project, session=session)
-    data_source = client.list_data_sources(
-        project_id=project.uid,
-        data_source_name=name,
-        session=session,
-    )
+    db_session = client.get_db_session()
+    project = client.get_project(project_name=project, db_session=db_session)
 
-    if data_source is not None:
-        client.update_data_source(
-            session=session,
-            collection=DataSource(
-                project_id=project.uid,
-                name=name,
-                description=description,
-                data_source_type=source_type,
-                labels=labels,
-            ),
-        ).with_raise()
-    else:
-        client.create_data_source(
-            session=session,
-            data_source=DataSource(
-                project_id=project.uid,
-                name=name,
-                description=description,
-                owner_name=owner,
-                data_source_type=source_type,
-                labels=labels,
-            ),
-        ).with_raise()
+    client.update_data_source(
+        db_session=db_session,
+        collection=DataSource(
+            project_id=project.uid,
+            name=name,
+            description=description,
+            data_source_type=source_type,
+            labels=labels,
+            owner_id=client.get_user(username=owner).uid,
+        ),
+    ).with_raise()
 
 
 @click.command("sessions")
@@ -387,17 +346,15 @@ def list_sessions(user, last, created):
     """
     List chat sessions
 
-    :param user:    username filter
-    :param last:    last n sessions
-    :param created: created after date
-
-    :return:    None
+    :param user:    Username filter
+    :param last:    Last n sessions
+    :param created: Created after date
     """
     click.echo("Running List Sessions")
 
     if user:
         user = client.get_user(user_name=user).uid
-    data = client.list_chat_sessions(
+    data = client.list_sessions(
         user_id=user, created_after=created, last=last, output_mode="short"
     )
     table = format_table_results(data)
@@ -408,9 +365,9 @@ def sources_to_text(sources) -> str:
     """
     Convert a list of sources to a text string.
 
-    :param sources: list of sources
+    :param sources: List of sources
 
-    :return:    text string
+    :return: Text string
     """
     if not sources:
         return ""
@@ -423,9 +380,9 @@ def sources_to_md(sources) -> str:
     """
     Convert a list of sources to a markdown string.
 
-    :param sources: list of sources
+    :param sources: List of sources
 
-    :return:    markdown string
+    :return: Markdown string
     """
     if not sources:
         return ""
@@ -441,9 +398,9 @@ def get_title(metadata) -> str:
     """
     Get the title from the metadata.
 
-    :param metadata:    metadata dictionary
+    :param metadata: Metadata dictionary
 
-    :return:    title string
+    :return: Title string
     """
     if "chunk" in metadata:
         return f"{metadata.get('title', '')}-{metadata['chunk']}"
@@ -452,14 +409,14 @@ def get_title(metadata) -> str:
     return metadata.get("title", "")
 
 
-def fill_params(params, params_dict=None) -> dict:
+def fill_params(params, params_dict=None) -> Optional[dict]:
     """
     Fill the parameters dictionary from a list of key=value strings.
 
-    :param params:      list of key=value strings
-    :param params_dict: dictionary to fill
+    :param params:      List of key=value strings
+    :param params_dict: Dictionary to fill
 
-    :return:    filled dictionary
+    :return: Filled dictionary
     """
     params_dict = params_dict or {}
     for param in params:
@@ -479,9 +436,9 @@ def format_table_results(table_results):
     """
     Format the table results as a printed table.
 
-    :param table_results:   table results dictionary
+    :param table_results: Table results dictionary
 
-    :return:    formatted table string
+    :return: Formatted table string
     """
     return tabulate(table_results, headers="keys", tablefmt="fancy_grid")
 

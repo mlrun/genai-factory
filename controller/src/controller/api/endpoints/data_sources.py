@@ -22,6 +22,7 @@ from controller.api.utils import (
     _send_to_application,
     get_auth_user,
     get_db,
+    parse_version,
 )
 from controller.db import client
 from genai_factory.schemas import (
@@ -39,19 +40,19 @@ router = APIRouter(prefix="/projects/{project_name}")
 def create_data_source(
     project_name: str,
     data_source: DataSource,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Create a new data source in the database.
 
-    :param project_name:        The name of the project to create the data source in.
-    :param data_source:         The data source to create.
-    :param session:             The database session.
+    :param project_name: The name of the project to create the data source in.
+    :param data_source:  The data source to create.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.create_data_source(data_source=data_source, session=session)
+        data = client.create_data_source(data_source=data_source, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -60,22 +61,38 @@ def create_data_source(
         )
 
 
-@router.get("/data_sources/{uid}")
+@router.get("/data_sources/{name}")
 def get_data_source(
-    project_name: str, uid: str, session=Depends(get_db)
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Get a data source from the database.
 
-    :param project_name:    The name of the project to get the data source from.
-    :param uid:             The uid of the data source to get.
-    :param session:         The database session.
+    :param project_name: The name of the project to get the data source from.
+    :param name:         The name of the data source to get.
+    :param uid:          The uid of the data source to get.
+    :param version:      The version of the data source to get.
+    :param db_session:   The database session.
 
-    :return:    The data source from the database.
+    :return: The data source from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
-        data = client.get_data_source(project_id=project_id, uid=uid, session=session)
+        # Parse the version if provided:
+        uid, version = parse_version(uid, version)
+        data = client.get_data_source(
+            project_id=project_id,
+            name=name,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
         if data is None:
             return APIResponse(
                 success=False, error=f"Data source with uid = {uid} not found"
@@ -88,49 +105,66 @@ def get_data_source(
         )
 
 
-@router.put("/data_sources/{data_source_name}")
+@router.put("/data_sources/{name}")
 def update_data_source(
     project_name: str,
     data_source: DataSource,
-    data_source_name: str,
-    session=Depends(get_db),
+    name: str,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Update a data source in the database.
 
-    :param project_name:        The name of the project to update the data source in.
-    :param data_source:         The data source to update.
-    :param data_source_name:    The name of the data source to update.
-    :param session:             The database session.
+    :param project_name: The name of the project to update the data source in.
+    :param data_source:  The data source to update.
+    :param name:         The name of the data source to update.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
     try:
-        data = client.update_data_source(data_source=data_source, session=session)
+        data = client.update_data_source(
+            name=name, data_source=data_source, db_session=db_session
+        )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update data source {data_source_name} in project {project_name}: {e}",
+            error=f"Failed to update data source {name} in project {project_name}: {e}",
         )
 
 
-@router.delete("/data_sources/{uid}")
+@router.delete("/data_sources/{name}")
 def delete_data_source(
-    project_name: str, uid: str, session=Depends(get_db)
+    project_name: str,
+    name: str,
+    uid: str = None,
+    version: str = None,
+    db_session=Depends(get_db),
 ) -> APIResponse:
     """
     Delete a data source from the database.
 
-    :param project_name:    The name of the project to delete the data source from.
-    :param uid:             The ID of the data source to delete.
-    :param session:         The database session.
+    :param project_name: The name of the project to delete the data source from.
+    :param name:         The name of the data source to delete.
+    :param uid:          The ID of the data source to delete.
+    :param version:      The version of the data source to delete.
+    :param db_session:   The database session.
 
-    :return:    The response from the database.
+    :returThe response from the database.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
+    uid, version = parse_version(uid, version)
     try:
-        client.delete_data_source(project_id=project_id, uid=uid, session=session)
+        client.delete_data_source(
+            name=name,
+            project_id=project_id,
+            uid=uid,
+            version=version,
+            db_session=db_session,
+        )
     except Exception as e:
         return APIResponse(
             success=False,
@@ -147,25 +181,28 @@ def list_data_sources(
     data_source_type: Union[DataSourceType, str] = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.DETAILS,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
     List data sources in the database.
 
-    :param project_name:        The name of the project to list the data sources from.
-    :param name:                The name to filter by.
-    :param version:             The version to filter by.
-    :param data_source_type:    The data source type to filter by.
-    :param labels:              The labels to filter by.
-    :param mode:                The output mode.
-    :param session:             The database session.
-    :param auth:                The authentication information.
+    :param project_name:     The name of the project to list the data sources from.
+    :param name:             The name to filter by.
+    :param version:          The version to filter by.
+    :param data_source_type: The data source type to filter by.
+    :param labels:           The labels to filter by.
+    :param mode:             The output mode.
+    :param db_session:       The database session.
+    :param auth:             The authentication information.
 
-    :return:    The response from the database.
+    :return: The response from the database.
     """
-    owner_id = client.get_user(user_name=auth.username, session=session).uid
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    owner = client.get_user(user_name=auth.username, db_session=db_session)
+    owner_id = getattr(owner, "uid", None)
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
     try:
         data = client.list_data_sources(
             project_id=project_id,
@@ -175,7 +212,7 @@ def list_data_sources(
             data_source_type=data_source_type,
             labels_match=labels,
             output_mode=mode,
-            session=session,
+            db_session=db_session,
         )
         return APIResponse(success=True, data=data)
     except Exception as e:
@@ -185,36 +222,45 @@ def list_data_sources(
         )
 
 
-@router.post("/data_sources/{uid}/ingest")
+@router.post("/data_sources/{name}/ingest")
 def ingest(
-    project_name,
-    uid,
+    project_name: str,
+    name: str,
     loader: str,
     path: str,
+    uid: str = None,
     metadata=None,
     version: str = None,
     from_file: bool = False,
-    session=Depends(get_db),
+    db_session=Depends(get_db),
     auth=Depends(get_auth_user),
 ):
     """
     Ingest document into the vector database.
 
-    :param project_name:        The name of the project to ingest the documents into.
-    :param uid:                 The UID of the data source to ingest the documents into.
-    :param loader:              The data loader type to use.
-    :param path:                The path to the document to ingest.
-    :param metadata:            The metadata to associate with the documents.
-    :param version:             The version of the documents.
-    :param from_file:           Whether the documents are from a file.
-    :param session:             The database session.
-    :param auth:                The authentication information.
+    :param project_name: The name of the project to ingest the documents into.
+    :param name:         The name of the data source to ingest the documents into.
+    :param loader:       The data loader type to use.
+    :param path:         The path to the document to ingest.
+    :param uid:          The UID of the data source to ingest the documents into.
+    :param metadata:     The metadata to associate with the documents.
+    :param version:      The version of the documents.
+    :param from_file:    Whether the documents are from a file.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
 
-    :return:    The response from the application.
+    :return: The response from the application.
     """
-    project_id = client.get_project(project_name=project_name, session=session).uid
+    project_id = client.get_project(
+        project_name=project_name, db_session=db_session
+    ).uid
+    uid, ds_version = parse_version(uid, version)
     data_source = client.get_data_source(
-        project_id=project_id, uid=uid, session=session
+        name=name,
+        project_id=project_id,
+        uid=uid,
+        version=ds_version,
+        db_session=db_session,
     )
 
     # Create document from path:
@@ -227,7 +273,7 @@ def ingest(
     )
 
     # Add document to the database:
-    document = client.create_document(document=document, session=session)
+    document = client.create_document(document=document, db_session=db_session)
 
     # Send ingest to application:
     params = {
