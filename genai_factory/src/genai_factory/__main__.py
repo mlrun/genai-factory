@@ -38,7 +38,7 @@ _CONFIG_PATH = os.environ.get("WORKFLOWS_CONFIG_PATH", None)
 
 
 @click.group()
-def cli():
+def main():
     pass
 
 
@@ -113,8 +113,8 @@ def run(
     workflow_server.deploy(router=router)
 
 
-cli.add_command(run)
+main.add_command(run)
 
 
 if __name__ == "__main__":
-    cli()
+    main()
