@@ -107,15 +107,14 @@ class SqlClient:
         """
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
-        obj = session.query(db_class).filter_by(**kwargs)
-        if obj:
-            if obj.count() > 1:
-                if not kwargs.get("version"):
-                    # Take the latest created:
-                    obj = obj.order_by(db_class.created.desc()).first()
-                else:
-                    obj = obj.one_or_none()
-            return api_class.from_orm_object(obj)
+        query = session.query(db_class).filter_by(**kwargs)
+        num_objects = query.count()
+        if num_objects > 1:
+            # Take the latest created:
+            obj = query.order_by(db_class.created.desc()).first()
+        else:
+            obj = query.one_or_none()
+        return api_class.from_orm_object(obj)
 
     def _update(
         self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs

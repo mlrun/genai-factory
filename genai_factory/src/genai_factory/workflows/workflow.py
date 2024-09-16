@@ -80,8 +80,7 @@ class Workflow:
             "steps", {}
         )
         if isinstance(self._skeleton, list):
-            self._graph = mlrun_serving.states.RootFlowStep()
-            last_step = self._graph
+            last_step = mlrun_serving.states.RootFlowStep()
             for step in self._skeleton:
                 if isinstance(step, dict):
                     step_name = step.get("name", step["class_name"])
@@ -94,12 +93,13 @@ class Workflow:
                         step.class_args = steps_config["steps"][step_name]
                     last_step = last_step.to(step)
             last_step.respond()
+            self._graph = last_step
             return
 
         # Skeleton is a graph dictionary:
         self._graph = mlrun_serving.states.RootFlowStep.from_dict(self._skeleton)
         for step in self._graph:
-            if step.name in steps_config["steps"]:
+            if step.name in getattr(steps_config, "steps", {}):
                 step.class_args = steps_config["steps"][step.name]
 
     @property
