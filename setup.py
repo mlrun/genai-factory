@@ -26,5 +26,5 @@ setup(
     packages=find_packages(where="genai_factory/src"),  # Point to the src directory
     package_dir={"": "genai_factory/src"},  # Map the root to src directory
     install_requires=get_requirements(),
-    entry_points={"console_scripts": ["genai-factory=genai_factory.__main__:main"]},
+    entry_points={"console_scripts": ["genai-factory=genai_factory.__main__"]},
 )
