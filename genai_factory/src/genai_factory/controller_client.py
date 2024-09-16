@@ -111,6 +111,7 @@ class ControllerClient:
 
         # Check the response
         if response.status_code == 200:
+            logger.info(f"Response: {response.json()}")
             # If the request was successful, return the JSON response
             return response.json()
         # The request failed, raise an exception:
