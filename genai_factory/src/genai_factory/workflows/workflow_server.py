@@ -21,6 +21,7 @@ from genai_factory.controller_client import ControllerClient
 from genai_factory.schemas import WorkflowType
 from genai_factory.sessions import SessionStore
 from genai_factory.workflows import Workflow
+from genai_factory.utils import logger
 
 
 class WorkflowServer:
@@ -87,7 +88,7 @@ class WorkflowServer:
         return self._workflows[name].run(event)
 
     def _build(self):
-        self._logger.info("Building workflows")
+        logger.info("Building workflows")
 
         # Make sure there are workflows to build:
         if not self._workflows:

@@ -38,8 +38,12 @@ RUN mkdir -p ../data
 # Install requirements:
 RUN pip install -r /controller/requirements.txt
 
+# Set python path environment variable:
+ENV PYTHONPATH="/controller/src"
+ENV CTRL_DATA_PATH="/data"
+
 # Initiate database:
-RUN python -m controller.src.main initdb
+RUN python -m controller initdb
 
 # Run the controller's API server:
-CMD ["uvicorn", "controller.src.api:app", "--port", "8001", "--reload"]
+CMD ["uvicorn", "controller.api:app", "--port", "8001", "--reload"]
