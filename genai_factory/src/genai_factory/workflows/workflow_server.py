@@ -74,6 +74,7 @@ class WorkflowServer:
             skeleton=graph,
             session_store=self._session_store,
             config=self._config,
+            client=self.controller_client,
             version=version,
             description=description,
             labels=labels,

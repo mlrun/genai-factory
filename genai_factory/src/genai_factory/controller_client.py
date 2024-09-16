@@ -42,6 +42,20 @@ class ControllerClient:
         self._project_name = project_name
         self._username = username
         self._token = token
+        self._project_id = None
+        self._owner_id = None
+
+    @property
+    def project_id(self):
+        if not self._project_id:
+            self._project_id = self.get_project().uid
+        return self._project_id
+
+    @property
+    def owner_id(self):
+        if not self._owner_id:
+            self._owner_id = self.get_user().uid
+        return self._owner_id
 
     def _send_request(
         self,

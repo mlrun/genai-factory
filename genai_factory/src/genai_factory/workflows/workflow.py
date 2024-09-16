@@ -18,6 +18,7 @@ import mlrun.serving as mlrun_serving
 from mlrun.utils import get_caller_globals
 
 from genai_factory.config import WorkflowServerConfig
+from genai_factory.controller_client import ControllerClient
 from genai_factory.schemas import APIDictResponse, WorkflowType
 from genai_factory.schemas import Workflow as WorkflowSchema
 from genai_factory.sessions import SessionStore
@@ -32,6 +33,7 @@ class Workflow:
         skeleton: Union[List[Union[mlrun_serving.states.FlowStep, dict]], dict],
         session_store: SessionStore,
         config: WorkflowServerConfig,
+        client: ControllerClient,
         description: str = "",
         labels: dict = None,
         deployment: str = None,
@@ -50,6 +52,7 @@ class Workflow:
         self._labels = labels
         self._description = description
         self._deployment = deployment
+        self._client = client
 
         # Prepare future instances:
         self._graph = None
@@ -57,11 +60,13 @@ class Workflow:
 
     def to_schema(self) -> WorkflowSchema:
         return WorkflowSchema(
+            owner_id=self._client.owner_id,
+            project_id=self._client.project_id,
             name=self._name,
             version=self._version,
             workflow_type=self._workflow_type,
             configuration=self.get_config(),
-            graph=self._graph.to_dict(),
+            graph=[step.to_dict() for step in self._graph],
             labels=self._labels,
             description=self._description,
             deployment=self._deployment,
