@@ -80,12 +80,12 @@ class Workflow:
             for step in self._skeleton:
                 if isinstance(step, dict):
                     step_name = step.get("name", step["class_name"])
-                    if step_name in steps_config["steps"]:
+                    if step_name in getattr(steps_config, "steps", {}):
                         step.update(steps_config["steps"][step_name])
                     last_step = last_step.to(**step)
                 else:
                     step_name = step.name
-                    if step_name in steps_config["steps"]:
+                    if step_name in getattr(steps_config, "steps", {}):
                         step.class_args = steps_config["steps"][step_name]
                     last_step = last_step.to(step)
             last_step.respond()
