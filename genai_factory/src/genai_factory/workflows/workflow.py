@@ -66,7 +66,7 @@ class Workflow:
             version=self._version,
             workflow_type=self._workflow_type,
             configuration=self.get_config(),
-            graph=[step.to_dict() for step in self._graph],
+            graph=self._graph.to_dict(),
             labels=self._labels,
             description=self._description,
             deployment=self._deployment,
@@ -80,7 +80,8 @@ class Workflow:
             "steps", {}
         )
         if isinstance(self._skeleton, list):
-            last_step = mlrun_serving.states.RootFlowStep()
+            self._graph = mlrun_serving.states.RootFlowStep()
+            last_step = self._graph
             for step in self._skeleton:
                 if isinstance(step, dict):
                     step_name = step.get("name", step["class_name"])
@@ -93,7 +94,6 @@ class Workflow:
                         step.class_args = steps_config["steps"][step_name]
                     last_step = last_step.to(step)
             last_step.respond()
-            self._graph = last_step
             return
 
         # Skeleton is a graph dictionary:

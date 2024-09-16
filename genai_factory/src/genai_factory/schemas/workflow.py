@@ -14,7 +14,7 @@
 
 import os
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 from genai_factory.schemas import Conversation
 from genai_factory.schemas.base import BaseWithVerMetadata
@@ -36,7 +36,7 @@ class Workflow(BaseWithVerMetadata):
     deployment: Optional[str] = None
     workflow_function: Optional[str] = None
     configuration: Optional[dict] = None
-    graph: Optional[List[dict]] = None
+    graph: Optional[dict] = None
 
     def get_infer_path(self):
         if self.deployment is None:

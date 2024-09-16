@@ -101,7 +101,7 @@ def print_config():
 @click.option(
     "-m", "--metadata", type=(str, str), multiple=True, help="Metadata Key value pair"
 )
-@click.option("-v", "--version", type=str, help="document version")
+@click.option("-v", "--version", type=str, help="document version", default="")
 @click.option("-d", "--data-source", type=str, help="Data source name")
 @click.option(
     "-f", "--from-file", is_flag=True, help="Take the document paths from the file"
@@ -120,7 +120,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
     :param from_file:   Take the document paths from the file
     """
     db_session = client.get_db_session()
-    project = client.get_project(project_name=project, db_session=db_session)
+    project = client.get_project(name=project, db_session=db_session)
     data_source = client.get_data_source(
         project_id=project.uid, name=data_source, db_session=db_session
     )
@@ -200,7 +200,7 @@ def infer(
     """
     db_session = client.get_db_session()
 
-    project = client.get_project(project_name=project, db_session=db_session)
+    project = client.get_project(name=project, db_session=db_session)
     # Getting the workflow:
     workflow = client.get_workflow(
         project_id=project.uid, name=workflow_name, db_session=db_session
