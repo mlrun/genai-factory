@@ -31,7 +31,7 @@ class WorkflowServerConfig(BaseModel):
     URL of the controller API. Default: http://localhost:8001.
     """
 
-    controller_username: str = "admin"
+    controller_username: str = "guest"
     """
     Username to use for the controller API. Default: admin.
     """
