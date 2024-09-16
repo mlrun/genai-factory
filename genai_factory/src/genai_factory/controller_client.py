@@ -18,7 +18,7 @@ import requests
 from mlrun.utils.helpers import dict_to_json
 
 from genai_factory.schemas import ChatSession, DataSource, Project, User, Workflow
-from genai_factory.workflows import logger
+from genai_factory.utils import logger
 
 
 class ControllerClient:
