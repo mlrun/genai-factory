@@ -19,7 +19,7 @@ from langchain_core.prompts import PromptTemplate
 from genai_factory.chains.base import ChainRunner
 from genai_factory.config import get_llm, get_vector_db
 from genai_factory.schemas import WorkflowEvent
-from genai_factory.workflows import logger
+from genai_factory.utils import logger
 
 
 class DocumentCallbackHandler(BaseCallbackHandler):

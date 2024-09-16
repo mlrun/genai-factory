@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
+
 from urllib.parse import urlparse
 
 import uvicorn
@@ -21,10 +21,6 @@ from genai_factory.controller_client import ControllerClient
 from genai_factory.schemas import WorkflowType
 from genai_factory.sessions import SessionStore
 from genai_factory.workflows import Workflow
-
-# Initialize the MLRun-GenAI logger:
-logger = logging.getLogger("mlrun-genai-factory")
-logger.addHandler(logging.StreamHandler())
 
 
 class WorkflowServer:
@@ -41,16 +37,20 @@ class WorkflowServer:
     @property
     def controller_client(self) -> ControllerClient:
         if not self._controller_client:
-            self._controller_client = ControllerClient(
-                controller_url=self._config.controller_url,
-                project_name=self._config.project_name,
-                username=self._config.controller_username,
-            )
+            self._set_controller_client()
         return self._controller_client
+
+    def _set_controller_client(self):
+        self._controller_client = ControllerClient(
+            controller_url=self._config.controller_url,
+            project_name=self._config.project_name,
+            username=self._config.controller_username,
+        )
 
     def set_config(self, config: WorkflowServerConfig):
         self._config = config
-        self._controller_client()
+        # reinitialize the controller client with the new config
+        self._set_controller_client()
         self._session_store = SessionStore(self._config)
         for workflow in self._workflows.values():
             workflow._server = None
@@ -87,7 +87,7 @@ class WorkflowServer:
         return self._workflows[name].run(event)
 
     def _build(self):
-        logger.info("Building workflows")
+        self._logger.info("Building workflows")
 
         # Make sure there are workflows to build:
         if not self._workflows:

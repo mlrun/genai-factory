@@ -19,7 +19,8 @@ from pydantic import BaseModel
 
 from genai_factory.data.doc_loader import get_data_loader, get_loader_obj
 from genai_factory.schemas import APIResponse
-from genai_factory.workflows import logger, workflow_server
+from genai_factory.utils import logger
+from genai_factory.workflows import workflow_server
 
 
 class IngestItem(BaseModel):

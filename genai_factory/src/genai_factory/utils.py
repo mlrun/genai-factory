@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from genai_factory.workflows.workflow import Workflow
-from genai_factory.workflows.workflow_server import WorkflowServer
+import logging
 
-workflow_server = WorkflowServer()
+# Initialize the GenAI Factory logger:
+logger = logging.getLogger("genai-factory")
+logger.addHandler(logging.StreamHandler())
