@@ -104,7 +104,7 @@ async def infer_workflow(
 
     event = {
         "username": auth.username,
-        "session_id": item.session_id,
+        "session_name": item.session_name,
         "query": item.question,
         "workflow_id": workflow.uid,
     }

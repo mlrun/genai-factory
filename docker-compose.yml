@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  controller:
+    build:
+      context: .
+      dockerfile: controller/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/controller/src
+      - CTRL_DATA_PATH=/data
+    networks:
+      - app-network
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_WORKFLOW_NAME=default
+    depends_on:
+      - controller
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

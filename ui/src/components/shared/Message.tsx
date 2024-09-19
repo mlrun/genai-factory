@@ -43,17 +43,16 @@ const Message = () => {
       const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
       return [...safeMessages, { role: 'AI', content: '', sources: [] }]
     })
-
-    const workflowId = sessions.find(session => session.uid === sessionId)?.workflow_id
-    const result = await Client.inferWorkflow('default', workflowId ?? 'default', {
+    const sessionName = sessions.find(session => session.uid === sessionId)?.name || 'default'
+    const result = await Client.inferWorkflow('default',  'default', {
       question: inputValue,
-      session_id: sessionId,
+      session_name: sessionName,
       data_source: 'default'
     }).then(res => {
       if (res.error) {
         setIsMessageError(true)
         toast({
-          title: 'An unexpected error occured',
+          title: 'An unexpected error occurred',
           description: res.error,
           status: 'error',
           duration: 5000,

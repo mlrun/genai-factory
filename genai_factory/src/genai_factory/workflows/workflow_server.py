@@ -28,7 +28,7 @@ class WorkflowServer:
     def __init__(self, config: WorkflowServerConfig = None):
         self._config = config or WorkflowServerConfig()
         self._controller_client = None
-        self._session_store = SessionStore(self._config)
+        self._session_store = None
         self._workflows: dict[str, Workflow] = {}
 
     @property
@@ -52,7 +52,7 @@ class WorkflowServer:
         self._config = config
         # reinitialize the controller client with the new config
         self._set_controller_client()
-        self._session_store = SessionStore(self._config)
+        self._session_store = SessionStore(self._controller_client)
         for workflow in self._workflows.values():
             workflow._server = None
 
@@ -98,20 +98,25 @@ class WorkflowServer:
             )
 
         # Initialize the controller client:
-        self._controller_client = ControllerClient(
-            controller_url=self._config.controller_url,
-            project_name=self._config.project_name,
-            username=self._config.controller_username,
-        )
+        self._set_controller_client()
 
+        if not self._session_store or not self._config:
+            raise ValueError(
+                "Session store and configuration must be set before building workflows."
+                " Make sure to set them via the `set_config` method."
+            )
         for workflow in self._workflows.values():
-            workflow.build()
+            workflow.build(
+                config=self._config,
+                session_store=self._session_store,
+            )
 
     def _commit(self):
         """
         Commit the workflows to the controller.
         """
         for workflow in self._workflows.values():
+            workflow.set_deployment()
             self._controller_client.update_workflow(workflow.to_schema())
 
     def api_startup(self):

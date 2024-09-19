@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from genai_factory.schemas import ChatSession, WorkflowEvent
+from genai_factory.schemas import WorkflowEvent
 
 
 class SessionStore:
@@ -21,20 +21,19 @@ class SessionStore:
 
     def read_state(self, event: WorkflowEvent):
         event.user = self.client.get_user(username=event.username, email=event.username)
-        event.username = event.user["name"] or "guest"
-        if not event.session and event.session_id:
-            resp = self.client.get_session(
-                uid=event.session_id, user_name=event.username
+        event.username = event.user.name or "guest"
+        if not event.session and event.session_name:
+            event.session = self.client.get_session(
+                name=event.session_name, username=event.username
             )
-            chat_session = ChatSession(**resp)
-            event.session = chat_session
-            event.conversation = chat_session.to_conversation()
+            event.conversation = event.session.to_conversation()
 
     def save(self, event: WorkflowEvent):
         """Save the session and conversation to the database"""
-        if event.session_id:
+        if event.session_name:
+            session = event.session
+            session.history = event.conversation.to_list()
             self.client.update_session(
-                chat_session=event.session,
+                chat_session=session,
                 username=event.username,
-                history=event.conversation.to_list(),
             )

@@ -25,8 +25,7 @@ from genai_factory import WorkflowServerConfig
 from genai_factory.api import router
 
 # Load the environment variables:
-_ROOT_PATH = pathlib.Path(__file__).parent.parent.parent
-dotenv.load_dotenv(os.environ.get("GENAI_FACTORY_ENV_PATH", str(_ROOT_PATH / ".env")))
+dotenv.load_dotenv(os.environ.get("GENAI_FACTORY_ENV_PATH", "./.env"))
 _USER_NAME = os.environ.get("GENAI_FACTORY_USER_NAME", "")
 _IS_LOCAL_CONFIG = os.environ.get(
     "GENAI_FACTORY_IS_LOCAL_CONFIG", "0"

@@ -42,8 +42,11 @@ RUN pip install -r /controller/requirements.txt
 ENV PYTHONPATH="/controller/src"
 ENV CTRL_DATA_PATH="/data"
 
+# Expose the controller's API port:
+EXPOSE 8001
+
 # Initiate database:
 RUN python -m controller initdb
 
 # Run the controller's API server:
-CMD ["uvicorn", "controller.api:app", "--port", "8001", "--reload"]
+CMD ["uvicorn", "controller.api:app","--host", "0.0.0.0", "--port", "8001", "--reload"]

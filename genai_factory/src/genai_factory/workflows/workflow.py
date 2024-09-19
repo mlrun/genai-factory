@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from typing import List, Union
 
 import mlrun.serving as mlrun_serving
@@ -72,10 +73,17 @@ class Workflow:
             deployment=self._deployment,
         )
 
+    def set_deployment(self):
+        self._deployment = os.path.join(
+            self._config.deployment_url, f"api/workflows/{self._name}/infer"
+        )
+
     def get_config(self):
         return self._config.workflows_kwargs.get(self._name, {})
 
-    def build(self):
+    def build(self, config: WorkflowServerConfig, session_store: SessionStore):
+        self._config = config
+        self._session_store = session_store
         steps_config = self._config.workflows_kwargs.get(self._name, {}).get(
             "steps", {}
         )

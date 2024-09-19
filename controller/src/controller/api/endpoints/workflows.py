@@ -81,9 +81,7 @@ def get_workflow(
 
     :return: The workflow from the database.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
         data = client.get_workflow(
@@ -153,9 +151,7 @@ def delete_workflow(
 
     :return: The response from the database.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid=uid, version=version)
     try:
         client.delete_workflow(
@@ -198,11 +194,9 @@ def list_workflows(
 
     :return: The response from the database.
     """
-    owner = client.get_user(user_name=auth.username, db_session=db_session)
+    owner = client.get_user(name=auth.username, db_session=db_session)
     owner_id = getattr(owner, "uid", None)
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     try:
         data = client.list_workflows(
             name=name,
@@ -242,9 +236,7 @@ def infer_workflow(
     :return: The response from the database.
     """
     # Get workflow from the database
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     workflow = client.get_workflow(
         project_id=project_id, name=name, db_session=db_session
     )
@@ -252,7 +244,6 @@ def infer_workflow(
         return APIResponse(
             success=False, error=f"Workflow with name = {name} not found"
         )
-    path = workflow.get_infer_path()
 
     if query.session_name:
         # Get session by name:
@@ -263,7 +254,7 @@ def infer_workflow(
                     name=query.session_name,
                     workflow_id=workflow.uid,
                     owner_id=client.get_user(
-                        user_name=auth.username, db_session=db_session
+                        name=auth.username, db_session=db_session
                     ).uid,
                 ),
             )
@@ -272,9 +263,11 @@ def infer_workflow(
         "item": query.dict(),
         "workflow": workflow.to_dict(short=True),
     }
+    path = workflow.deployment
 
     # Sent the event to the application's workflow:
     try:
+        print(f"Sending data to {path}: {data}")
         data = _send_to_application(
             path=path,
             method="POST",

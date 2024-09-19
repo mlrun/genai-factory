@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from enum import Enum
 from typing import Optional
 
@@ -38,11 +37,6 @@ class Workflow(BaseWithVerMetadata):
     configuration: Optional[dict] = None
     graph: Optional[dict] = None
 
-    def get_infer_path(self):
-        if self.deployment is None:
-            return None
-        return os.path.join(self.deployment, "infer")
-
 
 class WorkflowEvent:
     """
@@ -53,13 +47,13 @@ class WorkflowEvent:
         self,
         query=None,
         username=None,
-        session_id=None,
+        session_name=None,
         db_session=None,
         workflow_id=None,
         **kwargs,
     ):
         self.username = username
-        self.session_id = session_id
+        self.session_name = session_name
         self.original_query = query
         self.query = query
         self.kwargs = kwargs

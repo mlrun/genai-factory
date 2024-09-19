@@ -58,8 +58,8 @@ class WorkflowServerConfig(BaseModel):
 
     workflows_kwargs: dict[str, dict] = {}
     """
-    Keyword arguments for each step's initialization in a workflow. Expecting a dictionary of per workflow name to step 
-    configurations:: 
+    Keyword arguments for each step's initialization in a workflow. Expecting a dictionary of per workflow name to step
+     configurations::
 
         step_kwargs = config.workflows_kwargs[workflow_name]["steps"][step_name]
     """

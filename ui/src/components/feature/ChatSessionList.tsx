@@ -181,7 +181,7 @@ const ChatSessionList = (props: Props) => {
                     }}
                   />
                 ) : (
-                  session.description || session.name
+                  session.name
                 )}
               </>
             </Button>
