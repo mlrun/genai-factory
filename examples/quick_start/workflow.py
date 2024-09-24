@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from genai_factory import workflow_server
 from genai_factory.chains.base import HistorySaver, SessionLoader
 from genai_factory.chains.refine import RefineQuery
 from genai_factory.chains.retrieval import MultiRetriever
-from genai_factory import workflow_server
 
 workflow_graph = [
     SessionLoader(),
