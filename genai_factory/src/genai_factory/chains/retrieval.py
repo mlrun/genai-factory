@@ -23,6 +23,7 @@ from langchain.schema import Document
 from genai_factory.chains.base import ChainRunner
 from genai_factory.config import get_llm, get_vector_db
 from genai_factory.schemas import WorkflowEvent
+from genai_factory.utils import logger
 
 #TODO use workflow server logger
 logger = logging.getLogger(__name__)

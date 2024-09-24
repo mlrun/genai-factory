@@ -80,9 +80,7 @@ def get_data_source(
 
     :return: The data source from the database.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     try:
         # Parse the version if provided:
         uid, version = parse_version(uid, version)
@@ -153,9 +151,7 @@ def delete_data_source(
 
     :returThe response from the database.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
         client.delete_data_source(
@@ -198,11 +194,9 @@ def list_data_sources(
 
     :return: The response from the database.
     """
-    owner = client.get_user(user_name=auth.username, db_session=db_session)
+    owner = client.get_user(name=auth.username, db_session=db_session)
     owner_id = getattr(owner, "uid", None)
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     try:
         data = client.list_data_sources(
             project_id=project_id,
@@ -251,9 +245,7 @@ def ingest(
 
     :return: The response from the application.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, ds_version = parse_version(uid, version)
     data_source = client.get_data_source(
         name=name,

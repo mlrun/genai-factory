@@ -40,6 +40,6 @@ export enum WorkflowType {
 
 export type Query = {
   question: string
-  session_id: string
+  session_name: string
   data_source: string
 }

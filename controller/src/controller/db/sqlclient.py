@@ -105,16 +105,17 @@ class SqlClient:
 
         :return: The object.
         """
+        logger.debug(f"Getting object: {kwargs}")
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
-        obj = session.query(db_class).filter_by(**kwargs)
+        query = session.query(db_class).filter_by(**kwargs)
+        num_objects = query.count()
+        if num_objects > 1:
+            # Take the latest created:
+            obj = query.order_by(db_class.created.desc()).first()
+        else:
+            obj = query.one_or_none()
         if obj:
-            if obj.count() > 1:
-                if not kwargs.get("version"):
-                    # Take the latest created:
-                    obj = obj.order_by(db_class.created.desc()).first()
-                else:
-                    obj = obj.one_or_none()
             return api_class.from_orm_object(obj)
 
     def _update(
@@ -1186,6 +1187,10 @@ class SqlClient:
             return self.list_sessions(
                 user_id=user_id, last=1, db_session=db_session, **kwargs
             )[0]
+        elif name:
+            return self._get(
+                db_session, db.Session, api_models.ChatSession, name=name, **kwargs
+            )
         raise ValueError("session_name or user_id must be provided")
 
     def update_session(

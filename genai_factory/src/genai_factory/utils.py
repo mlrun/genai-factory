@@ -1,4 +1,4 @@
-# Copyright 2024 Iguazio
+# Copyright 2023 Iguazio
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:18-alpine
+import logging
 
-WORKDIR /app
-
-COPY  ui/package.json  ui/package-lock.json ./
-
-RUN npm install
-
-COPY ui/ .
-
-RUN npm run build
-
-EXPOSE 3000
-
-CMD ["npm", "run", "dev"]
+# Initialize the GenAI Factory logger:
+logger = logging.getLogger("genai-factory")
+logger.addHandler(logging.StreamHandler())

@@ -1,4 +1,4 @@
-# Copyright 2024 Iguazio
+# Copyright 2023 Iguazio
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:18-alpine
+from genai_factory.chains.base import HistorySaver, SessionLoader
+from genai_factory.chains.refine import RefineQuery
+from genai_factory.chains.retrieval import MultiRetriever
+from genai_factory import workflow_server
 
-WORKDIR /app
+workflow_graph = [
+    SessionLoader(),
+    RefineQuery(),
+    MultiRetriever(),
+    HistorySaver(),
+]
 
-COPY  ui/package.json  ui/package-lock.json ./
-
-RUN npm install
-
-COPY ui/ .
-
-RUN npm run build
-
-EXPOSE 3000
-
-CMD ["npm", "run", "dev"]
+workflow_server.add_workflow(
+    name="default", graph=workflow_graph, workflow_type="application"
+)

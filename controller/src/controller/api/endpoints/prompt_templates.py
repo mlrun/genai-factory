@@ -67,9 +67,7 @@ def get_prompt(
 
     :return: The prompt from the database.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
         data = client.get_prompt_template(
@@ -139,9 +137,7 @@ def delete_prompt(
 
     :return: The response from the database.
     """
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
         client.delete_prompt_template(
@@ -182,11 +178,9 @@ def list_prompts(
 
     :return: The response from the database.
     """
-    owner = client.get_user(user_name=auth.username, db_session=db_session)
+    owner = client.get_user(name=auth.username, db_session=db_session)
     owner_id = getattr(owner, "uid", None)
-    project_id = client.get_project(
-        project_name=project_name, db_session=db_session
-    ).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     try:
         data = client.list_prompt_templates(
             project_id=project_id,

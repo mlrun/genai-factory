@@ -1,4 +1,4 @@
-# Copyright 2024 Iguazio
+# Copyright 2023 Iguazio
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:18-alpine
+from setuptools import find_packages, setup
 
-WORKDIR /app
 
-COPY  ui/package.json  ui/package-lock.json ./
+def get_requirements():
+    with open("genai_factory/requirements.txt") as f:
+        return f.read().splitlines()
 
-RUN npm install
 
-COPY ui/ .
-
-RUN npm run build
-
-EXPOSE 3000
-
-CMD ["npm", "run", "dev"]
+setup(
+    name="genai-factory",
+    version="0.1",
+    packages=find_packages(where="genai_factory/src"),  # Point to the src directory
+    package_dir={"": "genai_factory/src"},  # Map the root to src directory
+    install_requires=get_requirements(),
+    entry_points={"console_scripts": ["genai-factory=genai_factory.__main__:main"]},
+)

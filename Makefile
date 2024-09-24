@@ -14,13 +14,21 @@
 
 CONTROLLER_NAME = "genai-factory-controller"
 
+.PHONY: genai-factory
+genai-factory:
+	# Build the Docker image using the
+	docker-compose up -d --build
+	@echo "GenAI Factory Controller and UI application are running in the background"
+	@echo "UI application is available at http://localhost:3000"
+	@echo "Controller API is available at http://localhost:8001"
+
 .PHONY: controller
 controller:
 	# Build controller's image:
 	docker build -f controller/Dockerfile -t $(CONTROLLER_NAME):latest .
 
 	# Run controller locally in a container:
-	docker run -d --net host --name $(CONTROLLER_NAME) $(CONTROLLER_NAME):latest
+	docker run -d -p 8001:8001 --name $(CONTROLLER_NAME) $(CONTROLLER_NAME):latest
 
 	# Announce the server is running:
 	@echo "GenAI Factory Controller is running in the background"

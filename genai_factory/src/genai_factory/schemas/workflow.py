@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from enum import Enum
-from typing import List, Optional
-
-import storey
+from typing import Optional
 
 from genai_factory.schemas import Conversation
 from genai_factory.schemas.base import BaseWithVerMetadata
@@ -38,15 +35,7 @@ class Workflow(BaseWithVerMetadata):
     deployment: Optional[str] = None
     workflow_function: Optional[str] = None
     configuration: Optional[dict] = None
-    graph: Optional[List[dict]] = None
-
-    def get_infer_path(self):
-        if self.deployment is None:
-            return None
-        return os.path.join(self.deployment, "infer")
-
-    def add_graph(self, graph: List[storey.Flow]):
-        self.graph = [step.to_dict() for step in graph]
+    graph: Optional[dict] = None
 
 
 class WorkflowEvent:
@@ -58,13 +47,13 @@ class WorkflowEvent:
         self,
         query=None,
         username=None,
-        session_id=None,
+        session_name=None,
         db_session=None,
         workflow_id=None,
         **kwargs,
     ):
         self.username = username
-        self.session_id = session_id
+        self.session_name = session_name
         self.original_query = query
         self.query = query
         self.kwargs = kwargs

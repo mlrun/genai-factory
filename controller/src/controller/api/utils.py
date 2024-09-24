@@ -47,7 +47,7 @@ def get_auth_user(
     if x_username:
         return AuthInfo(username=x_username, token=token)
     else:
-        return AuthInfo(username="guest@example.com", token=token)
+        return AuthInfo(username="guest", token=token)
 
 
 def _send_to_application(
@@ -68,7 +68,8 @@ def _send_to_application(
         url = f"{config.application_url}/api/{path}"
     else:
         url = path
-
+    # TODO: This line should be improved. This for the controller to application communication
+    url = url.replace("localhost", "host.docker.internal")
     if isinstance(request, Request):
         # If the request is a FastAPI request, get the data from the body
         kwargs["data"] = request._body.decode("utf-8")

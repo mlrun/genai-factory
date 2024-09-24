@@ -65,7 +65,7 @@ def get_session(
     """
     user_id = None
     if name == "$last":
-        user_id = client.get_user(user_name=user_name, db_session=db_session).uid
+        user_id = client.get_user(name=user_name, db_session=db_session).uid
         name = None
     try:
         data = client.get_session(
@@ -127,7 +127,7 @@ def delete_session(
 
     :return:    The response from the database.
     """
-    user_id = client.get_user(user_name=user_name, db_session=db_session).uid
+    user_id = client.get_user(name=user_name, db_session=db_session).uid
     try:
         client.delete_session(
             name=name, uid=uid, user_id=user_id, db_session=db_session
@@ -163,7 +163,7 @@ def list_sessions(
 
     :return: The response from the database.
     """
-    user_id = client.get_user(user_name=user_name, db_session=db_session).uid
+    user_id = client.get_user(name=user_name, db_session=db_session).uid
     try:
         data = client.list_sessions(
             user_id=user_id,

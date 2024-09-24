@@ -139,7 +139,7 @@ def list_projects(
     :return: The response from the database.
     """
     if owner_name is not None:
-        owner_id = client.get_user(user_name=owner_name, db_session=db_session).uid
+        owner_id = client.get_user(name=owner_name, db_session=db_session).uid
     else:
         owner_id = None
     try:

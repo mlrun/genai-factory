@@ -13,104 +13,107 @@
 # limitations under the License.
 #
 # main file with cli commands using python click library
+
 import importlib.util
-import sys
+import os
+import pathlib
 
 import click
-import uvicorn
+import dotenv
 
+from genai_factory import WorkflowServerConfig
 from genai_factory.api import router
-from genai_factory.chains.base import HistorySaver, SessionLoader
-from genai_factory.chains.refine import RefineQuery
-from genai_factory.chains.retrieval import MultiRetriever
-from genai_factory.config import config, username
-from genai_factory.workflows import AppServer
 
-default_graph = [
-    SessionLoader(),
-    RefineQuery(),
-    MultiRetriever(),
-    HistorySaver(),
+# Load the environment variables:
+dotenv.load_dotenv(os.environ.get("GENAI_FACTORY_ENV_PATH", "./.env"))
+_USER_NAME = os.environ.get("GENAI_FACTORY_USER_NAME", "")
+_IS_LOCAL_CONFIG = os.environ.get(
+    "GENAI_FACTORY_IS_LOCAL_CONFIG", "0"
+).lower().strip() in [
+    "true",
+    "1",
 ]
+_CONFIG_PATH = os.environ.get("WORKFLOWS_CONFIG_PATH", None)
 
 
 @click.group()
-def cli():
+def main():
     pass
 
 
-@click.command()
-@click.argument("workflow-name", type=str)
-@click.option("-p", "--path", type=str, default=None, help="Path to the workflow file")
-@click.option("-r", "--runner", type=str, default="fastapi", help="Runner to use")
+@click.command(help="Run a GenAI Factory workflows deployment script.")
+@click.argument(
+    "workflows-path",
+    type=click.Path(exists=True, path_type=pathlib.Path),
+)
 @click.option(
-    "-t",
-    "--workflow-type",
-    type=str,
-    default="application",
-    help="Type of the workflow",
+    "-c",
+    "--config-path",
+    type=click.Path(exists=True, path_type=pathlib.Path),
+    help="Path to a config file to use. Note: This option takes priority on both set configuration via the workflow "
+    "server instance in code, and via path from environment variable.",
+)
+@click.option(
+    "-d",
+    "--deployer",
+    type=click.Choice(choices=["fastapi", "nuclio"]),
+    default="fastapi",
+    help="How to deploy the workflow server with the added workflows in the given script.",
 )
 def run(
-    workflow_name: str,
-    runner: str,
-    path: str,
-    workflow_type: str,
+    workflows_path: pathlib.Path,
+    config_path: pathlib.Path,
+    deployer: str,
 ):
     """
-    Run workflow application
+    Run given workflows from file.
 
-    :param workflow_name:   The workflow name
-    :param runner:          The runner to use, default is fastapi.
-    :param path:            The path to the workflow file.
-    :param workflow_type:   The type of the workflow. Can be one of mlrun.genai.schemas.WorkflowType
+    :param workflows_path: The workflows file path.
+    :param config_path:    A configuration file path. Note: This option takes priority on both set configuration via
+                           the workflow server instance in code, and via path from environment variable:
 
-    :return:    None
+                           1. Command config
+                           2. Env file config
+                           3. Workflow server manual set config
+    :param deployer:       The deployer to use, default is fastapi.
     """
-    # Import the workflow's graph from the path
-    if path:
-        # Load the module from the given file path
-        spec = importlib.util.spec_from_file_location("module_name", path)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["module_name"] = module
-        spec.loader.exec_module(module)
-
-        # Retrieve the desired object from the module
-        click.echo(f"Using graph from {path}")
-        graph = getattr(module, "workflow_graph")
+    # Load the configuration if given:
+    if config_path:
+        click.echo(f"Loading configuration from: {config_path}")
+        config = WorkflowServerConfig.from_yaml(config_path)
     else:
-        # Use the default graph
-        click.echo("Using default graph")
-        graph = default_graph
+        # Initialize the global configuration:
+        if _CONFIG_PATH:
+            config = WorkflowServerConfig.from_yaml(_CONFIG_PATH)
+        elif _IS_LOCAL_CONFIG:
+            config = WorkflowServerConfig.local_config()
+        else:
+            config = None  # The user count on the default config, or he set it manually in the script.
 
-    if runner == "nuclio":
-        click.echo("Running nuclio is not supported yet")
-    elif runner == "fastapi":
-        app_server = AppServer()
-        app_server.add_workflow(
-            project_name="default",
-            name=workflow_name,
-            graph=graph,
-            deployment=config.infer_path(workflow_name),
-            workflow_type=workflow_type,
-            username=username,
-            update=True,
-        )
-        app = app_server.to_fastapi(router=router)
+    # Importing the workflows server instance:
+    click.echo(f"Importing workflows server from: {workflows_path}")
 
-        # Deploy the fastapi app
-        host = config.workflow_deployment["host"]
-        port = config.workflow_deployment["port"]
-        click.echo(f"Running workflow {workflow_name} with fastapi on {host}")
-        uvicorn.run(app, host=host, port=port)
+    # import workflow_server from given path:
 
-    else:
-        click.echo(
-            f"Runner {runner} not supported. Supported runners are: nuclio, fastapi"
-        )
+    # Load the module from the file path
+    spec = importlib.util.spec_from_file_location("workflow_server", workflows_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # Access the variable from the module
+    workflow_server = module.workflow_server
+
+    # Set the configuration:
+    if config:
+        workflow_server.set_config(config=config)
+
+    # Retrieve the desired object from the module
+    click.echo(f"Running workflows using a '{deployer}' runner...")
+    workflow_server.deploy(router=router)
 
 
-cli.add_command(run)
+main.add_command(run)
 
 
 if __name__ == "__main__":
-    cli()
+    main()
