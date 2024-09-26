@@ -10,6 +10,9 @@ services:
     environment:
       - PYTHONPATH=/controller/src
       - CTRL_DATA_PATH=/data
+      - CTRL_CONFIG_PATH=/controller-config.yaml
+    volumes:
+      - ./controller/controller-config.yaml:/controller-config.yaml
     networks:
       - app-network
 
