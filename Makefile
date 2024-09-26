@@ -33,10 +33,7 @@ up: ## Deploy GenAI factory controller and UI
 .PHONY: down
 down: ## Stop GenAI factory controller and UI
 	# Build the Docker image using the
-	docker compose up -d --build
-	@echo "GenAI Factory Controller and UI application are running in the background"
-	@echo "UI application is available at http://localhost:3000"
-	@echo "Controller API is available at http://localhost:8001"
+	docker compose down
 
 .PHONY: controller
 controller:
