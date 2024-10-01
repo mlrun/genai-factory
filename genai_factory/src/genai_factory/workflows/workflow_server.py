@@ -15,7 +15,6 @@
 from urllib.parse import urlparse
 
 import uvicorn
-
 from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
 from genai_factory.schemas import WorkflowType
@@ -55,6 +54,7 @@ class WorkflowServer:
         self._session_store = SessionStore(self._controller_client)
         for workflow in self._workflows.values():
             workflow._server = None
+            workflow._client = self._controller_client
 
     def add_workflow(
         self,

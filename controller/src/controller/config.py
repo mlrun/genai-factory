@@ -42,7 +42,7 @@ class CtrlConfig(BaseModel):
     def print(self):
         print(yaml.dump(self.dict()))
 
-    # @classmethod
+    @classmethod
     def load_from_yaml(cls, path: str):
         with open(path, "r") as f:
             data = yaml.safe_load(f)

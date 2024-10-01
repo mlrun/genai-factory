@@ -1,0 +1,5 @@
+verbose: true
+log_level: DEBUG
+db_type: sql
+sql_connection_str: sqlite:////data/sql.db
+application_url: http://localhost:8000
