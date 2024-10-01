@@ -107,7 +107,7 @@ class WorkflowServerConfig(BaseModel):
             "collection_name": "default",
             "persist_directory": str(
                 (
-                    pathlib.Path(os.environ["MLRUN_GENAI_LOCAL_CHROMA"]) / "chroma"
+                    pathlib.Path(os.environ["GENAI_FACTORY_LOCAL_CHROMA"]) / "chroma"
                 ).absolute()
             ),
         }
