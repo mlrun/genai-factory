@@ -14,13 +14,26 @@
 
 CONTROLLER_NAME = "genai-factory-controller"
 
-.PHONY: genai-factory
-genai-factory:
+.PHONY: help
+help: ## Display available commands
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: all
+all:
+	$(error please pick a target)
+
+.PHONY: up
+up: ## Deploy GenAI factory controller and UI
 	# Build the Docker image using the
-	docker-compose up -d --build
+	docker compose up -d --build
 	@echo "GenAI Factory Controller and UI application are running in the background"
 	@echo "UI application is available at http://localhost:3000"
 	@echo "Controller API is available at http://localhost:8001"
+
+.PHONY: down
+down: ## Stop GenAI factory controller and UI
+	# Build the Docker image using the
+	docker compose down
 
 .PHONY: controller
 controller:

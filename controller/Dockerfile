@@ -29,14 +29,16 @@ RUN apt update -qqq \
     && rm -rf /var/lib/apt/lists/* \
 
 WORKDIR /controller
-COPY /controller/src /controller/src
+
+# Install requirements:
 COPY /controller/requirements.txt /controller/
+RUN pip install -r /controller/requirements.txt
+
+# Copy controller source code
+COPY /controller/src /controller/src
 
 # Make the data directory:
 RUN mkdir -p ../data
-
-# Install requirements:
-RUN pip install -r /controller/requirements.txt
 
 # Set python path environment variable:
 ENV PYTHONPATH="/controller/src"
