@@ -46,7 +46,7 @@ There are three main types of configuration in the GenAI Factory:
     OPENAI_BASE_URL=...
     OPENAI_API_KEY=...
     GENAI_FACTORY_IS_LOCAL_CONFIG=true  # Set to 'true' for local configuration
-    MLRUN_GENAI_LOCAL_CHROMA=/tmp/chromadb  # Path to local Chroma database (if applicable)
+    GENAI_FACTORY_LOCAL_CHROMA=/tmp/chromadb  # Path to local Chroma database (if applicable)
     ```
 
     **Note: These credentials are used by the application, not the controller.**
