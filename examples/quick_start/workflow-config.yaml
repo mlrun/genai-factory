@@ -1,0 +1,20 @@
+chunk_overlap: 20
+chunk_size: 1024
+controller_url: http://localhost:8001
+controller_username: guest
+default_llm:
+  class_name: langchain_openai.ChatOpenAI
+  model_name: gpt-3.5-turbo
+  temperature: 0
+default_vector_store:
+  class_name: chroma
+  collection_name: default
+  persist_directory: /tmp/chromadb/chroma
+deployment_url: http://localhost:8000
+embeddings:
+  class_name: huggingface
+  model_name: all-MiniLM-L6-v2
+log_level: INFO
+project_name: default
+verbose: true
+workflows_kwargs: {}
