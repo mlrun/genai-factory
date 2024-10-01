@@ -21,7 +21,6 @@ import pathlib
 import click
 import dotenv
 from genai_factory.api import router
-from genai_factory.utils import logger
 
 from genai_factory import WorkflowServerConfig
 
@@ -107,9 +106,6 @@ def run(
     # Set the configuration:
     if config:
         workflow_server.set_config(config=config)
-
-    # Set log level
-    logger.setLevel(config.log_level.upper())
 
     # Retrieve the desired object from the module
     click.echo(f"Running workflows using a '{deployer}' runner...")
