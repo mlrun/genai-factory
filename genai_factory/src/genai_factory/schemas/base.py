@@ -69,69 +69,6 @@ class Base(BaseModel):
         return cls.parse_obj(data)
         # return cls.model_validate(data)  # pydantic v2
 
-    @classmethod
-    def from_orm_object(cls, obj):
-        object_dict = {}
-        for field in obj.__table__.columns:
-            object_dict[field.name] = getattr(obj, field.name)
-        spec = object_dict.pop("spec", {})
-        object_dict.update(spec)
-        if obj.labels:
-            object_dict["labels"] = {label.name: label.value for label in obj.labels}
-        return cls.from_dict(object_dict)
-
-    def merge_into_orm_object(self, orm_object):
-        struct = self.to_dict(drop_none=True)
-        spec = orm_object.spec or {}
-        labels = struct.pop("labels", None)
-        for k, v in struct.items():
-            if k in (metadata_fields + self._top_level_fields) and k not in [
-                "created",
-                "updated",
-            ]:
-                setattr(orm_object, k, v)
-            if k not in [metadata_fields + self._top_level_fields]:
-                spec[k] = v
-        orm_object.spec = spec
-
-        if labels:
-            old = {label.name: label for label in orm_object.labels}
-            orm_object.labels.clear()
-            for name, value in labels.items():
-                if name in old:
-                    if value is not None:  # None means delete
-                        old[name].value = value
-                        orm_object.labels.append(old[name])
-                else:
-                    orm_object.labels.append(
-                        orm_object.Label(name=name, value=value, parent=orm_object.name)
-                    )
-
-        return orm_object
-
-    def to_orm_object(self, obj_class, uid=None):
-        struct = self.to_dict(drop_none=False, short=False)
-        obj_dict = {
-            k: v
-            for k, v in struct.items()
-            if k in (metadata_fields + self._top_level_fields)
-            and k not in ["created", "updated"]
-        }
-        obj_dict["spec"] = {
-            k: v
-            for k, v in struct.items()
-            if k not in metadata_fields + self._top_level_fields
-        }
-        labels = obj_dict.pop("labels", None)
-        if uid:
-            obj_dict["uid"] = uid
-        obj = obj_class(**obj_dict)
-        if labels:
-            obj.labels.clear()
-            for name, value in labels.items():
-                obj.labels.append(obj.Label(name=name, value=value, parent=obj.name))
-        return obj
-
     def to_yaml(self, drop_none=True):
         return yaml.dump(self.to_dict(drop_none=drop_none))
 

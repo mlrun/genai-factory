@@ -32,11 +32,13 @@ default_db_path = os.environ.get(
 class CtrlConfig(BaseModel):
     """Configuration for the agent."""
 
-    verbose: bool = True
     log_level: str = "DEBUG"
-    # SQL Database
+    # database kwargs:
+    db: dict[str, str] = {
+        "db_url": default_db_path,
+        "verbose": True,
+    }
     db_type: str = "sql"
-    sql_connection_str: str = default_db_path
     application_url: str = "http://localhost:8000"
 
     def print(self):

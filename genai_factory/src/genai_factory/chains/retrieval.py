@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from typing import Dict, List, Optional
 
 from langchain.callbacks.base import BaseCallbackHandler
@@ -24,9 +23,6 @@ from genai_factory.chains.base import ChainRunner
 from genai_factory.config import get_llm, get_vector_db
 from genai_factory.schemas import WorkflowEvent
 from genai_factory.utils import logger
-
-#TODO use workflow server logger
-logger = logging.getLogger(__name__)
 
 
 class DocumentCallbackHandler(BaseCallbackHandler):
@@ -49,8 +45,8 @@ class DocumentRetriever:
     Example:
         vector_store = get_vector_db(config)
         llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-        query = "What is an llm?"
-        dr = document_retrevial(llm, vector_store)
+        query = "What is an LLM?"
+        dr = document_retrieval(llm, vector_store)
         dr.get_answer(query)
 
     Args:
