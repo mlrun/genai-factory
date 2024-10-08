@@ -30,10 +30,10 @@ class SqlClient(Client):
     This is the SQL client that interact with the SQL database.
     """
 
-    def __init__(self, db_url: str, verbose: bool = False):
-        self.db_url = db_url
+    def __init__(self, url: str, verbose: bool = False):
+        self.db_url = url
         self.engine = sqlalchemy.create_engine(
-            db_url, echo=verbose, connect_args={"check_same_thread": False}
+            self.db_url, echo=verbose, connect_args={"check_same_thread": False}
         )
         self._session_maker = sessionmaker(bind=self.engine)
         self._local_maker = sessionmaker(
@@ -59,7 +59,7 @@ class SqlClient(Client):
         return self._local_maker()
 
     @staticmethod
-    def _from_db_object(obj, obj_class):
+    def _to_schema_object(obj, obj_class):
         """
         Convert an object from the database to an API object.
         :param obj:       The object from the database.
@@ -140,7 +140,7 @@ class SqlClient(Client):
                     )
         return orm_object
 
-    def create_tables(self, drop_old: bool = False, names: list = None):
+    def create_database(self, drop_old: bool = False, names: list = None):
         """
         Create the tables in the database.
 
@@ -173,7 +173,7 @@ class SqlClient(Client):
         db_object = self._to_db_object(obj, db_class, uid=uid)
         session.add(db_object)
         session.commit()
-        return self._from_db_object(db_object, obj.__class__)
+        return self._to_schema_object(db_object, obj.__class__)
 
     def _get(
         self, session: sqlalchemy.orm.Session, db_class, api_class, **kwargs
@@ -199,7 +199,7 @@ class SqlClient(Client):
         else:
             obj = query.one_or_none()
         if obj:
-            return self._from_db_object(obj, api_class)
+            return self._to_schema_object(obj, api_class)
 
     def _update(
         self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs
@@ -221,7 +221,7 @@ class SqlClient(Client):
             obj = self._merge_into_db_object(api_object, obj)
             session.add(obj)
             session.commit()
-            return self._from_db_object(obj, api_object.__class__)
+            return self._to_schema_object(obj, api_object.__class__)
         else:
             # Create a new object if not found
             logger.debug(f"Object not found, creating a new one: {api_object}")
