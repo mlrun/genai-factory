@@ -32,6 +32,10 @@ Answer in one word, the class of the request.
 
 
 class Classifier(ChainRunner):
+    """
+    A step that classifies a given text into a list of possible classes.
+    The classes must be provided in the classifier_classes parameter.
+    """
     def __init__(self, llm=None, prompt_template=None, classifier_classes=None, **kwargs):
         super().__init__(**kwargs)
         if not classifier_classes:
@@ -54,8 +58,6 @@ class Classifier(ChainRunner):
         resp = self._chain.invoke(
             {"question": event.query, "chat_history": chat_history, "classifier_classes": self.classifier_classes}
         )
-        print("-"*50)
-        print(resp.content)
         logger.debug(f"classifierd question: {resp}")
         return {"answer": resp.content, "sources": ""}
 
