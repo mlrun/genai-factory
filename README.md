@@ -2,62 +2,108 @@
 
 Demo an end to end LLM agent solution with modular architecture, persistent storage and front-end UI that can work with various LLM models and storage solutions.
 
-the configuration is specified in a YAML file, which indicate the model, embeddings, storage to use, and various parameters. 
-the user can point to the configuration file by setting the `AGENT_CONFIG_PATH` environment variable.
+## Overview
+The GenAI Factory is a flexible and scalable platform for building large language model (LLM) agents. It features a modular architecture, allowing users to easily swap out different LLM models and storage solutions as needed. The platform includes a user-friendly front-end UI, making it easy to interact with the LLM agent.
 
-environment variables and credentials can be loaded from a `.env` file in the root directory. or an alternate path set by the `AGENT_ENV_PATH` environment variable.
-data can be stored in local files or remote SQL and Vector databases. the local file storage path can be set by the `AGENT_DATA_PATH` environment variable (defaults to `./data/`).
+![](docs/genai_factory_architecture.jpg)
 
-# Getting it to work
-In order to deploy the GenAI Factory locally, we need to update the docker desktop software and to enable host networking.
-For more information, please refer to the following link:
-https://docs.docker.com/network/drivers/host/#docker-desktop
+## Features
+- Modular architecture for easy switching between LLM models and storage solutions
+- Persistent storage options for local files or remote SQL and Vector databases
+- Front-end UI for interacting with the LLM agent
+- Configuration specified in YAML files for specifying model, embeddings, storage options, and other parameters
+- Environment variables and credentials loaded from `.env` file or alternate path
 
-## Deploy the controller
-This command will start the API controller server into a local docker container.
+## Getting Started
+
+### Pre-Requisites
+- Docker Desktop installed and updated
+- Host networking enabled (see [Docker documentation](https://docs.docker.com/network/drivers/host/#docker-desktop) for more information)
+
+### Deployment
+1. **Deploy the controller and UI**:
+
+    Run `make up` to start the API controller and UI in local Docker containers. If there are any port conflicts on your machine, update the ports in [docker-compose.yml](docker-compose.yml) and the URL's in [controller-config.yaml](controller/controller-config.yaml) as needed.
+
+2. **Deploy an application**:
+
+    Follow the [quick start](examples/quick_start/notebook.ipynb) to get up and running quickly. It will involve the following steps:
+    1. Create a `.env` file which include OpenAI credentials
+    2. Configure parameters in [workflow-config.yaml](examples/quick_start/workflow-config.yaml) as needed including embedding model, completion model, generation parameters, port changes, and more.
+    3. Build your application in [workflow.py](examples/quick_start/workflow.py) using pre-defined components such as `SessionLoader`, `RefineQuery`, `MultiRetriever`, `HistorySaver`, `Agent`, and more.
+    3. Deploy the application via `genai-factory run --config-file workflow-config.yaml workflow.py`
+    4. Follow the [quick start](examples/quick_start/notebook.ipynb) for more details on how to ingest data and query the model via the UI.
+
+### Configuration
+There are three main types of configuration in the GenAI Factory:
+
+1. **`.env`**:
+
+    This is used to define credentials such as OpenAI API keys and define where to load [controller-config.yaml](controller/controller-config.yaml) and [workflow-config.yaml](examples/quick_start/workflow-config.yaml) files.
+
+    Example:
+    ```bash
+    OPENAI_BASE_URL=...
+    OPENAI_API_KEY=...
+    GENAI_FACTORY_IS_LOCAL_CONFIG=true  # Set to 'true' for local configuration
+    GENAI_FACTORY_LOCAL_CHROMA=/tmp/chromadb  # Path to local Chroma database (if applicable)
+    ```
+
+    **Note: These credentials are used by the application, not the controller.**
+
+2. **`controller-config.yaml`**:
+
+    This is used to configure the controller and specify the database type, connection string, application URL, and more.
+
+    Example:
+    ```yaml
+    verbose: true
+    log_level: DEBUG
+    db_type: sql
+    sql_connection_str: sqlite:////data/sql.db
+    application_url: http://localhost:8000
+    ```
+
+    The data stored in the controller is not application specific, but rather relates to data sources, projects, users, session histories, etc.
+
+3. **`workflow-config.yaml`**: 
+
+    This is used to configure the application itself and specify embedding models, completion models, generation parameters, vector database storage, and more.
+
+    Example:
+    ```yaml
+    chunk_overlap: 20
+    chunk_size: 1024
+    controller_url: http://localhost:8001
+    controller_username: guest
+    default_llm:
+      class_name: langchain_openai.ChatOpenAI
+      model_name: gpt-3.5-turbo
+      temperature: 0
+    default_vector_store:
+      class_name: chroma
+      collection_name: default
+      persist_directory: /tmp/chromadb/chroma
+    deployment_url: http://localhost:8000
+    embeddings:
+      class_name: huggingface
+      model_name: all-MiniLM-L6-v2
+    log_level: INFO
+    project_name: default
+    verbose: true
+    workflows_kwargs: {}
+    ```
+
+    The application is responsible for the vector database persistence, configuration, and retrieval. It is also responsible for generations using the defined completion model.
+
+## Full Controller CLI
+
+To interact with the controller CLI, `docker exec` into the **controller container** and use the `python -m controller` CLI.
+
 ```shell
-make controller
-```
+python -m controller --help
 
-## Initialize the database:
-The database is Initialized when building the controller.
-In order to erase and start fresh, we can simply use the controller's command line interface.
-
-```shell
-python -m controller.src.main initdb
-```
-
-## To start the application's API:
-
-```shell
-uvicorn pipeline:app
-```
-
-## To start UI:
-Future work will include a UI command to run the UI.
-```shell
-make ui
-```
-
-# CLI usage
-
-To ingest data into the vector database:
-```shell
-python -m controller.src.main ingest -l web https://milvus.io/docs/overview.md
-```
-
-To ask a question:
-```shell   
-python -m controller.src.main infer "What is Milvus?"
-```
-
-
-Full CLI:
-
-```shell
-python -m controller.src.main
-
-Usage: python -m controller.src.main [OPTIONS] COMMAND [ARGS]...
+Usage: python -m controller [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --help  Show this message and exit.
@@ -70,3 +116,9 @@ Commands:
   list    List the different objects in the database (by category)
   update  Create or update an object in the database
 ```
+
+For example, to ingest data from a website, run the following:
+```bash
+python -m controller ingest -l web https://docs.mlrun.org/en/stable/index.html
+```
+For more information, see the [quick start](examples/quick_start/notebook.ipynb).
