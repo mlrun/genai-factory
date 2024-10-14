@@ -49,6 +49,7 @@ class WorkflowServer:
 
     def set_config(self, config: WorkflowServerConfig):
         self._config = config
+        logger.setLevel(config.log_level.upper())
         # reinitialize the controller client with the new config
         self._set_controller_client()
         self._session_store = SessionStore(self._controller_client)
