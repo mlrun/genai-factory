@@ -189,6 +189,26 @@ document_to_data_source = Table(
     Column("extra_data", JSON),
 )
 
+# Association table between deployments and models for many-to-many relationship
+deployment_to_model = Table(
+    "deployment_to_model",
+    Base.metadata,
+    Column("deployment_id", String(ID_LENGTH), ForeignKey("deployment.uid")),
+    Column("deployment_version", String(TEXT_LENGTH), ForeignKey("deployment.version")),
+    Column("model_id", String(ID_LENGTH), ForeignKey("model.uid")),
+    Column("model_version", String(TEXT_LENGTH), ForeignKey("model.version")),
+)
+
+# Association table between deployments and workflows for many-to-many relationship
+deployment_to_workflow = Table(
+    "deployment_to_workflow",
+    Base.metadata,
+    Column("deployment_id", String(ID_LENGTH), ForeignKey("deployment.uid")),
+    Column("deployment_version", String(TEXT_LENGTH), ForeignKey("deployment.version")),
+    Column("workflow_id", String(ID_LENGTH), ForeignKey("workflow.uid")),
+    Column("workflow_version", String(TEXT_LENGTH), ForeignKey("workflow.version")),
+)
+
 
 class User(BaseSchema):
     """
@@ -416,6 +436,21 @@ class Model(VersionedOwnerBaseSchema):
             prompt_template_to_model.c.prompt_version,
         ],
     )
+    # many-to-many relationship with deployments:
+    deployments: Mapped[List["Deployment"]] = relationship(
+        back_populates="models",
+        secondary=deployment_to_model,
+        primaryjoin="and_(Model.uid == deployment_to_model.c.model_id,"
+        " Model.version == deployment_to_model.c.model_version)",
+        secondaryjoin="and_(Deployment.uid == deployment_to_model.c.deployment_id,"
+        " Deployment.version == deployment_to_model.c.deployment_version)",
+        foreign_keys=[
+            deployment_to_model.c.model_id,
+            deployment_to_model.c.model_version,
+            deployment_to_model.c.deployment_id,
+            deployment_to_model.c.deployment_version,
+        ],
+    )
 
     def __init__(
         self,
@@ -585,6 +620,21 @@ class Workflow(VersionedOwnerBaseSchema):
     project: Mapped["Project"] = relationship(back_populates="workflows")
     # one-to-many relationship with sessions:
     sessions: Mapped[List["Session"]] = relationship(back_populates="workflow")
+    # many-to-many relationship with deployments:
+    deployments: Mapped[List["Deployment"]] = relationship(
+        back_populates="workflows",
+        secondary=deployment_to_workflow,
+        primaryjoin="and_(Workflow.uid == deployment_to_workflow.c.workflow_id,"
+        " Workflow.version == deployment_to_workflow.c.workflow_version)",
+        secondaryjoin="and_(Deployment.uid == deployment_to_workflow.c.deployment_id,"
+        " Deployment.version == deployment_to_workflow.c.deployment_version)",
+        foreign_keys=[
+            deployment_to_workflow.c.workflow_id,
+            deployment_to_workflow.c.workflow_version,
+            deployment_to_workflow.c.deployment_id,
+            deployment_to_workflow.c.deployment_version,
+        ],
+    )
 
     def __init__(
         self,
@@ -644,3 +694,73 @@ class Session(OwnerBaseSchema):
             labels=labels,
         )
         self.workflow_id = workflow_id
+
+
+class Deployment(VersionedOwnerBaseSchema):
+    """
+    The Deployment table which is used to define deployments for the project.
+
+    :arg deployment_type: The type of the deployment.
+                          Can be one of the values in genai_factory.schemas.deployment.DeploymentType.
+    """
+
+    # Columns:
+    address: Mapped[str] = mapped_column(String(255))
+    deployment_type: Mapped[str] = mapped_column(String(255))
+
+    # Relationships:
+
+    # many-to-many relationship with models:
+    models: Mapped[List["Model"]] = relationship(
+        back_populates="deployments",
+        secondary=deployment_to_model,
+        primaryjoin="and_(Deployment.uid == deployment_to_model.c.deployment_id,"
+        " Deployment.version == deployment_to_model.c.deployment_version)",
+        secondaryjoin="and_(Model.uid == deployment_to_model.c.model_id,"
+        " Model.version == deployment_to_model.c.model_version)",
+        foreign_keys=[
+            deployment_to_model.c.deployment_id,
+            deployment_to_model.c.deployment_version,
+            deployment_to_model.c.model_id,
+            deployment_to_model.c.model_version,
+        ],
+    )
+    # many-to-many relationship with workflows:
+    workflows: Mapped[List["Workflow"]] = relationship(
+        back_populates="deployments",
+        secondary=deployment_to_workflow,
+        primaryjoin="and_(Deployment.uid == deployment_to_workflow.c.deployment_id,"
+        " Deployment.version == deployment_to_workflow.c.deployment_version)",
+        secondaryjoin="and_(Workflow.uid == deployment_to_workflow.c.workflow_id,"
+        " Workflow.version == deployment_to_workflow.c.workflow_version)",
+        foreign_keys=[
+            deployment_to_workflow.c.deployment_id,
+            deployment_to_workflow.c.deployment_version,
+            deployment_to_workflow.c.workflow_id,
+            deployment_to_workflow.c.workflow_version,
+        ],
+    )
+
+    def __init__(
+        self,
+        uid,
+        name,
+        spec,
+        version,
+        address,
+        deployment_type,
+        description=None,
+        owner_id=None,
+        labels=None,
+    ):
+        super().__init__(
+            uid=uid,
+            name=name,
+            version=version,
+            spec=spec,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.address = address
+        self.deployment_type = deployment_type

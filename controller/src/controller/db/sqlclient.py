@@ -162,7 +162,7 @@ class SqlClient:
     def _list(
         self,
         session: sqlalchemy.orm.Session,
-        db_class: db.Base,
+        db_class: Type[db.Base],
         api_class: Type[api_models.Base],
         output_mode: api_models.OutputMode,
         labels_match: List[str] = None,
@@ -1269,6 +1269,120 @@ class SqlClient:
         if last > 0:
             query = query.limit(last)
         return _process_output(query.all(), api_models.ChatSession, output_mode)
+
+    def create_deployment(
+        self,
+        deployment: Union[api_models.Deployment, dict],
+        db_session: sqlalchemy.orm.Session = None,
+    ):
+        """
+        Create a new deployment in the database.
+
+        :param deployment: The deployment object to create.
+        :param db_session: The session to use.
+
+        :return: The created deployment.
+        """
+        logger.debug(f"Creating deployment: {deployment}")
+        if isinstance(deployment, dict):
+            deployment = api_models.Deployment.from_dict(deployment)
+        return self._create(db_session, db.Deployment, deployment)
+
+    def get_deployment(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
+        """
+        Get a deployment from the database.
+
+        :param name:       The name of the deployment to get.
+        :param db_session: The session to use.
+
+        :return: The requested deployment.
+        """
+        logger.debug(f"Getting deployment: name={name}")
+        return self._get(
+            db_session, db.Deployment, api_models.Deployment, name=name, **kwargs
+        )
+
+    def update_deployment(
+        self,
+        name: str,
+        deployment: Union[api_models.Deployment, dict],
+        db_session: sqlalchemy.orm.Session = None,
+    ):
+        """
+        Update an existing deployment in the database.
+
+        :param name:       The name of the deployment to update.
+        :param deployment: The deployment object with the new data.
+        :param db_session: The session to use.
+
+        :return: The updated deployment.
+        """
+        logger.debug(f"Updating deployment: {deployment}")
+        if isinstance(deployment, dict):
+            deployment = api_models.Deployment.from_dict(deployment)
+        return self._update(
+            db_session, db.Deployment, deployment, name=name, uid=deployment.uid
+        )
+
+    def delete_deployment(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
+        """
+        Delete a deployment from the database.
+
+        :param name:       The name of the deployment to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the deployment.
+        """
+        logger.debug(f"Deleting deployment: name={name}")
+        self._delete(db_session, db.Deployment, name=name, **kwargs)
+
+    def list_deployments(
+        self,
+        name: str = None,
+        owner_id: str = None,
+        version: str = None,
+        deployment_type: Union[api_models.DeploymentType, str] = None,
+        labels_match: Union[list, str] = None,
+        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+        db_session: sqlalchemy.orm.Session = None,
+    ):
+        """
+        List deployments from the database.
+
+        :param name:            The name to filter the deployments by.
+        :param owner_id:        The owner to filter the deployments by.
+        :param version:         The version to filter the deployments by.
+        :param deployment_type: The project to filter the deployments by.
+        :param labels_match:    The labels to match, filter the deployments by labels.
+        :param output_mode:     The output mode.
+        :param db_session:      The session to use.
+
+        :return: The list of deployments.
+        """
+        logger.debug(
+            f"Getting deployments: owner_id={owner_id}, version={version}, type={deployment_type},"
+            f" labels_match={labels_match}, mode={output_mode}"
+        )
+        filters = []
+        if name:
+            filters.append(db.Deployment.name == name)
+        if owner_id:
+            filters.append(db.Deployment.owner_id == owner_id)
+        if version:
+            filters.append(db.Deployment.version == version)
+        if deployment_type:
+            filters.append(db.Deployment.deployment_type == deployment_type)
+        return self._list(
+            session=db_session,
+            db_class=db.Deployment,
+            api_class=api_models.Deployment,
+            output_mode=output_mode,
+            labels_match=labels_match,
+            filters=filters,
+        )
 
 
 def _dict_to_object(cls, d):

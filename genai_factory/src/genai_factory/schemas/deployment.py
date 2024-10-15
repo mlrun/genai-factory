@@ -12,18 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from genai_factory import workflow_server
-from genai_factory.chains.base import HistorySaver, SessionLoader
-from genai_factory.chains.refine import RefineQuery
-from genai_factory.chains.retrieval import MultiRetriever
+from enum import Enum
+from typing import Any, Dict, Optional
 
-workflow_graph = [
-    SessionLoader(),
-    RefineQuery(),
-    MultiRetriever(),
-    HistorySaver(),
-]
+from genai_factory.schemas.base import BaseWithVerMetadata
 
-workflow_server.add_workflow(
-    name="default", graph=workflow_graph, workflow_type="application"
-)
+
+class DeploymentType(str, Enum):
+    MODEL = "model"
+    WORKFLOW = "workflow"
+    APPLICATION = "application"
+
+
+class Deployment(BaseWithVerMetadata):
+    _top_level_fields = ["address", "deployment_type"]
+    address: str
+    deployment_type: DeploymentType
+    configuration: Optional[Dict[str, Any]] = None
+    is_deployed: Optional[bool] = False
+    is_monitored: Optional[bool] = False
+    is_local: Optional[bool] = False

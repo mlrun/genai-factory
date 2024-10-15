@@ -24,7 +24,7 @@ class ModelType(str, Enum):
 
 
 class Model(BaseWithVerMetadata):
-    _extra_fields = ["path", "producer", "deployment"]
+    _extra_fields = ["path", "producer"]
     _top_level_fields = ["model_type", "task"]
 
     model_type: ModelType
@@ -33,4 +33,3 @@ class Model(BaseWithVerMetadata):
     task: Optional[str] = None
     path: Optional[str] = None
     producer: Optional[str] = None
-    deployment: Optional[str] = None
