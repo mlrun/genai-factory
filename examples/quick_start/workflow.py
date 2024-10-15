@@ -20,6 +20,7 @@ from genai_factory.chains import (
     SessionLoader,
 )
 
+
 workflow_graph = [
     SessionLoader(),
     RefineQuery(),

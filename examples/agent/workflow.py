@@ -16,6 +16,7 @@ from examples.agent.agent import Agent
 from genai_factory import workflow_server
 from genai_factory.chains import HistorySaver, RefineQuery, SessionLoader
 
+
 workflow_graph = [
     SessionLoader(),
     RefineQuery(),

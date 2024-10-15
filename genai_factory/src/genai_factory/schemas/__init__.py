@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from genai_factory.schemas.base import APIDictResponse, APIResponse, Base, OutputMode
+from genai_factory.schemas.base import (
+    APIDictResponse,
+    APIResponse,
+    Base,
+    OutputMode,
+    metadata_fields,
+)
 from genai_factory.schemas.data_source import DataSource, DataSourceType
 from genai_factory.schemas.dataset import Dataset
 from genai_factory.schemas.document import Document
