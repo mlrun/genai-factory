@@ -29,49 +29,10 @@ class Client(ABC):
         """
         pass
 
-    @staticmethod
-    @abstractmethod
-    def _to_schema_object(obj, obj_class: Type[api_models.Base]):
-        """
-        Convert an ORM object to a schema object.
-
-        :param obj:       The DB object.
-        :param obj_class: The schema class.
-
-        :return: The schema object.
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def _merge_into_db_object(obj, obj_class):
-        """
-        Merge a schema object into an DB object.
-
-        :param obj:       The schema object.
-        :param obj_class: The DB class.
-
-        :return: The DB object.
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def _to_db_object(obj, obj_class):
-        """
-        Convert a schema object to a DB object.
-
-        :param obj:       The schema object.
-        :param obj_class: The DB class.
-
-        :return: The DB object.
-        """
-        pass
-
     @abstractmethod
     def create_database(self, drop_old: bool = False, names: list = None):
         """
-        Create the tables in the database.
+        Create a new database.
 
         :param drop_old: Whether to drop the old data before creating the new data.
         :param names:    The names of the entities to create. If None, all entities will be created.

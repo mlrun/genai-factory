@@ -30,8 +30,8 @@ class SqlClient(Client):
     This is the SQL client that interact with the SQL database.
     """
 
-    def __init__(self, url: str, verbose: bool = False):
-        self.db_url = url
+    def __init__(self, db_url: str, verbose: bool = False):
+        self.db_url = db_url
         self.engine = sqlalchemy.create_engine(
             self.db_url, echo=verbose, connect_args={"check_same_thread": False}
         )
@@ -59,11 +59,15 @@ class SqlClient(Client):
         return self._local_maker()
 
     @staticmethod
-    def _to_schema_object(obj, obj_class):
+    def _to_schema_object(
+        obj, schema_class: Type[api_models.Base]
+    ) -> Type[api_models.Base]:
         """
         Convert an object from the database to an API object.
-        :param obj:       The object from the database.
-        :param obj_class: The API class of the object.
+
+        :param obj:          The object from the database.
+        :param schema_class: The API class of the object.
+
         :return: The API object.
         """
         object_dict = {}
@@ -73,15 +77,17 @@ class SqlClient(Client):
         object_dict.update(spec)
         if obj.labels:
             object_dict["labels"] = {label.name: label.value for label in obj.labels}
-        return obj_class.from_dict(object_dict)
+        return schema_class.from_dict(object_dict)
 
     @staticmethod
     def _to_db_object(obj, obj_class, uid=None):
         """
         Convert an API object to a database object.
+
         :param obj:       The API object.
         :param obj_class: The DB class of the object.
         :param uid:       The UID of the object.
+
         :return: The database object.
         """
         struct = obj.to_dict(drop_none=False, short=False)
@@ -110,8 +116,10 @@ class SqlClient(Client):
     def _merge_into_db_object(obj, orm_object):
         """
         Merge an API object into a database object.
+
         :param obj:        The API object.
         :param orm_object: The ORM object.
+
         :return: The updated ORM object.
         """
         struct = obj.to_dict(drop_none=True)
