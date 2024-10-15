@@ -13,9 +13,8 @@
 # limitations under the License.
 
 from examples.agent.agent import Agent
-from genai_factory.chains import HistorySaver, SessionLoader
-from genai_factory.chains import RefineQuery
 from genai_factory import workflow_server
+from genai_factory.chains import HistorySaver, RefineQuery, SessionLoader
 
 workflow_graph = [
     SessionLoader(),
