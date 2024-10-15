@@ -12,18 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
-
-from controller.config import config
-
-client = None
-
-
-class DatabaseType(str, Enum):
-    SQL = "sql"
-
-
-if config.db_type == "sql":
-    from controller.db.sql import SqlClient
-
-    client = SqlClient(**config.db)
+from controller.db.sql.sqlclient import SqlClient
