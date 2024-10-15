@@ -74,6 +74,7 @@ class Classifier(ChainRunner):
         Classify a given text, to of out of a list of possible classes.
 
         :param event: The event of the workflow, containing the conversation and the text to classify.
+
         :return:      An event, containing the answer and the sources.
         """
         chat_history = str(event.conversation)

@@ -63,6 +63,7 @@ class GeneralLLMInvoke(ChainRunner):
         Generate a response to a given text based on the conversation history.
 
         :param event: The event of the workflow, containing the conversation and the query.
+
         :return:      An event, containing the answer and the sources.
         """
         chat_history = str(event.conversation)
