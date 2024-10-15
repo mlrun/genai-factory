@@ -19,12 +19,13 @@ from typing import List, Type, Union
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-import controller.db.sqldb as db
+import controller.db.sql.sqldb as db
 import genai_factory.schemas as api_models
 from controller.config import logger
+from controller.db.client import Client
 
 
-class SqlClient:
+class SqlClient(Client):
     """
     This is the SQL client that interact with the SQL database.
     """
@@ -32,7 +33,7 @@ class SqlClient:
     def __init__(self, db_url: str, verbose: bool = False):
         self.db_url = db_url
         self.engine = sqlalchemy.create_engine(
-            db_url, echo=verbose, connect_args={"check_same_thread": False}
+            self.db_url, echo=verbose, connect_args={"check_same_thread": False}
         )
         self._session_maker = sessionmaker(bind=self.engine)
         self._local_maker = sessionmaker(
@@ -57,7 +58,97 @@ class SqlClient:
         """
         return self._local_maker()
 
-    def create_tables(self, drop_old: bool = False, names: list = None):
+    @staticmethod
+    def _to_schema_object(
+        obj, schema_class: Type[api_models.Base]
+    ) -> Type[api_models.Base]:
+        """
+        Convert an object from the database to an API object.
+
+        :param obj:          The object from the database.
+        :param schema_class: The API class of the object.
+
+        :return: The API object.
+        """
+        object_dict = {}
+        for field in obj.__table__.columns:
+            object_dict[field.name] = getattr(obj, field.name)
+        spec = object_dict.pop("spec", {})
+        object_dict.update(spec)
+        if obj.labels:
+            object_dict["labels"] = {label.name: label.value for label in obj.labels}
+        return schema_class.from_dict(object_dict)
+
+    @staticmethod
+    def _to_db_object(obj, obj_class, uid=None):
+        """
+        Convert an API object to a database object.
+
+        :param obj:       The API object.
+        :param obj_class: The DB class of the object.
+        :param uid:       The UID of the object.
+
+        :return: The database object.
+        """
+        struct = obj.to_dict(drop_none=False, short=False)
+        obj_dict = {
+            k: v
+            for k, v in struct.items()
+            if k in (api_models.metadata_fields + obj._top_level_fields)
+            and k not in ["created", "updated"]
+        }
+        obj_dict["spec"] = {
+            k: v
+            for k, v in struct.items()
+            if k not in api_models.metadata_fields + obj._top_level_fields
+        }
+        labels = obj_dict.pop("labels", None)
+        if uid:
+            obj_dict["uid"] = uid
+        obj = obj_class(**obj_dict)
+        if labels:
+            obj.labels.clear()
+            for name, value in labels.items():
+                obj.labels.append(obj.Label(name=name, value=value, parent=obj.name))
+        return obj
+
+    @staticmethod
+    def _merge_into_db_object(obj, orm_object):
+        """
+        Merge an API object into a database object.
+
+        :param obj:        The API object.
+        :param orm_object: The ORM object.
+
+        :return: The updated ORM object.
+        """
+        struct = obj.to_dict(drop_none=True)
+        spec = orm_object.spec or {}
+        labels = struct.pop("labels", None)
+        for k, v in struct.items():
+            if k in (api_models.metadata_fields + obj._top_level_fields) and k not in [
+                "created",
+                "updated",
+            ]:
+                setattr(orm_object, k, v)
+            if k not in [api_models.metadata_fields + obj._top_level_fields]:
+                spec[k] = v
+        orm_object.spec = spec
+        if labels:
+            old = {label.name: label for label in orm_object.labels}
+            orm_object.labels.clear()
+            for name, value in labels.items():
+                if name in old:
+                    if value is not None:  # None means delete
+                        old[name].value = value
+                        orm_object.labels.append(old[name])
+                else:
+                    orm_object.labels.append(
+                        orm_object.Label(name=name, value=value, parent=orm_object.name)
+                    )
+        return orm_object
+
+    def create_database(self, drop_old: bool = False, names: list = None):
         """
         Create the tables in the database.
 
@@ -87,10 +178,10 @@ class SqlClient:
         session = self.get_db_session(session)
         # try:
         uid = uuid.uuid4().hex
-        db_object = obj.to_orm_object(db_class, uid=uid)
+        db_object = self._to_db_object(obj, db_class, uid=uid)
         session.add(db_object)
         session.commit()
-        return obj.__class__.from_orm_object(db_object)
+        return self._to_schema_object(db_object, obj.__class__)
 
     def _get(
         self, session: sqlalchemy.orm.Session, db_class, api_class, **kwargs
@@ -116,7 +207,7 @@ class SqlClient:
         else:
             obj = query.one_or_none()
         if obj:
-            return api_class.from_orm_object(obj)
+            return self._to_schema_object(obj, api_class)
 
     def _update(
         self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs
@@ -135,10 +226,10 @@ class SqlClient:
         session = self.get_db_session(session)
         obj = session.query(db_class).filter_by(**kwargs).one_or_none()
         if obj:
-            api_object.merge_into_orm_object(obj)
+            obj = self._merge_into_db_object(api_object, obj)
             session.add(obj)
             session.commit()
-            return api_object.__class__.from_orm_object(obj)
+            return self._to_schema_object(obj, api_object.__class__)
         else:
             # Create a new object if not found
             logger.debug(f"Object not found, creating a new one: {api_object}")
@@ -192,7 +283,7 @@ class SqlClient:
             pass
         output = query.all()
         logger.debug(f"output: {output}")
-        return _process_output(output, api_class, output_mode)
+        return self._process_output(output, api_class, output_mode)
 
     @staticmethod
     def _drop_none(**kwargs):
@@ -1268,7 +1359,7 @@ class SqlClient:
         query = query.order_by(db.Session.updated.desc())
         if last > 0:
             query = query.limit(last)
-        return _process_output(query.all(), api_models.ChatSession, output_mode)
+        return self._process_output(query.all(), api_models.ChatSession, output_mode)
 
     def create_deployment(
         self,

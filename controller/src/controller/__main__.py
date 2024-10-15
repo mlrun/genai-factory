@@ -46,7 +46,7 @@ def initdb():
     """
     click.echo("Running Init DB")
     db_session = client.get_db_session()
-    client.create_tables(True)
+    client.create_database(True)
 
     # Create admin user:
     click.echo("Creating admin user")

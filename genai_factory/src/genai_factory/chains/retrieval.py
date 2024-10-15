@@ -45,8 +45,8 @@ class DocumentRetriever:
     Example:
         vector_store = get_vector_db(config)
         llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-        query = "What is an llm?"
-        dr = document_retrevial(llm, vector_store)
+        query = "What is an LLM?"
+        dr = document_retrieval(llm, vector_store)
         dr.get_answer(query)
 
     Args:
