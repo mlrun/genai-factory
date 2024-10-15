@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from langchain_core.language_models.llms import LLM
 from langchain_core.prompts.prompt import PromptTemplate
 
 from genai_factory.chains.base import ChainRunner
@@ -36,20 +37,34 @@ class GeneralLLMInvoke(ChainRunner):
     A step that generates a response to a given text based on the conversation history.
     Is the base class for all steps that require an llm invoke but with different prompts.
     """
-    def __init__(self, llm=None, prompt_template=None, **kwargs):
+
+    def __init__(self, llm: LLM = None, prompt_template: str = None, **kwargs):
+        """
+        :param llm:             The llm to use, if None a default llm will be used from config.
+        :param prompt_template: A template for the prompt to use for the llm, if None a default prompt will be used.
+        """
         super().__init__(**kwargs)
         self.llm = llm
         self.prompt_template = prompt_template
         self._chain = None
 
-    def post_init(self, mode="sync"):
+    def post_init(self):
+        """
+        Initialize the chain with the llm and the prompt, load the llm from the config if not given.
+        """
         self.llm = self.llm or get_llm(self.context._config)
         general_prompt = PromptTemplate.from_template(
             self.prompt_template or _general_prompt_template
         )
         self._chain = general_prompt | self.llm
 
-    def _run(self, event: WorkflowEvent):
+    def _run(self, event: WorkflowEvent) -> dict:
+        """
+        Generate a response to a given text based on the conversation history.
+
+        :param event: The event of the workflow, containing the conversation and the query.
+        :return:      An event, containing the answer and the sources.
+        """
         chat_history = str(event.conversation)
         logger.debug(f"Question: {event.query}\nChat history: {chat_history}")
         resp = self._chain.invoke(
@@ -59,11 +74,10 @@ class GeneralLLMInvoke(ChainRunner):
         return {"answer": resp.content, "sources": ""}
 
 
-def get_refine_chain(config, verbose=False, prompt_template=None):
+def get_refine_chain(config, verbose: bool = False, prompt_template: str = None):
     llm = get_llm(config)
     verbose = verbose or config.verbose
     return RefineQuery(llm=llm, verbose=verbose, prompt_template=prompt_template)
-
 
 
 _refine_prompt_template = """
@@ -82,9 +96,15 @@ Standalone request:
 
 
 class RefineQuery(GeneralLLMInvoke):
-    def __init__(self, llm=None, prompt_template=None, **kwargs):
+    """
+    A step that refines a given text based on the conversation, to be a standalone request.
+    The same as GeneralLLMInvoke but with a different prompt.
+    """
+
+    def __init__(self, llm: LLM = None, prompt_template: str = None, **kwargs):
         prompt = prompt_template or _refine_prompt_template
         super().__init__(llm=llm, prompt_template=prompt, **kwargs)
+
 
 _summerize_prompt_template = """
 Given the following conversation and a follow up request, summerize the whole conversation.
@@ -97,7 +117,13 @@ Follow Up Input: {question}
 Summerization:
 """
 
+
 class Summerize(GeneralLLMInvoke):
-    def __init__(self, llm=None, prompt_template=None, **kwargs):
+    """
+    A step that summerizes a given text (promp and query).
+    The same as GeneralLLMInvoke but with a different prompt.
+    """
+
+    def __init__(self, llm: LLM = None, prompt_template: str = None, **kwargs):
         prompt = prompt_template or _summerize_prompt_template
         super().__init__(llm=llm, prompt_template=prompt, **kwargs)

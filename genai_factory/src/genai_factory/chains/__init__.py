@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .llm_classifier import Classifier
-from .sentiment_analysis import SentimentAnalysisStep
-from .base import HistorySaver, SessionLoader, ChainRunner
-from .retrieval import MultiRetriever
-from .llm_invoke import RefineQuery, Summerize, GeneralLLMInvoke
+from genai_factory.chains.base import ChainRunner, HistorySaver, SessionLoader
+from genai_factory.chains.llm_classifier import Classifier
+from genai_factory.chains.llm_invoke import GeneralLLMInvoke, RefineQuery, Summerize
+from genai_factory.chains.retrieval import MultiRetriever
+from genai_factory.chains.sentiment_analysis import SentimentAnalysisStep
