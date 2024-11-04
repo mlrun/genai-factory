@@ -20,9 +20,9 @@ import pathlib
 
 import click
 import dotenv
-from genai_factory.api import router
 
 from genai_factory import WorkflowServerConfig
+from genai_factory.api import router
 
 # Load the environment variables:
 dotenv.load_dotenv(os.environ.get("GENAI_FACTORY_ENV_PATH", "./.env"))
