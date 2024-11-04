@@ -706,27 +706,3 @@ class Client(ABC):
         :return: The list of chat sessions.
         """
         pass
-
-    def _process_output(
-        self,
-        items,
-        obj_class,
-        mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-    ) -> Union[list, dict]:
-        """
-        Process the output of a query. Use this method to convert the output to the desired format.
-        For example when listing.
-
-        :param items:     The items to process.
-        :param obj_class: The class of the items.
-        :param mode:      The output mode.
-
-        :return: The processed items.
-        """
-        if mode == api_models.OutputMode.NAMES:
-            return [item.name for item in items]
-        items = [self._from_db_object(item, obj_class) for item in items]
-        if mode == api_models.OutputMode.DETAILS:
-            return items
-        short = mode == api_models.OutputMode.SHORT
-        return [item.to_dict(short=short) for item in items]

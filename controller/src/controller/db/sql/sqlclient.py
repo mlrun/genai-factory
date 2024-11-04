@@ -1475,20 +1475,26 @@ class SqlClient(Client):
             filters=filters,
         )
 
+    def _process_output(
+        self,
+        items,
+        obj_class,
+        mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+    ) -> Union[list, dict]:
+        """
+        Process the output of a query. Use this method to convert the output to the desired format.
+        For example when listing.
 
-def _dict_to_object(cls, d):
-    if isinstance(d, dict):
-        return cls.from_dict(d)
-    return d
+        :param items:     The items to process.
+        :param obj_class: The class of the items.
+        :param mode:      The output mode.
 
-
-def _process_output(
-    items, obj_class, mode: api_models.OutputMode = api_models.OutputMode.DETAILS
-) -> Union[list, dict]:
-    if mode == api_models.OutputMode.NAMES:
-        return [item.name for item in items]
-    items = [obj_class.from_orm_object(item) for item in items]
-    if mode == api_models.OutputMode.DETAILS:
-        return items
-    short = mode == api_models.OutputMode.SHORT
-    return [item.to_dict(short=short) for item in items]
+        :return: The processed items.
+        """
+        if mode == api_models.OutputMode.NAMES:
+            return [item.name for item in items]
+        items = [self._to_schema_object(item, obj_class) for item in items]
+        if mode == api_models.OutputMode.DETAILS:
+            return items
+        short = mode == api_models.OutputMode.SHORT
+        return [item.to_dict(short=short) for item in items]
