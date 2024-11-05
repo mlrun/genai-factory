@@ -14,7 +14,7 @@
 
 import datetime
 import uuid
-from typing import List, Type, Union
+from typing import List, Optional, Type, Union
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
@@ -1474,6 +1474,29 @@ class SqlClient(Client):
             labels_match=labels_match,
             filters=filters,
         )
+
+    def get_workflow_deployments(
+        self,
+        project_id: str,
+        name: str,
+        db_session: sqlalchemy.orm.Session = None,
+    ) -> List[Optional[api_models.Deployment]]:
+        session = self.get_db_session(db_session)
+        query = session.query(db.Workflow).filter_by(name=name)
+        num_objects = query.count()
+        if num_objects > 1:
+            # Take the latest created:
+            workflow = query.order_by(db.Workflow.created.desc()).first()
+        else:
+            workflow = query.one_or_none()
+        deployments = workflow.deployments
+        if deployments:
+            return [
+                self._to_schema_object(deployment, api_models.Deployment)
+                for deployment in deployments
+            ]
+        else:
+            return []
 
     def _process_output(
         self,

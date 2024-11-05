@@ -17,7 +17,14 @@ from typing import Union
 import requests
 from mlrun.utils.helpers import dict_to_json
 
-from genai_factory.schemas import ChatSession, DataSource, Project, User, Workflow
+from genai_factory.schemas import (
+    ChatSession,
+    DataSource,
+    Deployment,
+    Project,
+    User,
+    Workflow,
+)
 from genai_factory.utils import logger
 
 
@@ -273,3 +280,18 @@ class ControllerClient:
             data=workflow.to_dict(),
         )
         return Workflow(**response["data"])
+
+    def update_deployment(self, deployment: Deployment) -> Deployment:
+        """
+        Update a deployment in the database. If the deployment does not exist, it will be created.
+
+        :param deployment: The deployment object to update.
+
+        :return: The updated deployment object.
+        """
+        response = self._send_request(
+            path=f"projects/{self._project_name}/deployments/{deployment.name}",
+            method="PUT",
+            data=deployment.to_dict(),
+        )
+        return Deployment(**response["data"])

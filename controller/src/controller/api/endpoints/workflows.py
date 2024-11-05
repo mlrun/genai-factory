@@ -263,7 +263,10 @@ def infer_workflow(
         "item": query.dict(),
         "workflow": workflow.to_dict(short=True),
     }
-    path = workflow.deployment
+    deployments = client.get_workflow_deployments(
+        project_id=project_id, name=name, db_session=db_session
+    )
+    path = deployments[0].address
 
     # Sent the event to the application's workflow:
     try:
@@ -279,4 +282,32 @@ def infer_workflow(
         return APIResponse(
             success=False,
             error=f"Failed to infer workflow {name} in project {project_name}: {e}",
+        )
+
+
+@router.get("/workflows/{name}/deployments")
+def get_workflow_deployments(
+    project_name: str,
+    name: str,
+    db_session=Depends(get_db),
+) -> APIResponse:
+    """
+    Get a workflow's deployments from the database.
+
+    :param project_name: The name of the project to get the workflow's deployments from.
+    :param name:         The name of the workflow to get the deployments from.
+    :param db_session:   The database session.
+
+    :return: The response from the database.
+    """
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
+    try:
+        data = client.get_workflow_deployments(
+            project_id=project_id, name=name, db_session=db_session
+        )
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            error=f"Failed to get deployments for workflow {name} in project {project_name}: {e}",
         )
