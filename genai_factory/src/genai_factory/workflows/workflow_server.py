@@ -18,7 +18,7 @@ import uvicorn
 
 from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
-from genai_factory.schemas import WorkflowType
+from genai_factory.schemas import Deployment, WorkflowType
 from genai_factory.sessions import SessionStore
 from genai_factory.utils import logger
 from genai_factory.workflows import Workflow
@@ -47,6 +47,9 @@ class WorkflowServer:
             project_name=self._config.project_name,
             username=self._config.controller_username,
         )
+
+    def get_workflow_id(self, name: str) -> str:
+        return self._workflows[name].get_id()
 
     def set_config(self, config: WorkflowServerConfig):
         self._config = config
@@ -88,7 +91,19 @@ class WorkflowServer:
             raise ValueError(f"workflow {name} not found")
 
         # Run the workflow:
+        event["workflow_id"] = self._workflows[name].get_id()
         return self._workflows[name].run(event)
+
+    def _set_deployment(self):
+        self._controller_client.update_deployment(
+            Deployment(
+                project_id=self._controller_client.project_id,
+                owner_id=self._controller_client.owner_id,
+                address=self._config.deployment_url,
+                **self._config.deployment,
+            ),
+            workflows=list(self._workflows.keys()),
+        )
 
     def _build(self):
         logger.info("Building workflows")
@@ -118,8 +133,11 @@ class WorkflowServer:
         Commit the workflows to the controller.
         """
         for workflow in self._workflows.values():
-            workflow.set_deployment()
-            self._controller_client.update_workflow(workflow.to_schema())
+            workflow._id = self._controller_client.update_workflow(
+                workflow.to_schema()
+            ).uid
+        # Set deployment for all workflows:
+        self._set_deployment()
 
     def api_startup(self):
         print("\nstartup event\n")

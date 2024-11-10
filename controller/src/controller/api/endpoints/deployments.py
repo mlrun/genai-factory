@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import json
 from typing import List, Optional, Tuple
 
 from fastapi import APIRouter, Depends
 
 from controller.api.utils import (
     AuthInfo,
+    _send_to_application,
     get_auth_user,
     get_db,
     parse_version,
@@ -25,19 +26,22 @@ from controller.api.utils import (
 from controller.db import client
 from genai_factory.schemas import (
     APIResponse,
+    ChatSession,
     Deployment,
     DeploymentType,
     OutputMode,
+    QueryItem,
 )
 
 router = APIRouter(prefix="/projects/{project_name}")
 
-router.post("/deployments")
 
-
+@router.post("/deployments")
 def create_deployment(
     project_name: str,
     deployment: Deployment,
+    workflows: List[str] = None,
+    models: List[str] = None,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
@@ -45,12 +49,21 @@ def create_deployment(
 
     :param project_name: The name of the project to create the workflow in.
     :param deployment:   The deployment to create.
+    :param workflows:    List of workflow names to associate with the deployment.
+    :param models:       List of model names to associate with the deployment.
     :param db_session:   The database session.
 
     :return: The response from the database.
     """
+    relations = {}
+    if workflows:
+        relations["workflows"] = workflows
+    if models:
+        relations["model"] = models
     try:
-        data = client.create_deployment(deployment=deployment, db_session=db_session)
+        data = client.create_deployment(
+            deployment=deployment, db_session=db_session, relations=relations
+        )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -106,6 +119,8 @@ def update_deployment(
     project_name: str,
     name: str,
     deployment: Deployment,
+    workflows: List[str] = None,
+    models: List[str] = None,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
@@ -114,13 +129,20 @@ def update_deployment(
     :param project_name: The name of the project to update the deployment in.
     :param name:         The name of the deployment to update.
     :param deployment:   The deployment to update.
+    :param workflows:    List of workflow names to associate with the deployment.
+    :param models:       List of model names to associate with the deployment.
     :param db_session:   The database session.
 
     :return: The response from the database.
     """
+    relations = {}
+    if workflows:
+        relations["workflows"] = workflows
+    if models:
+        relations["model"] = models
     try:
         data = client.update_deployment(
-            name=name, deployment=deployment, db_session=db_session
+            name=name, deployment=deployment, db_session=db_session, relations=relations
         )
         return APIResponse(success=True, data=data)
     except Exception as e:
@@ -212,4 +234,66 @@ def list_deployments(
         return APIResponse(
             success=False,
             message=f"Failed to list deployments in project {project_name}: {e}",
+        )
+
+
+@router.post("/deployments/{name}/infer")
+def infer_deployment(
+    project_name: str,
+    name: str,
+    workflow: str,
+    query: QueryItem,
+    db_session=Depends(get_db),
+    auth: AuthInfo = Depends(get_auth_user),
+) -> APIResponse:
+    """
+    Infer a deployment in the database.
+
+    :param project_name: The name of the project to infer the deployment from.
+    :param name:         The name of the deployment to infer.
+    :param workflow:     The workflow to use for inference.
+    :param query:        The query item to infer.
+    :param db_session:   The database session.
+    :param auth:         The authentication information.
+
+    :return: The response from the database.
+    """
+    # Get deployment from the database
+    project_id = client.get_project(name=project_name).uid
+    deployment = client.get_deployment(
+        name=name, project_id=project_id, deployment_type=DeploymentType.WORKFLOW
+    )
+    if deployment is None:
+        return APIResponse(
+            success=False,
+            message=f"Deployment with name = {name} not found",
+        )
+    if query.session_name:
+        workflow_uid = client.get_workflow(name=workflow, db_session=db_session).uid
+        # Get session by name:
+        session = client.get_session(name=query.session_name, db_session=db_session)
+        if session is None:
+            client.create_session(
+                session=ChatSession(
+                    name=query.session_name,
+                    workflow_id=workflow_uid,
+                    owner_id=client.get_user(
+                        name=auth.username, db_session=db_session
+                    ).uid,
+                ),
+            )
+    path = f"{deployment.address}/api/workflows/{workflow}/infer"
+    try:
+        print(f"Sending data to {path}")
+        data = _send_to_application(
+            path=path,
+            method="POST",
+            data=json.dumps(query.dict()),
+            auth=auth,
+        )
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            message=f"Failed to infer deployment {name} in project {project_name}: {e}",
         )

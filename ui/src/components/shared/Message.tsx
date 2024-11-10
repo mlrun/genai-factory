@@ -44,7 +44,7 @@ const Message = () => {
       return [...safeMessages, { role: 'AI', content: '', sources: [] }]
     })
     const sessionName = sessions.find(session => session.uid === sessionId)?.name || 'default'
-    const result = await Client.inferWorkflow('default',  'default', {
+    const result = await Client.inferWorkflow('default', 'default', 'default', {
       question: inputValue,
       session_name: sessionName,
       data_source: 'default'

@@ -26,6 +26,7 @@ class DeploymentType(str, Enum):
 
 class Deployment(BaseWithVerMetadata):
     _top_level_fields = ["address", "deployment_type"]
+    project_id: str
     address: str
     deployment_type: DeploymentType
     configuration: Optional[Dict[str, Any]] = None

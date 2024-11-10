@@ -700,11 +700,16 @@ class Deployment(VersionedOwnerBaseSchema):
     """
     The Deployment table which is used to define deployments for the project.
 
+    :arg project_id:      The project's id.
+    :arg address:         The address of the deployment. Can be a URL or an IP address.
     :arg deployment_type: The type of the deployment.
                           Can be one of the values in genai_factory.schemas.deployment.DeploymentType.
     """
 
     # Columns:
+    project_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH), ForeignKey("project.uid")
+    )
     address: Mapped[str] = mapped_column(String(255))
     deployment_type: Mapped[str] = mapped_column(String(255))
 
@@ -743,6 +748,7 @@ class Deployment(VersionedOwnerBaseSchema):
 
     def __init__(
         self,
+        project_id,
         uid,
         name,
         spec,
@@ -762,5 +768,6 @@ class Deployment(VersionedOwnerBaseSchema):
             owner_id=owner_id,
             labels=labels,
         )
+        self.project_id = project_id
         self.address = address
         self.deployment_type = deployment_type

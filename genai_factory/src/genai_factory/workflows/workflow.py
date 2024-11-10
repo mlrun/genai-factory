@@ -45,6 +45,7 @@ class Workflow:
 
         # Store parameters:
         self._name = name
+        self._id = None
         self._version = version
         self._workflow_type = workflow_type
         self._skeleton = skeleton
@@ -72,6 +73,9 @@ class Workflow:
             description=self._description,
             # deployment=self._deployment,
         )
+
+    def get_id(self):
+        return self._id
 
     def set_deployment(self):
         self._deployment = os.path.join(

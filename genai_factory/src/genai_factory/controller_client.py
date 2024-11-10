@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Union
+from typing import Optional, Union
 
 import requests
 from mlrun.utils.helpers import dict_to_json
@@ -147,9 +147,26 @@ class ControllerClient:
         )
         return DataSource(**response["data"])
 
+    def create_session(self, session: ChatSession, username: str = None) -> ChatSession:
+        """
+        Create a new session in the database.
+
+        :param session: The session object to create.
+        :param username: The name of the user to create the session for.
+
+        :return: The created session from the database.
+        """
+        username = username or self._username
+        response = self._send_request(
+            path=f"users/{username}/sessions",
+            method="POST",
+            data=session.to_dict(),
+        )
+        return ChatSession(**response["data"])
+
     def get_session(
         self, name: str, uid: str = None, username: str = None
-    ) -> ChatSession:
+    ) -> Optional[ChatSession]:
         """
         Get a user's session
 
@@ -166,6 +183,8 @@ class ControllerClient:
         response = self._send_request(
             path=f"users/{username}/sessions/{name}", method="GET", params=params
         )
+        if response["data"] is None:
+            return None
         return ChatSession(**response["data"])
 
     def get_user(self, username: str = "", email: str = None, uid: str = None) -> User:
@@ -281,17 +300,29 @@ class ControllerClient:
         )
         return Workflow(**response["data"])
 
-    def update_deployment(self, deployment: Deployment) -> Deployment:
+    def update_deployment(
+        self,
+        deployment: Deployment,
+        workflows: list[str] = None,
+        models: list[str] = None,
+    ) -> Deployment:
         """
         Update a deployment in the database. If the deployment does not exist, it will be created.
 
         :param deployment: The deployment object to update.
+        :param workflows:  List of workflow names to associate with the deployment.
+        :param models:     List of model names to associate with the deployment.
 
         :return: The updated deployment object.
         """
+        data = {
+            "workflows": workflows,
+            "models": models,
+            "deployment": deployment.to_dict(),
+        }
         response = self._send_request(
             path=f"projects/{self._project_name}/deployments/{deployment.name}",
             method="PUT",
-            data=deployment.to_dict(),
+            data=data,
         )
         return Deployment(**response["data"])

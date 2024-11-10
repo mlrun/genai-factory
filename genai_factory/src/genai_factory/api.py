@@ -20,7 +20,7 @@ from pydantic import BaseModel
 
 from genai_factory import workflow_server
 from genai_factory.data.doc_loader import get_data_loader, get_loader_obj
-from genai_factory.schemas import Document, QueryItem, Workflow
+from genai_factory.schemas import ChatSession, Document, QueryItem
 
 app = FastAPI()
 
@@ -93,7 +93,6 @@ async def ingest(
 async def infer_workflow(
     request: Request,
     name: str,
-    workflow: Workflow,
     item: QueryItem,
     auth=Depends(get_auth_user),
 ):
@@ -106,8 +105,23 @@ async def infer_workflow(
         "username": auth.username,
         "session_name": item.session_name,
         "query": item.question,
-        "workflow_id": workflow.uid,
     }
+
+    # Create session if not exists
+    if item.session_name:
+        client = app_server.controller_client
+        # Get session by name:
+        session = client.get_session(name=item.session_name)
+        if session is None:
+            workflow_uid = app_server.get_workflow_id(name)
+            client.create_session(
+                session=ChatSession(
+                    name=item.session_name,
+                    workflow_id=workflow_uid,
+                    owner_id=client.owner_id,
+                ),
+            )
+
     resp = app_server.run_workflow(name, event)
     print(f"resp: {resp}")
     return resp
