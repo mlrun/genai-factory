@@ -1291,29 +1291,6 @@ class SqlClient(Client):
             filters=filters,
         )
 
-    def get_workflow_deployments(
-        self,
-        workflow_name: str,
-        db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        Get the deployments for a workflow.
-
-        :param workflow_name: The name of the workflow.
-        :param db_session:    The session to use.
-
-        :return: The list of deployments.
-        """
-        logger.debug(f"Getting workflow deployments: workflow_name={workflow_name}")
-        session = self.get_db_session(db_session)
-        workflow = self.get_workflow(
-            workflow_name, db_session=session, convert_to_api_schema=False
-        )
-        return [
-            self._to_schema_object(deployment, api_models.Deployment)
-            for deployment in workflow.deployments
-        ]
-
     def create_session(
         self,
         session: Union[api_models.ChatSession, dict],

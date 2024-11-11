@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 from typing import List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Depends
 
 from controller.api.utils import (
     AuthInfo,
-    _send_to_application,
     get_auth_user,
     get_db,
     parse_version,
@@ -27,9 +25,7 @@ from controller.api.utils import (
 from controller.db import client
 from genai_factory.schemas import (
     APIResponse,
-    ChatSession,
     OutputMode,
-    QueryItem,
     Workflow,
     WorkflowType,
 )
