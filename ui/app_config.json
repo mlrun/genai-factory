@@ -1,0 +1,17 @@
+{
+  "project": {
+    "name": "default"
+  },
+  "workflow": {
+    "name": "default"
+  },
+  "deployment": {
+    "name": "default"
+  },
+  "user": {
+    "name": "guest"
+  },
+  "data_source": {
+    "name": "default"
+  }
+}

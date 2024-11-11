@@ -26,7 +26,6 @@ from controller.api.utils import (
 from controller.db import client
 from genai_factory.schemas import (
     APIResponse,
-    ChatSession,
     Deployment,
     DeploymentType,
     OutputMode,
@@ -68,7 +67,7 @@ def create_deployment(
     except Exception as e:
         return APIResponse(
             success=False,
-            message=f"Failed to create deployment {deployment.name} in project {project_name}: {e}",
+            error=f"Failed to create deployment {deployment.name} in project {project_name}: {e}",
         )
 
 
@@ -104,13 +103,13 @@ def get_deployment(
         if data is None:
             return APIResponse(
                 success=False,
-                message=f"Deployment with name = {name} not found",
+                error=f"Deployment with name = {name} not found",
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            message=f"Failed to get deployment {name} in project {project_name}: {e}",
+            error=f"Failed to get deployment {name} in project {project_name}: {e}",
         )
 
 
@@ -148,7 +147,7 @@ def update_deployment(
     except Exception as e:
         return APIResponse(
             success=False,
-            message=f"Failed to update deployment {name} in project {project_name}: {e}",
+            error=f"Failed to update deployment {name} in project {project_name}: {e}",
         )
 
 
@@ -185,7 +184,7 @@ def delete_deployment(
     except Exception as e:
         return APIResponse(
             success=False,
-            message=f"Failed to delete deployment {name} in project {project_name}: {e}",
+            error=f"Failed to delete deployment {name} in project {project_name}: {e}",
         )
 
 
@@ -233,7 +232,7 @@ def list_deployments(
     except Exception as e:
         return APIResponse(
             success=False,
-            message=f"Failed to list deployments in project {project_name}: {e}",
+            error=f"Failed to list deployments in project {project_name}: {e}",
         )
 
 
@@ -259,29 +258,19 @@ def infer_deployment(
     :return: The response from the database.
     """
     # Get deployment from the database
-    project_id = client.get_project(name=project_name).uid
+    project_id = client.get_project(name=project_name, db_session=db_session).uid
     deployment = client.get_deployment(
-        name=name, project_id=project_id, deployment_type=DeploymentType.WORKFLOW
+        name=name,
+        project_id=project_id,
+        deployment_type=DeploymentType.WORKFLOW,
+        db_session=db_session,
     )
     if deployment is None:
         return APIResponse(
             success=False,
-            message=f"Deployment with name = {name} not found",
+            error=f"Deployment with name = {name} not found",
         )
-    if query.session_name:
-        workflow_uid = client.get_workflow(name=workflow, db_session=db_session).uid
-        # Get session by name:
-        session = client.get_session(name=query.session_name, db_session=db_session)
-        if session is None:
-            client.create_session(
-                session=ChatSession(
-                    name=query.session_name,
-                    workflow_id=workflow_uid,
-                    owner_id=client.get_user(
-                        name=auth.username, db_session=db_session
-                    ).uid,
-                ),
-            )
+
     path = f"{deployment.address}/api/workflows/{workflow}/infer"
     try:
         print(f"Sending data to {path}")
@@ -295,5 +284,5 @@ def infer_deployment(
     except Exception as e:
         return APIResponse(
             success=False,
-            message=f"Failed to infer deployment {name} in project {project_name}: {e}",
+            error=f"Failed to infer deployment {name} in project {project_name}: {e}",
         )

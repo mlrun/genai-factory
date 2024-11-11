@@ -189,7 +189,7 @@ class ApiClient {
     }
   }
 
-  async inferWorkflow(projectName: string, deploymentName: string, workflowName: string, query: Query) {
+  async inferDeployment(projectName: string, deploymentName: string, workflowName: string, query: Query) {
     try {
       const response = await this.client.post(`/projects/${projectName}/deployments/${deploymentName}/infer`, query, {params: {workflow: workflowName}});
       return this.handleResponse(response);
