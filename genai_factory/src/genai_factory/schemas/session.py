@@ -68,11 +68,12 @@ class Conversation(BaseModel):
 
 
 class ChatSession(BaseWithOwner):
-    _extra_fields = ["history"]
+    _extra_fields = ["history", "extra_data"]
     _top_level_fields = ["workflow_id"]
 
     workflow_id: str
     history: List[Message] = []
+    extra_data: Optional[dict] = None
 
     def to_conversation(self):
         return Conversation.from_list(self.history)
