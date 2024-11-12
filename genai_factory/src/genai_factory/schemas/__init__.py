@@ -21,6 +21,7 @@ from genai_factory.schemas.base import (
 )
 from genai_factory.schemas.data_source import DataSource, DataSourceType
 from genai_factory.schemas.dataset import Dataset
+from genai_factory.schemas.deployment import Deployment, DeploymentType
 from genai_factory.schemas.document import Document
 from genai_factory.schemas.model import Model, ModelType
 from genai_factory.schemas.project import Project

@@ -20,7 +20,7 @@ from mlrun.utils import get_caller_globals
 
 from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
-from genai_factory.schemas import APIDictResponse, WorkflowType
+from genai_factory.schemas import APIDictResponse, Deployment, WorkflowType
 from genai_factory.schemas import Workflow as WorkflowSchema
 from genai_factory.sessions import SessionStore
 
@@ -45,6 +45,7 @@ class Workflow:
 
         # Store parameters:
         self._name = name
+        self._id = None
         self._version = version
         self._workflow_type = workflow_type
         self._skeleton = skeleton
@@ -70,12 +71,29 @@ class Workflow:
             graph=self._graph.to_dict(),
             labels=self._labels,
             description=self._description,
-            deployment=self._deployment,
+            # deployment=self._deployment,
         )
+
+    def get_id(self):
+        return self._id
 
     def set_deployment(self):
         self._deployment = os.path.join(
             self._config.deployment_url, f"api/workflows/{self._name}/infer"
+        )
+        self._client.update_deployment(
+            Deployment(
+                name=self._name,
+                project_id=self._client.project_id,
+                owner_id=self._client.owner_id,
+                version=self._version,
+                deployment_type="workflow",
+                address=self._deployment,
+                labels=self._labels,
+                description="deployment of " + self._description
+                if self._description
+                else self._name + " deployment",
+            )
         )
 
     def get_config(self):

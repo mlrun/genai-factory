@@ -162,8 +162,48 @@ class SqlClient(Client):
             db.Base.metadata.drop_all(self.engine, tables=tables)
         db.Base.metadata.create_all(self.engine, tables=tables, checkfirst=True)
 
+    @staticmethod
+    def _add_relationships(relations: dict, session: sqlalchemy.orm.Session, db_object):
+        """
+        Add relationships to the object.
+
+        :param relations: A dictionary of relationships to add. The structure is:
+                            {
+                                "relation_name": {
+                                    "names": List[str], # The names of the related objects.
+                                    "class": Type[db.Base], # The class of the related objects.}
+                            }
+        :param session:   The session to use.
+        :param db_object: The database object to add the relationships to.
+
+        :return: The updated database object.
+        """
+        for relation, value in relations.items():
+            object_names, klass = value["names"], value["class"]
+            existed_relation = getattr(db_object, relation)
+            # Many relationship:
+            if isinstance(existed_relation, list):
+                for object_name in object_names:
+                    relative_object = (
+                        session.query(klass).filter_by(name=object_name).one_or_none()
+                    )
+                    if relative_object:
+                        existed_relation.append(relative_object)
+            # One relationship:
+            else:
+                relative_object = (
+                    session.query(klass).filter_by(name=object_names).one_or_none()
+                )
+                setattr(db_object, relation, relative_object)
+
+        return db_object
+
     def _create(
-        self, session: sqlalchemy.orm.Session, db_class, obj
+        self,
+        session: sqlalchemy.orm.Session,
+        db_class,
+        obj,
+        relations: dict = None,
     ) -> Type[api_models.Base]:
         """
         Create an object in the database.
@@ -172,6 +212,7 @@ class SqlClient(Client):
         :param session:  The session to use.
         :param db_class: The DB class of the object.
         :param obj:      The object to create.
+        :param relations: The relations to add. The structure is described in the _add_relationships method.
 
         :return: The created object.
         """
@@ -180,11 +221,19 @@ class SqlClient(Client):
         uid = uuid.uuid4().hex
         db_object = self._to_db_object(obj, db_class, uid=uid)
         session.add(db_object)
+        # Add relations
+        if relations:
+            db_object = self._add_relationships(relations, session, db_object)
         session.commit()
         return self._to_schema_object(db_object, obj.__class__)
 
     def _get(
-        self, session: sqlalchemy.orm.Session, db_class, api_class, **kwargs
+        self,
+        session: sqlalchemy.orm.Session,
+        db_class,
+        api_class=None,
+        convert_to_api_schema: bool = True,
+        **kwargs,
     ) -> Union[Type[api_models.Base], None]:
         """
         Get an object from the database.
@@ -207,10 +256,17 @@ class SqlClient(Client):
         else:
             obj = query.one_or_none()
         if obj:
-            return self._to_schema_object(obj, api_class)
+            if convert_to_api_schema:
+                obj = self._to_schema_object(obj, api_class)
+            return obj
 
     def _update(
-        self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs
+        self,
+        session: sqlalchemy.orm.Session,
+        db_class,
+        api_object,
+        relations: dict = None,
+        **kwargs,
     ) -> Type[api_models.Base]:
         """
         Update an object in the database.
@@ -218,6 +274,7 @@ class SqlClient(Client):
         :param session:    The session to use.
         :param db_class:   The DB class of the object.
         :param api_object: The API object with the new data.
+        :param relations:  The relations to add. The structure is described in the _add_relationships method.
         :param kwargs:     The keyword arguments to filter the object.
 
         :return: The updated object.
@@ -228,12 +285,15 @@ class SqlClient(Client):
         if obj:
             obj = self._merge_into_db_object(api_object, obj)
             session.add(obj)
+            # Add relations
+            if relations:
+                obj = self._add_relationships(relations, session, obj)
             session.commit()
             return self._to_schema_object(obj, api_object.__class__)
         else:
             # Create a new object if not found
             logger.debug(f"Object not found, creating a new one: {api_object}")
-            return self._create(session, db_class, api_object)
+            return self._create(session, db_class, api_object, relations=relations)
 
     def _delete(self, session: sqlalchemy.orm.Session, db_class, **kwargs):
         """
@@ -253,7 +313,7 @@ class SqlClient(Client):
     def _list(
         self,
         session: sqlalchemy.orm.Session,
-        db_class: db.Base,
+        db_class: Type[db.Base],
         api_class: Type[api_models.Base],
         output_mode: api_models.OutputMode,
         labels_match: List[str] = None,
@@ -1360,6 +1420,157 @@ class SqlClient(Client):
         if last > 0:
             query = query.limit(last)
         return self._process_output(query.all(), api_models.ChatSession, output_mode)
+
+    @staticmethod
+    def _prepare_deployment_relations(relations: dict):
+        """
+        Prepare the deployment relations.
+
+        :param relations: The relations to prepare.
+
+        :return: The prepared relations dictionary.
+        """
+        if "workflows" in relations:
+            relations["workflows"] = {
+                "class": db.Workflow,
+                "names": relations.get("workflows"),
+            }
+        if "models" in relations:
+            relations["models"] = {
+                "class": db.Model,
+                "names": relations.get("models"),
+            }
+        return relations
+
+    def create_deployment(
+        self,
+        deployment: Union[api_models.Deployment, dict],
+        relations: dict = None,
+        db_session: sqlalchemy.orm.Session = None,
+    ):
+        """
+        Create a new deployment in the database.
+
+        :param deployment: The deployment object to create.
+        :param relations:  The relations to update. The format is {relation_name: [object]}.
+        :param db_session: The session to use.
+
+        :return: The created deployment.
+        """
+        logger.debug(f"Creating deployment: {deployment}")
+        if isinstance(deployment, dict):
+            deployment = api_models.Deployment.from_dict(deployment)
+
+        return self._create(
+            db_session,
+            db.Deployment,
+            deployment,
+            relations=self._prepare_deployment_relations(relations),
+        )
+
+    def get_deployment(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
+        """
+        Get a deployment from the database.
+
+        :param name:       The name of the deployment to get.
+        :param db_session: The session to use.
+
+        :return: The requested deployment.
+        """
+        logger.debug(f"Getting deployment: name={name}")
+        return self._get(
+            db_session, db.Deployment, api_models.Deployment, name=name, **kwargs
+        )
+
+    def update_deployment(
+        self,
+        name: str,
+        deployment: Union[api_models.Deployment, dict],
+        relations: dict = None,
+        db_session: sqlalchemy.orm.Session = None,
+    ):
+        """
+        Update an existing deployment in the database.
+
+        :param name:       The name of the deployment to update.
+        :param deployment: The deployment object with the new data.
+        :param relations:  The relations to update. The format is {relation_name: [object]}.
+        :param db_session: The session to use.
+
+        :return: The updated deployment.
+        """
+        logger.debug(f"Updating deployment: {deployment}")
+        if isinstance(deployment, dict):
+            deployment = api_models.Deployment.from_dict(deployment)
+
+        return self._update(
+            db_session,
+            db.Deployment,
+            deployment,
+            name=name,
+            uid=deployment.uid,
+            relations=self._prepare_deployment_relations(relations),
+        )
+
+    def delete_deployment(
+        self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
+    ):
+        """
+        Delete a deployment from the database.
+
+        :param name:       The name of the deployment to delete.
+        :param db_session: The session to use.
+        :param kwargs:     Additional keyword arguments to filter the deployment.
+        """
+        logger.debug(f"Deleting deployment: name={name}")
+        self._delete(db_session, db.Deployment, name=name, **kwargs)
+
+    def list_deployments(
+        self,
+        name: str = None,
+        owner_id: str = None,
+        version: str = None,
+        deployment_type: Union[api_models.DeploymentType, str] = None,
+        labels_match: Union[list, str] = None,
+        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+        db_session: sqlalchemy.orm.Session = None,
+    ):
+        """
+        List deployments from the database.
+
+        :param name:            The name to filter the deployments by.
+        :param owner_id:        The owner to filter the deployments by.
+        :param version:         The version to filter the deployments by.
+        :param deployment_type: The project to filter the deployments by.
+        :param labels_match:    The labels to match, filter the deployments by labels.
+        :param output_mode:     The output mode.
+        :param db_session:      The session to use.
+
+        :return: The list of deployments.
+        """
+        logger.debug(
+            f"Getting deployments: owner_id={owner_id}, version={version}, type={deployment_type},"
+            f" labels_match={labels_match}, mode={output_mode}"
+        )
+        filters = []
+        if name:
+            filters.append(db.Deployment.name == name)
+        if owner_id:
+            filters.append(db.Deployment.owner_id == owner_id)
+        if version:
+            filters.append(db.Deployment.version == version)
+        if deployment_type:
+            filters.append(db.Deployment.deployment_type == deployment_type)
+        return self._list(
+            session=db_session,
+            db_class=db.Deployment,
+            api_class=api_models.Deployment,
+            output_mode=output_mode,
+            labels_match=labels_match,
+            filters=filters,
+        )
 
     def _process_output(
         self,

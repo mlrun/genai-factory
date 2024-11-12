@@ -19,6 +19,7 @@ import Client from '@services/Api'
 import { canSendMessageAtom, isMessageErrorAtom, messagesAtom, sessionIdAtom } from 'atoms'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
+import { config } from '../../../user_config';
 
 const Message = () => {
   const [inputValue, setInputValue] = useState('')
@@ -44,10 +45,10 @@ const Message = () => {
       return [...safeMessages, { role: 'AI', content: '', sources: [] }]
     })
     const sessionName = sessions.find(session => session.uid === sessionId)?.name || 'default'
-    const result = await Client.inferWorkflow('default',  'default', {
+    const result = await Client.inferDeployment(config.project.name, config.deployment.name, config.workflow.name, {
       question: inputValue,
       session_name: sessionName,
-      data_source: 'default'
+      data_source: config.data_source.name
     }).then(res => {
       if (res.error) {
         setIsMessageError(true)

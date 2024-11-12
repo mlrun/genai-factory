@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 from typing import List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Depends
 
 from controller.api.utils import (
     AuthInfo,
-    _send_to_application,
     get_auth_user,
     get_db,
     parse_version,
@@ -27,9 +25,7 @@ from controller.api.utils import (
 from controller.db import client
 from genai_factory.schemas import (
     APIResponse,
-    ChatSession,
     OutputMode,
-    QueryItem,
     Workflow,
     WorkflowType,
 )
@@ -213,70 +209,4 @@ def list_workflows(
         return APIResponse(
             success=False,
             error=f"Failed to list workflows in project {project_name}: {e}",
-        )
-
-
-@router.post("/workflows/{name}/infer")
-def infer_workflow(
-    project_name: str,
-    name: str,
-    query: QueryItem,
-    db_session=Depends(get_db),
-    auth: AuthInfo = Depends(get_auth_user),
-) -> APIResponse:
-    """
-    Run application workflow.
-
-    :param project_name: The name of the project to run the workflow in.
-    :param name:         The name of the workflow to run.
-    :param query:        The query to run.
-    :param db_session:   The database session.
-    :param auth:         The authentication information.
-
-    :return: The response from the database.
-    """
-    # Get workflow from the database
-    project_id = client.get_project(name=project_name, db_session=db_session).uid
-    workflow = client.get_workflow(
-        project_id=project_id, name=name, db_session=db_session
-    )
-    if workflow is None:
-        return APIResponse(
-            success=False, error=f"Workflow with name = {name} not found"
-        )
-
-    if query.session_name:
-        # Get session by name:
-        session = client.get_session(name=query.session_name, db_session=db_session)
-        if session is None:
-            client.create_session(
-                session=ChatSession(
-                    name=query.session_name,
-                    workflow_id=workflow.uid,
-                    owner_id=client.get_user(
-                        name=auth.username, db_session=db_session
-                    ).uid,
-                ),
-            )
-    # Prepare the data to send to the application's workflow
-    data = {
-        "item": query.dict(),
-        "workflow": workflow.to_dict(short=True),
-    }
-    path = workflow.deployment
-
-    # Sent the event to the application's workflow:
-    try:
-        print(f"Sending data to {path}: {data}")
-        data = _send_to_application(
-            path=path,
-            method="POST",
-            data=json.dumps(data),
-            auth=auth,
-        )
-        return APIResponse(success=True, data=data)
-    except Exception as e:
-        return APIResponse(
-            success=False,
-            error=f"Failed to infer workflow {name} in project {project_name}: {e}",
         )

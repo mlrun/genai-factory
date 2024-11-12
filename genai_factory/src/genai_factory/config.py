@@ -56,6 +56,12 @@ class WorkflowServerConfig(BaseModel):
     URL to use for the workflows server deployment API. Default: http://localhost:8000.
     """
 
+    deployment: dict = {
+        "name": "default",
+        "deployment_type": "workflow",
+        "description": "Default workflow deployment",
+    }
+
     workflows_kwargs: dict[str, dict] = {}
     """
     Keyword arguments for each step's initialization in a workflow. Expecting a dictionary of per workflow name to step

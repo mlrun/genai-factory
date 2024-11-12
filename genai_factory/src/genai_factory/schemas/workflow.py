@@ -32,7 +32,6 @@ class Workflow(BaseWithVerMetadata):
 
     workflow_type: WorkflowType
     project_id: str
-    deployment: Optional[str] = None
     workflow_function: Optional[str] = None
     configuration: Optional[dict] = None
     graph: Optional[dict] = None

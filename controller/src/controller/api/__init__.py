@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from controller.api.endpoints import (
     data_sources,
     datasets,
+    deployments,
     documents,
     models,
     projects,
@@ -79,6 +80,10 @@ api_router.include_router(
 api_router.include_router(
     sessions.router,
     tags=["sessions"],
+)
+api_router.include_router(
+    deployments.router,
+    tags=["deployments"],
 )
 
 # Include the router in the main app

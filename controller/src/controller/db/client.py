@@ -706,3 +706,82 @@ class Client(ABC):
         :return: The list of chat sessions.
         """
         pass
+
+    @abstractmethod
+    def create_deployment(
+        self,
+        deployment: Union[api_models.Deployment, dict],
+        relations: dict = None,
+        **kwargs,
+    ) -> api_models.Deployment:
+        """
+        Create a new deployment in the database.
+
+        :param deployment: The deployment object to create.
+        :param relations:  The relations to update. The format is {relation_name: [object]}.
+
+        :return: The created deployment.
+        """
+        pass
+
+    @abstractmethod
+    def get_deployment(self, name: str, **kwargs) -> Optional[api_models.Deployment]:
+        """
+        Get a deployment from the database.
+
+        :param name: The name of the deployment to get.
+
+        :return: The requested deployment.
+        """
+        pass
+
+    @abstractmethod
+    def update_deployment(
+        self,
+        name: str,
+        deployment: Union[api_models.Deployment, dict],
+        relations: dict = None,
+        **kwargs,
+    ) -> api_models.Deployment:
+        """
+        Update an existing deployment in the database.
+
+        :param name:       The name of the deployment to update.
+        :param deployment: The deployment object with the new data.
+        :param relations:  The relations to update. The format is {relation_name: [object]}.
+
+        :return: The updated deployment.
+        """
+        pass
+
+    @abstractmethod
+    def delete_deployment(self, name: str, **kwargs):
+        """
+        Delete a deployment from the database.
+
+        :param name: The name of the deployment to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_deployments(
+        self,
+        name: str = None,
+        project_id: str = None,
+        deployment_type: Union[api_models.DeploymentType, str] = None,
+        labels_match: Union[list, str] = None,
+        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+        **kwargs,
+    ) -> List[Optional[api_models.Deployment]]:
+        """
+        List deployments from the database.
+
+        :param name:            The name to filter the deployments by.
+        :param project_id:      The project to filter the deployments by.
+        :param deployment_type: The deployment type to filter the deployments by.
+        :param labels_match:    The labels to match, filter the deployments by labels.
+        :param output_mode:     The output mode.
+
+        :return: The list of deployments.
+        """
+        pass

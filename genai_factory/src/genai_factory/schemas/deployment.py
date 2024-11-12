@@ -13,23 +13,23 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
-class ModelType(str, Enum):
+class DeploymentType(str, Enum):
     MODEL = "model"
-    ADAPTER = "adapter"
+    WORKFLOW = "workflow"
+    APPLICATION = "application"
 
 
-class Model(BaseWithVerMetadata):
-    _extra_fields = ["path", "producer"]
-    _top_level_fields = ["model_type", "task"]
-
-    model_type: ModelType
-    base_model: str
+class Deployment(BaseWithVerMetadata):
+    _top_level_fields = ["address", "deployment_type"]
     project_id: str
-    task: Optional[str] = None
-    path: Optional[str] = None
-    producer: Optional[str] = None
+    address: str
+    deployment_type: DeploymentType
+    configuration: Optional[Dict[str, Any]] = None
+    is_deployed: Optional[bool] = False
+    is_monitored: Optional[bool] = False
+    is_local: Optional[bool] = False
