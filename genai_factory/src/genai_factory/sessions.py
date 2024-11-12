@@ -27,10 +27,13 @@ class SessionStore:
                 name=event.session_name, username=event.username
             )
             event.conversation = event.session.to_conversation()
+            event.results["session_extra_data"] = event.session.extra_data
 
     def save(self, event: WorkflowEvent):
         """Save the session and conversation to the database"""
         if event.session_name:
+            if event.results.get("session_extra_data"):
+                event.session.extra_data = event.results.pop("session_extra_data")
             session = event.session
             session.history = event.conversation.to_list()
             self.client.update_session(
