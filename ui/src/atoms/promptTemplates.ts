@@ -25,11 +25,11 @@ export const promptTemplatesErrorAtom = atom<string | null>(null);
 
 export const promptTemplatesWithFetchAtom = atom(
   (get) => get(promptTemplatesAtom),
-  async (_get, set, username) => {
+  async (_get, set, projectName) => {
     set(promptTemplatesLoadingAtom, true);
     set(promptTemplatesErrorAtom, null);
     try {
-      const promptTemplates = await Client.getPromptTemplates(username as string);
+      const promptTemplates = await Client.getPromptTemplates(projectName as string);
       const sortedPromptTemplates = promptTemplates.data.sort((a: PromptTemplate, b: PromptTemplate) => {
         const dateA = new Date(a.created as string);
         const dateB = new Date(b.created as string);

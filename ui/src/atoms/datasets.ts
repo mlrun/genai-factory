@@ -25,11 +25,11 @@ export const datasetsErrorAtom = atom<string | null>(null);
 
 export const datasetsWithFetchAtom = atom(
   (get) => get(datasetsAtom),
-  async (_get, set, username) => {
+  async (_get, set, projectName) => {
     set(datasetsLoadingAtom, true);
     set(datasetsErrorAtom, null);
     try {
-      const datasets = await Client.getDatasets(username as string);
+      const datasets = await Client.getDatasets(projectName as string);
       const sortedDatasets = datasets.data.sort((a: Dataset, b: Dataset) => {
         const dateA = new Date(a.created as string);
         const dateB = new Date(b.created as string);

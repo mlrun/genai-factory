@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import DocumentsTable from '@components/feature/DocumentsTable'
-import Layout from '@components/feature/Layout'
+import { ModalField } from '@shared/types/modalFieldConfigs'
 
-export const DocumentsTablePage = () => {
-  return (
-    <Layout>
-      <DocumentsTable />
-    </Layout>
-  )
-}
+export const datasetFields: ModalField[] = [
+  { name: 'name', label: 'Dataset Name', required: true },
+  { name: 'description', label: 'Description', required: true },
+  { name: 'path', label: 'Path' },
+  { name: 'task', label: 'Task' }
+]

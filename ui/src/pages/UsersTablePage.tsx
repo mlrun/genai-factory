@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Layout from '@components/feature/Layout'
-import UsersTable from '@components/feature/UsersTable'
+import UsersTable from '@components/feature/Tables/UsersTable'
 
 export const UsersTablePage = () => {
   return (

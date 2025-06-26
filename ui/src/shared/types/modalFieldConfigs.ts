@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import DatasetsTable from '@components/feature/DatasetsTable'
-import Layout from '@components/feature/Layout'
-
-export const DatasetsTablePage = () => {
-  return (
-    <Layout>
-      <DatasetsTable />
-    </Layout>
-  )
+export type ModalField = {
+  name: string
+  label: string
+  required?: boolean
+  options?: { label: string; value: string }[]
 }

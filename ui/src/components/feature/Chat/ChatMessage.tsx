@@ -17,7 +17,7 @@ import ChakraUIRenderer from 'chakra-ui-markdown-renderer'
 import { useAtom } from 'jotai'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
-import TypingText from './TypingText'
+import TypingText from '../TypingText'
 
 interface ChatMessageProps {
   message: string

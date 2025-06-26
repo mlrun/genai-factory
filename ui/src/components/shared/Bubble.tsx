@@ -15,7 +15,7 @@
 import { isMessageErrorAtom } from '@atoms/index'
 import { ChatIcon, CheckCircleIcon, CopyIcon } from '@chakra-ui/icons'
 import { Flex, IconButton, Spinner, useColorMode, useToast } from '@chakra-ui/react'
-import ChatMessage from '@components/feature/ChatMessage'
+import ChatMessage from '@components/feature/Chat/ChatMessage'
 import { colors } from '@shared/theme'
 import { Source } from '@shared/types'
 import { useAtom } from 'jotai'

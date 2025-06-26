@@ -13,37 +13,40 @@
 // limitations under the License.
 
 import { selectedSessionAtom, sessionsWithFetchAtom } from '@atoms/sessions'
-import { publicUserAtom, userWithFetchAtom } from '@atoms/users'
 import { AddIcon } from '@chakra-ui/icons'
 import { Button, Flex, useColorMode } from '@chakra-ui/react'
 import Client from '@services/Api'
 import { colors } from '@shared/theme'
 import { generateSessionId } from '@shared/utils'
-import { sessionIdAtom, userWithTokenAtom, usernameAtom } from 'atoms'
+import { sessionIdAtom, userWithTokenAtom, usernameAtom } from '@atoms/index'
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ChatSessionList from './ChatSessionList'
+import { User } from '@shared/types'
 
-const Chatbar = () => {
+interface ChatbarProps {
+  publicUser: User
+}
+
+const Chatbar = ({ publicUser }: ChatbarProps) => {
   const [, setSessionId] = useAtom(sessionIdAtom)
   const [username] = useAtom(usernameAtom)
   const [user] = useAtom(userWithTokenAtom)
   const [, setIsNew] = useState(true)
   const { colorMode } = useColorMode()
-  const [publicUser] = useAtom(publicUserAtom)
   const [, setSelectedSession] = useAtom(selectedSessionAtom)
 
-  const [, fetchPublicUser] = useAtom(userWithFetchAtom)
   const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
 
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
-    fetchSessions(user?.username)
-    fetchPublicUser(user?.username as string)
-  }, [fetchPublicUser, fetchSessions, user])
+    if(user) {
+      fetchSessions(user?.username)
+    }
+  }, [])
 
   useEffect(() => {
     if (pathname.includes('chat')) {

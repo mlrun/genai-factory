@@ -14,55 +14,41 @@
 
 import Logo from '@assets/mlrun.png'
 import { usernameAtom } from '@atoms/index'
-import { HamburgerIcon } from '@chakra-ui/icons'
 import {
   Avatar,
-  Box,
+  Box, Button,
   Flex,
-  IconButton,
   Image,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   useColorMode,
   useDisclosure
 } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
 import { useAtom } from 'jotai'
 import Rightbar from '../Rightbar'
+import { useNavigate } from 'react-router-dom'
 
 type Props = {
-  user: string
   onLoginChange: (value: boolean) => void
 }
-const Topbar = ({ user, onLoginChange }: Props) => {
+
+const Topbar = ({ onLoginChange }: Props) => {
   const { colorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
-
-  const [username, setUsername] = useAtom(usernameAtom)
+  const navigate = useNavigate()
+  const [username] = useAtom(usernameAtom)
 
   return (
     <Flex
-      alignItems={'center'}
-      justifyContent={'space-between'}
+      position="sticky"
+      top={0}
+      alignItems="center"
+      justifyContent="space-between"
       h={16}
-      bg={colorMode == 'dark' ? colors.topbarDark : colors.topbarLight}
+      bg={colorMode === 'dark' ? colors.topbarDark : colors.topbarLight}
+      zIndex={10}
       data-testid="topbar"
     >
-      <Flex alignItems={'center'}>
-        <Box paddingLeft={4} display={{ sm: 'flex', md: 'none' }} data-testid="menu-box">
-          <Menu>
-            <MenuButton as={IconButton} icon={<HamburgerIcon />} data-testid="hamburger-menu" />
-            <MenuList data-testid="menu-list">
-              <MenuItem>Users</MenuItem>
-              <MenuItem>Chat Histories</MenuItem>
-              <MenuItem>Data Sets</MenuItem>
-              <MenuItem>Documents</MenuItem>
-              <MenuItem>Pipelines</MenuItem>
-            </MenuList>
-          </Menu>
-        </Box>
+      <Flex alignItems="center">
         <Image
           paddingLeft={4}
           filter={colorMode === 'light' ? 'invert(100%)' : ''}
@@ -71,9 +57,30 @@ const Topbar = ({ user, onLoginChange }: Props) => {
           alt="logo"
           data-testid="logo"
         />
+        <Box paddingLeft={4} display="flex" gap={2}>
+          <Button variant="ghost" onClick={() => navigate('/projects')}>
+            Projects
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/chat')}>
+            Chat
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/users')}>
+            Users
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/chat-histories')}>
+            chat history
+          </Button>
+        </Box>
       </Flex>
-      <Flex alignItems={'center'} paddingRight={4}>
-        <Avatar _hover={{ cursor: 'pointer' }} onClick={onOpen} size="sm" name={username} src="" data-testid="avatar" />
+      <Flex alignItems="center" paddingRight={4}>
+        <Avatar
+          _hover={{ cursor: 'pointer' }}
+          onClick={onOpen}
+          size="sm"
+          name={username}
+          src=""
+          data-testid="avatar"
+        />
         <Rightbar isOpen={isOpen} onClose={onClose} onLoginChange={onLoginChange} />
       </Flex>
     </Flex>

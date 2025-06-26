@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from '@components/feature/Layout'
-import ProjectsTable from '@components/feature/ProjectsTable'
+import { ModalField } from '@shared/types/modalFieldConfigs'
 
-export const ProjectsTablePage = () => {
-  return (
-    <Layout>
-      <ProjectsTable />
-    </Layout>
-  )
-}
+export const userFields: ModalField[] = [
+  { name: 'name', label: 'Username', required: true },
+  { name: 'email', label: 'Email' },
+  { name: 'full_name', label: 'Full Name' },
+]

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ChatHistoryTable from '@components/feature/ChatHistoryTable'
+import ChatHistoryTable from '@components/feature/Chat/ChatHistoryTable'
 import Layout from '@components/feature/Layout'
 
 export const ChatHistoriesTablePage = () => {

@@ -28,7 +28,7 @@ import {
 import Client from '@services/Api'
 import { colors } from '@shared/theme'
 import { Session } from '@shared/types/session'
-import { canSendMessageAtom, isTypingAtom, messagesAtom, sessionIdAtom, usernameAtom } from 'atoms'
+import { canSendMessageAtom, isTypingAtom, messagesAtom, sessionIdAtom, usernameAtom } from '@atoms/index'
 import { useAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'

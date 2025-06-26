@@ -1,0 +1,80 @@
+// Copyright 2024 Iguazio
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box, Heading, Text, VStack, Code, useColorModeValue } from "@chakra-ui/react";
+
+type ProjectHeaderProps = {
+  name: string;
+  description?: string;
+  uid?: string;
+  created?: string;
+  updated?: string;
+  labels?: Record<string, string> | string | null;
+};
+
+const formatLabels = (labels?: Record<string, string> | string | null) => {
+  if (!labels) return "No labels";
+  if (typeof labels === "string") return labels;
+  return Object.entries(labels)
+    .map(([key, val]) => `${key}: ${val}`)
+    .join(", ");
+};
+
+const ProjectHeader = ({
+  name,
+  description,
+  uid,
+  created,
+  updated,
+  labels,
+}: ProjectHeaderProps) => {
+  const bg = useColorModeValue("gray.50", "gray.700");
+
+  return (
+    <VStack align="start" spacing={6}>
+      <Heading fontSize="3xl" fontWeight="bold">
+        {name}
+      </Heading>
+      <Text fontSize="lg" color="gray.600">
+        {description ?? "No description provided."}
+      </Text>
+
+      <Box bg={bg} p={4} rounded="md" w="full">
+        <Text fontWeight="medium" mb={1}>
+          UID
+        </Text>
+        <Code p={2} display="block" whiteSpace="nowrap" w="full" overflowX="auto">
+          {uid}
+        </Code>
+      </Box>
+
+      <Box w="full">
+        <Text color="gray.500">
+          <strong>Created:</strong> {created ? new Date(created).toLocaleString() : "N/A"}
+        </Text>
+        <Text color="gray.500">
+          <strong>Updated:</strong> {updated ? new Date(updated).toLocaleString() : "N/A"}
+        </Text>
+      </Box>
+
+      <Box w="full">
+        <Text color="gray.500">
+          <strong>Labels:</strong> {formatLabels(labels)}
+        </Text>
+      </Box>
+    </VStack>
+  );
+};
+
+export default ProjectHeader;

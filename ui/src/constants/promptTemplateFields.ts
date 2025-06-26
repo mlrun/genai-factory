@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from '@components/feature/Layout'
-import ModelsTable from '@components/feature/ModelsTable'
+import { ModalField } from '@shared/types/modalFieldConfigs'
 
-export const ModelsTablePage = () => {
-  return (
-    <Layout>
-      <ModelsTable />
-    </Layout>
-  )
-}
+export const promptTemplateFields: ModalField[] = [
+  { name: 'name', label: 'Name', required: true },
+  { name: 'description', label: 'Description', required: true },
+  { name: 'version', label: 'Version' },
+  { name: 'text', label: 'Text', required: true },
+]

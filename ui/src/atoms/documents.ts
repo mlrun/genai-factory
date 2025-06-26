@@ -25,11 +25,11 @@ export const documentsErrorAtom = atom<string | null>(null);
 
 export const documentsWithFetchAtom = atom(
   (get) => get(documentsAtom),
-  async (_get, set, username) => {
+  async (_get, set, projectName) => {
     set(documentsLoadingAtom, true);
     set(documentsErrorAtom, null);
     try {
-      const documents = await Client.getDocuments(username as string);
+      const documents = await Client.getDocuments(projectName as string);
       const sortedDocuments = documents.data.sort((a: Document, b: Document) => {
         const dateA = new Date(a.created as string);
         const dateB = new Date(b.created as string);

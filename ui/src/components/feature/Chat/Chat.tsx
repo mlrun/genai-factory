@@ -17,7 +17,7 @@ import Bubble from '@components/shared/Bubble'
 import Message from '@components/shared/Message'
 import Client from '@services/Api'
 import { ChatHistory } from '@shared/types'
-import { messagesAtom, sessionIdAtom, usernameAtom } from 'atoms'
+import { messagesAtom, sessionIdAtom, usernameAtom } from '@atoms/index'
 import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
@@ -30,7 +30,10 @@ const Chat = () => {
     async function fetchData() {
       await Client.getSession(username, sessionId)
     }
-    fetchData()
+
+    if(username.length > 0 && !sessionId) {
+      fetchData()
+    }
   }, [sessionId, setMessages, username])
 
   const lastMessageRef = useRef<HTMLDivElement>(null)

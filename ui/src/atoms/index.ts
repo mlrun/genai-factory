@@ -15,6 +15,7 @@
 import { ChatHistory, User } from '@shared/types';
 import { atom } from 'jotai';
 import { atomWithStorage } from "jotai/utils";
+import { Project } from '@shared/types/project'
 
 
 export const sessionIdAtom = atom<string>('');
@@ -28,7 +29,7 @@ export const usernameAtom = atom<string>('');
 export const isTypingAtom = atom<boolean>(false);
 export const canSendMessageAtom = atom<boolean>(true);
 export const isMessageErrorAtom = atom<boolean>(false);
-
+export const projectAtom = atom<Project | null>(null)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const selectedRowAtom = atom<any>({});
 

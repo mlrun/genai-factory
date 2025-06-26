@@ -26,33 +26,28 @@ import {
   ModalHeader,
   ModalOverlay
 } from '@chakra-ui/react'
-import { DataSource, DataSourceType } from '@shared/types/dataSource'
+import { Project } from '@shared/types/project'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 
-type DataSourceModalProps = {
+type ProjectModalProps = {
   isOpen: boolean
   onClose: () => void
-  onSave: (dataSource: DataSource) => void
-  dataSource?: DataSource
+  onSave: (project: Project) => void
+  project?: Project
 }
 
-const AddEditDataSourceModal: React.FC<DataSourceModalProps> = ({ isOpen, onClose, onSave, dataSource }) => {
+const AddEditProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose, onSave, project }) => {
   const [publicUser] = useAtom(publicUserAtom)
-  const [formData, setFormData] = useState<DataSource>(
-    dataSource || {
-      name: '',
-      description: '',
-      owner_id: publicUser.uid as string,
-      project_id: '',
-      data_source_type: DataSourceType.OTHER
-    }
+
+  const [formData, setFormData] = useState<Project>(
+    project || { name: '', description: '', owner_id: publicUser.uid as string ?? '' }
   )
   useEffect(() => {
-    if (dataSource) {
-      setFormData(dataSource)
+    if (project) {
+      setFormData(project)
     }
-  }, [dataSource])
+  }, [project])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -69,22 +64,31 @@ const AddEditDataSourceModal: React.FC<DataSourceModalProps> = ({ isOpen, onClos
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          {dataSource?.uid ? 'Edit' : 'Add New'} {' DataSource'}
+          {project?.uid ? 'Edit' : 'Add New'} {' Project'}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FormControl id="name" mb={4}>
-            <FormLabel>Data Source Name</FormLabel>
+            <FormLabel>Project</FormLabel>
             <Input type="text" name="name" value={formData.name || ''} onChange={handleChange} />
           </FormControl>
           <FormControl id="description" mb={4}>
             <FormLabel>Description</FormLabel>
             <Input type="text" name="description" value={formData.description || ''} onChange={handleChange} />
           </FormControl>
+          <FormControl id="version" mb={4}>
+            <FormLabel>Version</FormLabel>
+            <Input type="text" name="version" value={formData.version || ''} onChange={handleChange} />
+          </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button isDisabled={!formData.description || !formData.name} colorScheme="blue" mr={3} onClick={handleSubmit}>
-            {dataSource ? 'Save Changes' : 'Add DataSource'}
+          <Button
+            isDisabled={!formData.description || !formData.name || !formData.version}
+            colorScheme="blue"
+            mr={3}
+            onClick={handleSubmit}
+          >
+            {project ? 'Save Changes' : 'Add Project'}
           </Button>
           <Button variant="ghost" onClick={onClose}>
             Cancel
@@ -95,4 +99,4 @@ const AddEditDataSourceModal: React.FC<DataSourceModalProps> = ({ isOpen, onClos
   )
 }
 
-export default AddEditDataSourceModal
+export default AddEditProjectModal
