@@ -4,5 +4,5 @@ langchain_huggingface
 pymilvus
 langchain-milvus
 fastapi
-mlrun==1.6.4
+mlrun==1.9.1
 uvicorn==0.30.6
