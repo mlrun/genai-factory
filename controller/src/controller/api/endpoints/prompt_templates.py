@@ -39,7 +39,7 @@ def create_prompt(
     :return: The response from the database.
     """
     try:
-        data = client.create_prompt_template(prompt=prompt, db_session=db_session)
+        data = client.create_prompt_template(prompt_template=prompt, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -108,7 +108,7 @@ def update_prompt(
     """
     try:
         data = client.update_prompt_template(
-            name=name, prompt=prompt, db_session=db_session
+            name=name, prompt_template=prompt, db_session=db_session
         )
         return APIResponse(success=True, data=data)
     except Exception as e:
