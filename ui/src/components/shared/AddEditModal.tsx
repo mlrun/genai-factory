@@ -78,7 +78,6 @@ function AddEditModal<T extends { uid?: string }>({
             <FormControl key={field.name} id={field.name} mb={4} isRequired={field.required}>
               <FormLabel>
                 {field.label}
-                {field.required && <span style={{ color: 'red' }}> *</span>}
               </FormLabel>
 
               {field.options ? (

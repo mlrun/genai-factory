@@ -16,7 +16,8 @@ import Logo from '@assets/mlrun.png'
 import { usernameAtom } from '@atoms/index'
 import {
   Avatar,
-  Box, Button,
+  Box,
+  Button,
   Flex,
   Image,
   useColorMode,
@@ -25,7 +26,7 @@ import {
 import { colors } from '@shared/theme'
 import { useAtom } from 'jotai'
 import Rightbar from '../Rightbar'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 type Props = {
   onLoginChange: (value: boolean) => void
@@ -35,7 +36,23 @@ const Topbar = ({ onLoginChange }: Props) => {
   const { colorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const navigate = useNavigate()
+  const location = useLocation()
   const [username] = useAtom(usernameAtom)
+
+  // Helper to check if current path is base or base/*
+  const isPathActive = (current: string, base: string) =>
+    current === base || current.startsWith(base + '/')
+
+  const navItems = [
+    { label: 'Projects', path: '/projects' },
+    { label: 'Chat', path: '/chat' },
+    { label: 'Users', path: '/users' }
+  ]
+
+  // Only show "Chat History" if in /chat or /chat-histories
+  const shouldShowChatHistory =
+    isPathActive(location.pathname, '/chat') ||
+    isPathActive(location.pathname, '/chat-histories')
 
   return (
     <Flex
@@ -58,18 +75,21 @@ const Topbar = ({ onLoginChange }: Props) => {
           data-testid="logo"
         />
         <Box paddingLeft={4} display="flex" gap={2}>
-          <Button variant="ghost" onClick={() => navigate('/projects')}>
-            Projects
-          </Button>
-          <Button variant="ghost" onClick={() => navigate('/chat')}>
-            Chat
-          </Button>
-          <Button variant="ghost" onClick={() => navigate('/users')}>
-            Users
-          </Button>
-          <Button variant="ghost" onClick={() => navigate('/chat-histories')}>
-            chat history
-          </Button>
+          {[...navItems, ...(shouldShowChatHistory ? [{ label: 'Chat History', path: '/chat-histories' }] : [])]
+            .map(({ label, path }) => {
+              const isActive = isPathActive(location.pathname, path)
+              return (
+                <Button
+                  key={path}
+                  variant={isActive ? 'solid' : 'ghost'}
+                  onClick={() => navigate(path)}
+                  fontWeight={isActive ? 'bold' : 'normal'}
+                  colorScheme={isActive ? 'blue' : undefined}
+                >
+                  {label}
+                </Button>
+              )
+            })}
         </Box>
       </Flex>
       <Flex alignItems="center" paddingRight={4}>
@@ -81,10 +101,16 @@ const Topbar = ({ onLoginChange }: Props) => {
           src=""
           data-testid="avatar"
         />
-        <Rightbar isOpen={isOpen} onClose={onClose} onLoginChange={onLoginChange} />
+        <Rightbar
+          isOpen={isOpen}
+          onClose={onClose}
+          onLoginChange={onLoginChange}
+        />
       </Flex>
     </Flex>
   )
 }
 
 export default Topbar
+
+

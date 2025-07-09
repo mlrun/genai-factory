@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Heading, Text, VStack, Code, useColorModeValue } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  Code,
+  useColorModeValue,
+  Tag,
+} from "@chakra-ui/react";
 
 type ProjectHeaderProps = {
   name: string;
@@ -21,14 +29,6 @@ type ProjectHeaderProps = {
   created?: string;
   updated?: string;
   labels?: Record<string, string> | string | null;
-};
-
-const formatLabels = (labels?: Record<string, string> | string | null) => {
-  if (!labels) return "No labels";
-  if (typeof labels === "string") return labels;
-  return Object.entries(labels)
-    .map(([key, val]) => `${key}: ${val}`)
-    .join(", ");
 };
 
 const ProjectHeader = ({
@@ -41,11 +41,37 @@ const ProjectHeader = ({
 }: ProjectHeaderProps) => {
   const bg = useColorModeValue("gray.50", "gray.700");
 
+  const renderLabels = () => {
+    if (!labels || (typeof labels === "string" && labels.trim() === ""))
+      return <Text color="gray.500">No labels</Text>;
+
+    if (typeof labels === "string") {
+      return (
+        <Tag colorScheme="purple" variant="subtle" borderRadius="md">
+          {labels}
+        </Tag>
+      );
+    }
+
+    return Object.entries(labels).map(([key, val]) => (
+      <Tag
+        key={`${key}:${val}`}
+        colorScheme="purple"
+        variant="subtle"
+        borderRadius="md"
+        whiteSpace="nowrap"
+      >
+        {key} : {val}
+      </Tag>
+    ));
+  };
+
   return (
     <VStack align="start" spacing={6}>
       <Heading fontSize="3xl" fontWeight="bold">
         {name}
       </Heading>
+
       <Text fontSize="lg" color="gray.600">
         {description ?? "No description provided."}
       </Text>
@@ -61,20 +87,31 @@ const ProjectHeader = ({
 
       <Box w="full">
         <Text color="gray.500">
-          <strong>Created:</strong> {created ? new Date(created).toLocaleString() : "N/A"}
+          <strong>Created:</strong>{" "}
+          {created ? new Date(created).toLocaleString() : "N/A"}
         </Text>
         <Text color="gray.500">
-          <strong>Updated:</strong> {updated ? new Date(updated).toLocaleString() : "N/A"}
+          <strong>Updated:</strong>{" "}
+          {updated ? new Date(updated).toLocaleString() : "N/A"}
         </Text>
       </Box>
 
-      <Box w="full">
-        <Text color="gray.500">
-          <strong>Labels:</strong> {formatLabels(labels)}
+      <Box
+        w="full"
+        display="flex"
+        alignItems="center"
+        gap={2}
+        flexWrap="wrap"
+      >
+        <Text color="gray.500" fontWeight="semibold">
+          Labels:
         </Text>
+        {renderLabels()}
       </Box>
     </VStack>
   );
 };
 
 export default ProjectHeader;
+
+

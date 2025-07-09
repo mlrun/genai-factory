@@ -14,41 +14,122 @@
 
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { Button, Flex } from '@chakra-ui/react'
-import Breadcrumbs from '@components/shared/Breadcrumbs'
 import DataTableComponent from '@components/shared/Datatable'
 import { colors } from '@shared/theme'
-import { DataRow } from '@shared/types'
+import { ChatHistory } from '@shared/types'
 import { useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component'
 
-type ChatHistory = {
-  user: string
-}
 const ChatHistoryTable = () => {
   const [selectedRows, setSelectedRows] = useState<ChatHistory[]>([])
 
   const data: Partial<ChatHistory>[] = [
-    { user: 'John Doe' },
-    { user: 'Jane Smith' },
-    { user: 'Alice Johnson' },
-    { user: 'Bob Brown' },
-    { user: 'Charlie Davis' },
-    { user: 'Diana Evans' },
-    { user: 'Frank Green' },
-    { user: 'Grace Hill' },
-    { user: 'Henry Irving' },
-    { user: 'Isabel Jackson' },
-    { user: 'Isabel Jackson' },
-    { user: 'Isabel Jackson' },
-    { user: 'Isabel Jackson' },
-    { user: 'Isabel Jackson' },
-    { user: 'Isabel Jackson' }
+    {
+      name: 'Guest',
+      content: 'Hello, how can I help you?',
+      role: 'assistant',
+      sources: [],
+    },
+    {
+      name: 'John Doe',
+      content: 'I need help with my project.',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Jane Smith',
+      content: 'Can you explain how MLRun works?',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Alice Johnson',
+      content: 'Sure, here’s a quick overview of MLRun...',
+      role: 'assistant',
+      sources: [{ title: 'MLRun Docs', source: 'https://docs.mlrun.org' }],
+    },
+    {
+      name: 'Bob Brown',
+      content: 'What is the best way to deploy a function?',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Charlie Davis',
+      content: 'You can use Nuclio or Kubernetes jobs.',
+      role: 'assistant',
+      sources: [{ title: 'Deployment Options', source: 'https://docs.mlrun.org/en/latest/deploy/' }],
+    },
+    {
+      name: 'Diana Evans',
+      content: 'I got an error when running my pipeline.',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Frank Green',
+      content: 'Please check the logs for more details.',
+      role: 'assistant',
+      sources: [],
+    },
+    {
+      name: 'Grace Hill',
+      content: 'Can I customize the image used in the function?',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Henry Irving',
+      content: 'Yes, just set the `image` field when defining the function.',
+      role: 'assistant',
+      sources: [],
+    },
+    {
+      name: 'Isabel Jackson',
+      content: 'Thanks for the help!',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Isabel Jackson',
+      content: 'Can you save this session?',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Isabel Jackson',
+      content: 'What are the available datasets?',
+      role: 'user',
+      sources: [],
+    },
+    {
+      name: 'Isabel Jackson',
+      content: 'Please provide an example.',
+      role: 'user',
+      sources: [],
+    },
   ]
 
   const columns = [
     {
-      name: 'User',
-      selector: (row: DataRow<Partial<ChatHistory>>) => row.data.user ?? '',
+      name: 'User Name',
+      selector: (row: ChatHistory) => {
+        return row.name ?? ''
+      },
+      sortable: true
+    },
+    {
+      name: 'Role',
+      selector: (row: ChatHistory) => {
+        return row.role ?? ''
+      },
+      sortable: true
+    },
+    {
+      name: 'Message',
+      selector: (row: ChatHistory) => {
+        return row.content ?? ''
+      },
       sortable: true
     }
   ]
@@ -70,19 +151,6 @@ const ChatHistoryTable = () => {
 
   return (
     <Flex p={4} flexDirection={'column'} flexGrow={'grow'} width={'100%'}>
-      <Breadcrumbs
-        crumbs={[
-          {
-            page: 'Admin',
-            url: '/admin'
-          },
-          {
-            page: 'Chat Histories',
-            url: '/histories'
-          }
-        ]}
-      />
-
       <DataTableComponent
         filterText={''}
         title={'Chat Histories'}
