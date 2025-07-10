@@ -180,7 +180,8 @@ class ControllerClient:
         response = self._send_request(
             path=f"users/{username}", method="GET", params=params
         )
-        return User(**response["data"])
+        user_data = dict(response["data"])
+        return User(**user_data)
 
     def update_session(
         self,
@@ -212,7 +213,8 @@ class ControllerClient:
         response = self._send_request(
             path=f"projects/{self._project_name}", method="GET"
         )
-        return Project(**response["data"])
+        data = dict(response["data"])
+        return Project(**data)
 
     def create_workflow(self, workflow: Union[Workflow, dict]) -> Workflow:
         """
@@ -272,4 +274,5 @@ class ControllerClient:
             method="PUT",
             data=workflow.to_dict(),
         )
-        return Workflow(**response["data"])
+        data = dict(response["data"])
+        return Workflow(**data)
