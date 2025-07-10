@@ -3,6 +3,6 @@ langchain_openai
 langchain_huggingface
 pymilvus
 langchain-milvus
-fastapi
+fastapi>=0.103.0
 mlrun==1.9.1
 uvicorn==0.30.6
