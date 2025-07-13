@@ -456,6 +456,7 @@ class PromptTemplate(VersionedOwnerBaseSchema):
     project_id: Mapped[str] = mapped_column(
         String(ID_LENGTH), ForeignKey("project.uid")
     )
+    text: Mapped[str]
 
     # Relationships:
 
@@ -483,6 +484,7 @@ class PromptTemplate(VersionedOwnerBaseSchema):
         name,
         spec,
         version,
+        text,
         project_id,
         description=None,
         owner_id=None,
@@ -498,6 +500,7 @@ class PromptTemplate(VersionedOwnerBaseSchema):
             labels=labels,
         )
         self.project_id = project_id
+        self.text = text
 
 
 class Document(VersionedOwnerBaseSchema):
