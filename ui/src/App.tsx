@@ -15,7 +15,6 @@
 import { ChakraProvider } from '@chakra-ui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider as JotaiProvider } from 'jotai'
-import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
 import { LoginPage } from 'pages/LoginPage'
 import { UsersTablePage } from 'pages/UsersTablePage'
@@ -42,10 +41,6 @@ function App() {
     {
       path: '/users',
       element: <UsersTablePage />
-    },
-    {
-      path: '/chat-histories',
-      element: <ChatHistoriesTablePage />
     },
     {
       path: '/chat',

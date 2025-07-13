@@ -49,11 +49,6 @@ const Topbar = ({ onLoginChange }: Props) => {
     { label: 'Users', path: '/users' }
   ]
 
-  // Only show "Chat History" if in /chat or /chat-histories
-  const shouldShowChatHistory =
-    isPathActive(location.pathname, '/chat') ||
-    isPathActive(location.pathname, '/chat-histories')
-
   return (
     <Flex
       position="sticky"
@@ -75,21 +70,20 @@ const Topbar = ({ onLoginChange }: Props) => {
           data-testid="logo"
         />
         <Box paddingLeft={4} display="flex" gap={2}>
-          {[...navItems, ...(shouldShowChatHistory ? [{ label: 'Chat History', path: '/chat-histories' }] : [])]
-            .map(({ label, path }) => {
-              const isActive = isPathActive(location.pathname, path)
-              return (
-                <Button
-                  key={path}
-                  variant={isActive ? 'solid' : 'ghost'}
-                  onClick={() => navigate(path)}
-                  fontWeight={isActive ? 'bold' : 'normal'}
-                  colorScheme={isActive ? 'blue' : undefined}
-                >
-                  {label}
-                </Button>
-              )
-            })}
+          {navItems.map(({ label, path }) => {
+            const isActive = isPathActive(location.pathname, path)
+            return (
+              <Button
+                key={path}
+                variant={isActive ? 'solid' : 'ghost'}
+                onClick={() => navigate(path)}
+                fontWeight={isActive ? 'bold' : 'normal'}
+                colorScheme={isActive ? 'blue' : undefined}
+              >
+                {label}
+              </Button>
+            )
+          })}
         </Box>
       </Flex>
       <Flex alignItems="center" paddingRight={4}>
