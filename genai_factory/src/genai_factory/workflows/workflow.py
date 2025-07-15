@@ -141,11 +141,11 @@ class Workflow:
         if getattr(context, "session_store", None) is None:
             context.session_store = self._session_store
 
-    def run(self, event, db_session=None):
+    async def run(self, event, db_session=None):
         # todo: pass sql db_session to steps via context or event
         server = self.server
         try:
-            resp = server.test("", body=event)
+            resp = await server.test("", body=event)
         except Exception as e:
             server.wait_for_completion()
             raise e
