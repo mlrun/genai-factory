@@ -25,11 +25,11 @@ export const workflowsErrorAtom = atom<string | null>(null);
 
 export const workflowsWithFetchAtom = atom(
   (get) => get(workflowsAtom),
-  async (_get, set, username) => {
+  async (_get, set, projectName) => {
     set(workflowsLoadingAtom, true);
     set(workflowsErrorAtom, null);
     try {
-      const workflows = await Client.getWorkflows(username as string);
+      const workflows = await Client.getWorkflows(projectName as string);
       const sortedWorkflows = workflows.data.sort((a: Workflow, b: Workflow) => {
         const dateA = new Date(a.created as string);
         const dateB = new Date(b.created as string);

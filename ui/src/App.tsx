@@ -15,18 +15,12 @@
 import { ChakraProvider } from '@chakra-ui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider as JotaiProvider } from 'jotai'
-import { ChatHistoriesTablePage } from 'pages/ChatHistoriesPage'
 import { ChatPage } from 'pages/ChatPage'
-import { DataSourceTablePage } from 'pages/DataSourcesTablePage'
-import { DatasetsTablePage } from 'pages/DatasetsTablePage'
-import { DocumentsTablePage } from 'pages/DocumentsTablePage'
 import { LoginPage } from 'pages/LoginPage'
-import { ModelsTablePage } from 'pages/ModelsTablePage'
-import { ProjectsTablePage } from 'pages/ProjectsTablePage'
-import { PromptTemplatesTablePage } from 'pages/PromptTemplatesTablePage'
 import { UsersTablePage } from 'pages/UsersTablePage'
-import { WorkflowsTablePage } from 'pages/WorkflowsTablePage'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { ProjectsPage } from 'pages/ProjectsPage'
+import { ProjectPage } from 'pages/ProjectPage'
 
 function App() {
   const queryClient = new QueryClient()
@@ -37,35 +31,17 @@ function App() {
       element: <LoginPage />
     },
     {
-      path: '/admin/users',
+      path: '/projects',
+      element: <ProjectsPage />
+    },
+    {
+      path: '/projects/:name',
+      element: <ProjectPage />
+    },
+    {
+      path: '/users',
       element: <UsersTablePage />
     },
-    { path: '/admin/projects', element: <ProjectsTablePage /> },
-    { path: '/admin/data-sources', element: <DataSourceTablePage /> },
-    { path: '/admin/datasets', element: <DatasetsTablePage /> },
-    { path: '/admin/models', element: <ModelsTablePage /> },
-    { path: '/admin/documents', element: <DocumentsTablePage /> },
-    { path: '/admin/prompt-templates', element: <PromptTemplatesTablePage /> },
-    { path: '/admin/workflows', element: <WorkflowsTablePage /> },
-    {
-      path: '/admin/histories',
-      element: <ChatHistoriesTablePage />
-    },
-
-    {
-      path: '/admin/datasets',
-      element: <UsersTablePage />
-    },
-    {
-      path: '/admin/documents',
-      element: <ChatHistoriesTablePage />
-    },
-
-    {
-      path: '/admin/pipelines',
-      element: <UsersTablePage />
-    },
-
     {
       path: '/chat',
       element: <ChatPage />

@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from '@components/feature/Layout'
-import UsersTable from '@components/feature/Tables/UsersTable'
+import { isTypingAtom } from '@atoms/index'
+import ChakraUIRenderer from 'chakra-ui-markdown-renderer'
+import { useAtom } from 'jotai'
+import React from 'react'
+import ReactMarkdown from 'react-markdown'
+import TypingText from '../TypingText'
 
-export const UsersTablePage = () => {
+interface ChatMessageProps {
+  message: string
+}
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const [isTyping] = useAtom(isTypingAtom)
+
+  if (isTyping) {
+    return <TypingText text={message} />
+  }
   return (
-    <Layout>
-      <UsersTable />
-    </Layout>
+    <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
+      {message}
+    </ReactMarkdown>
   )
 }
+
+export default ChatMessage

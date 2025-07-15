@@ -60,14 +60,14 @@ describe('Topbar component', () => {
   })
 
   it('renders Topbar component with logo and avatar', () => {
-    renderWithProviders(<Topbar user="testuser" onLoginChange={mockOnLoginChange} />)
+    renderWithProviders(<Topbar onLoginChange={mockOnLoginChange} />)
 
     expect(screen.getByTestId('logo')).toBeInTheDocument()
     expect(screen.getByTestId('avatar')).toBeInTheDocument()
   })
 
   it('renders menu items when HamburgerIcon is clicked', () => {
-    renderWithProviders(<Topbar user="testuser" onLoginChange={mockOnLoginChange} />)
+    renderWithProviders(<Topbar onLoginChange={mockOnLoginChange} />)
 
     const menuButton = screen.getByTestId('hamburger-menu')
     fireEvent.click(menuButton)
@@ -81,7 +81,7 @@ describe('Topbar component', () => {
   })
 
   it('opens Rightbar when avatar is clicked', () => {
-    renderWithProviders(<Topbar user="testuser" onLoginChange={mockOnLoginChange} />)
+    renderWithProviders(<Topbar onLoginChange={mockOnLoginChange} />)
 
     const avatar = screen.getByTestId('avatar')
     fireEvent.click(avatar)

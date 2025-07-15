@@ -14,55 +14,53 @@
 
 import Logo from '@assets/mlrun.png'
 import { usernameAtom } from '@atoms/index'
-import { HamburgerIcon } from '@chakra-ui/icons'
 import {
   Avatar,
   Box,
+  Button,
   Flex,
-  IconButton,
   Image,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   useColorMode,
   useDisclosure
 } from '@chakra-ui/react'
 import { colors } from '@shared/theme'
 import { useAtom } from 'jotai'
 import Rightbar from '../Rightbar'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 type Props = {
-  user: string
   onLoginChange: (value: boolean) => void
 }
-const Topbar = ({ user, onLoginChange }: Props) => {
+
+const Topbar = ({ onLoginChange }: Props) => {
   const { colorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [username] = useAtom(usernameAtom)
 
-  const [username, setUsername] = useAtom(usernameAtom)
+  // Helper to check if current path is base or base/*
+  const isPathActive = (current: string, base: string) =>
+    current === base || current.startsWith(base + '/')
+
+  const navItems = [
+    { label: 'Projects', path: '/projects' },
+    { label: 'Chat', path: '/chat' },
+    { label: 'Users', path: '/users' }
+  ]
 
   return (
     <Flex
-      alignItems={'center'}
-      justifyContent={'space-between'}
+      position="sticky"
+      top={0}
+      alignItems="center"
+      justifyContent="space-between"
       h={16}
-      bg={colorMode == 'dark' ? colors.topbarDark : colors.topbarLight}
+      bg={colorMode === 'dark' ? colors.topbarDark : colors.topbarLight}
+      zIndex={10}
       data-testid="topbar"
     >
-      <Flex alignItems={'center'}>
-        <Box paddingLeft={4} display={{ sm: 'flex', md: 'none' }} data-testid="menu-box">
-          <Menu>
-            <MenuButton as={IconButton} icon={<HamburgerIcon />} data-testid="hamburger-menu" />
-            <MenuList data-testid="menu-list">
-              <MenuItem>Users</MenuItem>
-              <MenuItem>Chat Histories</MenuItem>
-              <MenuItem>Data Sets</MenuItem>
-              <MenuItem>Documents</MenuItem>
-              <MenuItem>Pipelines</MenuItem>
-            </MenuList>
-          </Menu>
-        </Box>
+      <Flex alignItems="center">
         <Image
           paddingLeft={4}
           filter={colorMode === 'light' ? 'invert(100%)' : ''}
@@ -71,13 +69,42 @@ const Topbar = ({ user, onLoginChange }: Props) => {
           alt="logo"
           data-testid="logo"
         />
+        <Box paddingLeft={4} display="flex" gap={2}>
+          {navItems.map(({ label, path }) => {
+            const isActive = isPathActive(location.pathname, path)
+            return (
+              <Button
+                key={path}
+                variant={isActive ? 'solid' : 'ghost'}
+                onClick={() => navigate(path)}
+                fontWeight={isActive ? 'bold' : 'normal'}
+                colorScheme={isActive ? 'blue' : undefined}
+              >
+                {label}
+              </Button>
+            )
+          })}
+        </Box>
       </Flex>
-      <Flex alignItems={'center'} paddingRight={4}>
-        <Avatar _hover={{ cursor: 'pointer' }} onClick={onOpen} size="sm" name={username} src="" data-testid="avatar" />
-        <Rightbar isOpen={isOpen} onClose={onClose} onLoginChange={onLoginChange} />
+      <Flex alignItems="center" paddingRight={4}>
+        <Avatar
+          _hover={{ cursor: 'pointer' }}
+          onClick={onOpen}
+          size="sm"
+          name={username}
+          src=""
+          data-testid="avatar"
+        />
+        <Rightbar
+          isOpen={isOpen}
+          onClose={onClose}
+          onLoginChange={onLoginChange}
+        />
       </Flex>
     </Flex>
   )
 }
 
 export default Topbar
+
+
