@@ -49,12 +49,22 @@ def initdb():
     client.create_database(True)
 
     # Create admin user:
-    click.echo("Creating admin user")
+    click.echo("Creating guest user")
     user_id = client.create_user(
         User(
             name="guest",
             email="guest@example.com",
             full_name="Guest User",
+            is_admin=True,
+        ),
+        db_session=db_session,
+    ).uid
+    click.echo("Creating admin user")
+    user_id = client.create_user(
+        User(
+            name="admin",
+            email="admin@example.com",
+            full_name="Admin User",
             is_admin=True,
         ),
         db_session=db_session,
