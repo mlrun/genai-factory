@@ -138,7 +138,9 @@ class ControllerClient:
             method="GET",
             params=params,
         )
-        return DataSource(**response["data"])
+        raw_response = response["data"]
+        dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
+        return DataSource(**dict_response)
 
     def get_session(
         self, name: str, uid: str = None, username: str = None
@@ -159,7 +161,9 @@ class ControllerClient:
         response = self._send_request(
             path=f"users/{username}/sessions/{name}", method="GET", params=params
         )
-        return ChatSession(**response["data"])
+        raw_response = response["data"]
+        dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
+        return ChatSession(**dict_response)
 
     def get_user(self, username: str = "", email: str = None, uid: str = None) -> User:
         """
@@ -180,7 +184,8 @@ class ControllerClient:
         response = self._send_request(
             path=f"users/{username}", method="GET", params=params
         )
-        user_data = dict(response["data"])
+        raw_response = response["data"]
+        user_data = dict(raw_response) if isinstance(raw_response, list) else raw_response
         return User(**user_data)
 
     def update_session(
@@ -202,7 +207,9 @@ class ControllerClient:
             method="PUT",
             data=chat_session.to_dict(),
         )
-        return ChatSession(**response["data"])
+        raw_response = response["data"]
+        dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
+        return ChatSession(**dict_response)
 
     def get_project(self) -> Project:
         """
@@ -213,8 +220,9 @@ class ControllerClient:
         response = self._send_request(
             path=f"projects/{self._project_name}", method="GET"
         )
-        data = dict(response["data"])
-        return Project(**data)
+        raw_response = response["data"]
+        dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
+        return Project(**dict_response)
 
     def create_workflow(self, workflow: Union[Workflow, dict]) -> Workflow:
         """
@@ -235,7 +243,9 @@ class ControllerClient:
             method="POST",
             data=workflow.to_dict(),
         )
-        return Workflow(**response["data"])
+        raw_response = response["data"]
+        dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
+        return Workflow(**dict_response)
 
     def get_workflow(
         self, workflow_name: str = None, workflow_id: str = None, version: str = None
@@ -274,5 +284,6 @@ class ControllerClient:
             method="PUT",
             data=workflow.to_dict(),
         )
-        data = dict(response["data"])
-        return Workflow(**data)
+        raw_response = response["data"]
+        dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
+        return Workflow(**dict_response)
