@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from '@components/feature/Layout'
-import UsersTable from '@components/feature/Tables/UsersTable'
-
-export const UsersTablePage = () => {
-  return (
-    <Layout>
-      <UsersTable />
-    </Layout>
-  )
-}
+export * from './datasetFields'
+export * from './dataSourceFields'
+export * from './documentFields'
+export * from './modelFields'
+export * from './promptTemplateFields'
+export * from './userFields'
+export * from './workflowFields'

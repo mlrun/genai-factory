@@ -12,33 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Flex, Menu, MenuItem } from '@chakra-ui/react'
+import { Box, Flex } from '@chakra-ui/react'
 import useAuth from '@hooks/useAuth'
-import { userWithTokenAtom, usernameAtom } from 'atoms'
+import { publicUserAtom } from 'atoms'
 import { motion as m } from 'framer-motion'
 import { useAtom } from 'jotai'
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Chatbar from './Chatbar'
+import Chatbar from './Chat/Chatbar'
 import Sidebar from './Sidebar'
 import TopBar from './Topbar/Topbar'
+import Client from '@services/Api'
 
 type LayoutProps = {
   children: ReactNode
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [username] = useAtom(usernameAtom)
-  const [user] = useAtom(userWithTokenAtom)
+  const [publicUser, setPublicUser] = useAtom(publicUserAtom)
+  const { user, logout } = useAuth()
+
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { logout } = useAuth()
-  const changeLogin = (data: boolean) => {
-    if (user?.username) {
-      logout()
+
+  useEffect(() => {
+    if (Object.keys(publicUser).length === 0 && user?.username) {
+      Client.getUser(user.username)
+        .then(res => setPublicUser(res.data))
+        .catch(error => {
+          console.error('Failed to fetch user:', error)
+          logout()
+        })
     }
+  }, [])
+
+  const changeLogin = () => {
+    if (user?.username) logout()
     navigate('/')
   }
+
+  const showChatbar = pathname.includes('chat')
+
   return (
     <m.div
       initial={{ opacity: 0 }}
@@ -46,30 +60,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       transition={{ duration: 0.3 }}
       exit={{ opacity: '50%' }}
     >
-      <Flex direction={'column'}>
-        <TopBar user={username} onLoginChange={changeLogin} />
-        <Flex justifyContent={'space-between'}>
-          <Box display={{ md: 'flex' }}>
-            <Sidebar>
-              {pathname.includes('chat') ? (
-                <Chatbar />
-              ) : (
-                <Menu>
-                  <MenuItem onClick={() => navigate('/admin/users')}>Users</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/projects')}>Projects</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/data-sources')}>Data Sources</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/datasets')}>Datasets</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/models')}>Models</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/documents')}>Documents</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/prompt-templates')}>Prompt Templates</MenuItem>
-                  <MenuItem onClick={() => navigate('/admin/workflows')}>Workflows</MenuItem>
-                </Menu>
-              )}
-            </Sidebar>
-          </Box>
-          <Flex width={'100%'} height={'91vh'}>
+      <Flex direction="column" height="100vh">
+        <TopBar onLoginChange={changeLogin} />
+        <Flex flex="1" overflow="hidden">
+          {showChatbar && (
+            <Box display={{ md: 'flex' }}>
+              <Sidebar>
+                <Chatbar publicUser={publicUser} />
+              </Sidebar>
+            </Box>
+          )}
+          <Box flex="1" overflowY="auto" bg="gray.50">
             {children}
-          </Flex>
+          </Box>
         </Flex>
       </Flex>
     </m.div>
@@ -77,3 +80,4 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 }
 
 export default Layout
+

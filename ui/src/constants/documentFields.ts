@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from '@components/feature/Layout'
-import UsersTable from '@components/feature/Tables/UsersTable'
+import { ModalField } from '@shared/types/modalFieldConfigs'
 
-export const UsersTablePage = () => {
-  return (
-    <Layout>
-      <UsersTable />
-    </Layout>
-  )
-}
+export const documentFields: ModalField[] = [
+  { name: 'name', label: 'Name', required: true },
+  { name: 'description', label: 'Description', required: true },
+  { name: 'version', label: 'Version' },
+  { name: 'path', label: 'Path', required: true },
+  { name: 'origin', label: 'Origin' },
+]

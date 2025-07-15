@@ -48,7 +48,7 @@ const Login = () => {
       }
 
       if (admin) {
-        navigate('/admin/users')
+        navigate('/projects')
       } else {
         await handleUserNavigation()
       }

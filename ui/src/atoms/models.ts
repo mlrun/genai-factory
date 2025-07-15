@@ -25,11 +25,11 @@ export const modelsErrorAtom = atom<string | null>(null);
 
 export const modelsWithFetchAtom = atom(
   (get) => get(modelsAtom),
-  async (_get, set, username) => {
+  async (_get, set, projectName) => {
     set(modelsLoadingAtom, true);
     set(modelsErrorAtom, null);
     try {
-      const models = await Client.getModels(username as string);
+      const models = await Client.getModels(projectName as string);
       const sortedModels = models.data.sort((a: Model, b: Model) => {
         const dateA = new Date(a.created as string);
         const dateB = new Date(b.created as string);
