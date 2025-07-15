@@ -37,14 +37,14 @@ class Base(BaseModel):
     _extra_fields = []
     _top_level_fields = []
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True,
+    }
 
     def to_dict(
         self, drop_none=True, short=False, drop_metadata=False, to_datestr=False
     ):
-        struct = self.dict()
-        # struct = self.model_dump(mode="json")  # pydantic v2
+        struct = self.model_dump(mode="json")
         new_struct = {}
         for k, v in struct.items():
             if (
@@ -66,8 +66,7 @@ class Base(BaseModel):
     def from_dict(cls, data: dict):
         if isinstance(data, cls):
             return data
-        return cls.parse_obj(data)
-        # return cls.model_validate(data)  # pydantic v2
+        return cls.model_validate(data)
 
     def to_yaml(self, drop_none=True):
         return yaml.dump(self.to_dict(drop_none=drop_none))
