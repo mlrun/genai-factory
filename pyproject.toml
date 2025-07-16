@@ -1,6 +1,6 @@
 [tool.ruff]
 extend-include = ["*.ipynb"]
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [

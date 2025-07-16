@@ -41,14 +41,17 @@ class CtrlConfig(BaseModel):
     db_type: str = "sql"
     application_url: str = "http://localhost:8000"
 
+    # Add any other configuration parameters as needed with model_config
     def print(self):
-        print(yaml.dump(self.dict()))
+        print(yaml.dump(self.model_dump()))
 
     @classmethod
     def load_from_yaml(cls, path: str):
         with open(path, "r") as f:
             data = yaml.safe_load(f)
-        return cls.parse_obj(data)
+        return cls.model_validate(data)
+
+
 
 
 config_path = os.environ.get("CTRL_CONFIG_PATH")

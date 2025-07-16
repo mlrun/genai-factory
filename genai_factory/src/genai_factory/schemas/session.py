@@ -54,17 +54,14 @@ class Conversation(BaseModel):
         self.messages.append(Message(role=role, content=content, sources=sources))
 
     def to_list(self):
-        return self.dict()["messages"]
-        # return self.model_dump(mode="json")["messages"]
+        return self.model_dump(mode="json")["messages"]
 
     def to_dict(self):
-        return self.dict()["messages"]
-        # return self.model_dump(mode="json")["messages"]
+        return self.model_dump(mode="json")["messages"]
 
     @classmethod
     def from_list(cls, data: list):
-        return cls.parse_obj({"messages": data or []})
-        # return cls.model_validate({"messages": data or []})
+        return cls.model_validate({"messages": data or []})
 
 
 class ChatSession(BaseWithOwner):

@@ -30,7 +30,11 @@ class ChainRunner(storey.Flow):
     def __call__(self, event: WorkflowEvent):
         return self._run(event)
 
-    def post_init(self, mode="sync"):
+    def post_init(self,
+        mode="sync",
+        context=None,
+        namespace=None,
+        creation_strategy=None):
         pass
 
     async def _do(self, event):

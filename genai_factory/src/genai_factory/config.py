@@ -89,13 +89,13 @@ class WorkflowServerConfig(BaseModel):
         return self.default_vector_store.get("collection_name", "default")
 
     def print(self):
-        print(yaml.dump(self.dict()))
+        print(yaml.dump(self.model_dump()))
 
     @classmethod
     def from_yaml(cls, path: Union[str, pathlib.Path]) -> "WorkflowServerConfig":
         with open(path, "r") as f:
             data = yaml.safe_load(f)
-        return cls.parse_obj(data)
+        return cls.model_validate(data)
 
     @classmethod
     def local_config(cls) -> "WorkflowServerConfig":

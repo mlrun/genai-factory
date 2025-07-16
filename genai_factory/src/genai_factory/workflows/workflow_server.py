@@ -82,13 +82,13 @@ class WorkflowServer:
             labels=labels,
         )
 
-    def run_workflow(self, name: str, event):
+    async def run_workflow(self, name: str, event):
         # Get the workflow object:
         if name not in self._workflows:
             raise ValueError(f"workflow {name} not found")
 
         # Run the workflow:
-        return self._workflows[name].run(event)
+        return await self._workflows[name].run(event)
 
     def _build(self):
         logger.info("Building workflows")
