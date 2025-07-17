@@ -34,7 +34,8 @@ class ChainRunner(storey.Flow):
         mode="sync",
         context=None,
         namespace=None,
-        creation_strategy=None):
+        creation_strategy=None,
+        **kwargs):
         pass
 
     async def _do(self, event):

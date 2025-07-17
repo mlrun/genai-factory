@@ -169,7 +169,8 @@ class MultiRetriever(ChainRunner):
         mode="sync",
         context=None,
         namespace=None,
-        creation_strategy=None):
+        creation_strategy=None,
+        **kwargs,):
         """
         Post initialization function, set the language model and default collection.
 
