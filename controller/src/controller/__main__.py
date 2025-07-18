@@ -100,7 +100,7 @@ def initdb():
 def print_config():
     """Print the config as a yaml file"""
     click.echo("Running Config")
-    click.echo(yaml.dump(config.dict()))
+    click.echo(yaml.dump(config.model_dump()))
 
 
 @click.command()
@@ -225,7 +225,7 @@ def infer(
     )
 
     data = {
-        "item": query.dict(),
+        "item": query.model_dump(),
         "workflow": workflow.to_dict(short=True),
     }
     headers = {"x_username": user} if user else {}

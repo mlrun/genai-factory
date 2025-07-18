@@ -260,7 +260,7 @@ def infer_workflow(
             )
     # Prepare the data to send to the application's workflow
     data = {
-        "item": query.dict(),
+        "item": query.model_dump(),
         "workflow": workflow.to_dict(short=True),
     }
     path = workflow.deployment
