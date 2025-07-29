@@ -165,11 +165,16 @@ class MultiRetriever(ChainRunner):
         self.default_collection = default_collection
         self._retrievers: Dict[str, DocumentRetriever] = {}
 
-    def post_init(self, mode: str = "sync"):
+    def post_init(self,
+        mode="sync",
+        context=None,
+        namespace=None,
+        creation_strategy=None,
+        **kwargs,):
         """
         Post initialization function, set the language model and default collection.
 
-        :param mode: The mode to use. #TODO what is this?
+        :param mode: The mode to use. Mode is a MLRun parameter passed during graph/server initialization and controls how steps are loaded
         """
         self.llm = self.llm or get_llm(self.context._config)
         if not self.default_collection:

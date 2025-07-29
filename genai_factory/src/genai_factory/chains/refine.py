@@ -41,7 +41,12 @@ class RefineQuery(ChainRunner):
         self.prompt_template = prompt_template
         self._chain = None
 
-    def post_init(self, mode="sync"):
+    def post_init(self,
+    mode="sync",
+    context=None,
+    namespace=None,
+    creation_strategy=None,
+    **kwargs, ):
         self.llm = self.llm or get_llm(self.context._config)
         refine_prompt = PromptTemplate.from_template(
             self.prompt_template or _refine_prompt_template
