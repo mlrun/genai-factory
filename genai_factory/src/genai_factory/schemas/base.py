@@ -37,9 +37,7 @@ class Base(BaseModel):
     _extra_fields = []
     _top_level_fields = []
 
-    model_config = {
-        "from_attributes": True,
-    }
+    #model_config = {"from_attributes": True}
 
     def to_dict(
         self, drop_none=True, short=False, drop_metadata=False, to_datestr=False

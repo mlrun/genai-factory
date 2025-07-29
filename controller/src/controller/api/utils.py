@@ -36,7 +36,6 @@ class AuthInfo(BaseModel):
     username: str
     token: str
     roles: List[str] = []
-    model_config = {"from_attributes": True}
 
 
 # placeholder for extracting the Auth info from the request
