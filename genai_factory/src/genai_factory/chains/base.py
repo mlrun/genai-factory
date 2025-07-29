@@ -36,6 +36,16 @@ class ChainRunner(storey.Flow):
         namespace=None,
         creation_strategy=None,
         **kwargs):
+        """
+            Finalize post-construction initialization for the runtime or function object.
+            :param mode : Execution mode, either "sync" (default) or "async"
+            :param context: MLRun context providing metadata, parameters, logging
+                for this runtime. Pass `None` if initialization is not tied to a specific run.
+            :param namespace: Namespace or project scope in which this object operates (e.g., Kubernetes
+                namespace). If not provided, MLRun defaults to the active project namespace.
+            :param creation_strategy: Resource creation during initialization (e.g., lazy).
+            :param **kwargs: Additional keyword arguments for custom initialization logic (forward compatability in MLRun)
+        """
         pass
 
     async def _do(self, event):
