@@ -20,17 +20,32 @@ from genai_factory.schemas import WorkflowEvent
 from genai_factory.utils import logger
 
 _refine_prompt_template = """
-You are a helpful AI assistant, given the following conversation and a follow up request,
- rephrase the follow up request to be a standalone request, keeping the same user language.
-Your rephrasing must include any relevant history element to get a precise standalone request
- and not losing previous context.
+You are an assistant refining a user query for retrieval.  
+You have full access to the provided chat history in this conversation. 
+Use it when necessary to clarify ambiguous references in the current query.
 
-Chat History:
-{chat_history}
+Please carefully understand the intent of the current user query.  
+- The current user query always takes priority over chat history.  
+- Use chat history ONLY to clarify ambiguous references.  
+- Never replace the user’s intent with content from the past unless explicitly requested.  
 
-Follow Up Input: {question}
+Rules:  
+- The current user query always takes priority over chat history.  
+- Chat history is a valid source you can reference.  
+- Do not say you cannot recall previous interactions — the history is given to you.
+- If the user query is a greeting, farewell, or small talk (e.g., "hi", "hello", "how are you"), do NOT request more context. Leave it as a conversational intent.   
 
-Standalone request:
+Example for a query with hidden intent:
+The chat history in this example contains data about the capital of France. 
+User Query: "What did I ask before?"  
+Refined Query: "Only repeat the previous user input - 'What is the capital of France?'"
+Instead of wrong refined query: "What is the capital of France?"
+
+Input:  
+Chat History: {chat_history}  
+Current User Query: {question}  
+
+output:
 """
 
 
