@@ -26,6 +26,20 @@ from langchain_openai import ChatOpenAI
 from genai_factory.chains.base import ChainRunner
 from genai_factory.chains.retrieval import MultiRetriever
 
+AGENT_SYSTEM_PROMPT = """
+You are a helpful AI assistant as part of a chatbot that can provide information about Beef Wellington recipes and general knowledge.
+
+Decision Rules:
+- For Beef Wellington content (ingredients, steps, tips, cooking details), use the beef-wellington-data-retriever tool
+- For general knowledge topics, use the wikipedia-query tool  
+- For meta-intents (e.g., "repeat my last question", "what did I ask before", "show me your last answer", "summarize earlier"), respond based on chat history without using tools
+
+Guidelines:  
+- Do not mention tools or retrieval process to the user
+- Keep answers concise, polite, and aligned with user intent
+- Prioritize accuracy of repetition over tool usage for meta-intents
+"""
+
 
 class Agent(ChainRunner):
     def __init__(self, *args, **kwargs):
@@ -40,32 +54,52 @@ class Agent(ChainRunner):
             self._llm = ChatOpenAI(model="gpt-4", temperature=0.5)
         return self._llm
 
-    def _get_agent(self):
-        if self.agent:
-            return self.agent
-        # Create the RAG tools
+    def _create_tools(self):
+        """Create and configure tools with detailed descriptions."""
+        # Create the RAG retriever
         retriever = MultiRetriever(default_collection="default", context=self.context)
         retriever.post_init()
         self.retriever = retriever._get_retriever("default")
-        beef_wellington_retriever_tool = create_retriever_tool(
+
+        # Beef Wellington retriever tool with detailed description:
+        beef_wellington_tool = create_retriever_tool(
             self.retriever.chain.retriever.vectorstore.as_retriever(),
             "beef-wellington-data-retriever",
-            "Query a retriever to get information about beef wellington recipe.",
+            """Use this tool to retrieve detailed information about Beef Wellington recipes. 
+            This includes ingredients, cooking steps, preparation tips, cooking temperatures, 
+            timing, techniques, and any other recipe-specific details. The tool provides 
+            comprehensive factual and instructional content specifically about Beef Wellington 
+            preparation and cooking methods.""",
         )
+
+        # Wikipedia tool with detailed description:
         api_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=100)
-        wiki_tool = WikipediaQueryRun(api_wrapper=api_wrapper)
-        tools = [beef_wellington_retriever_tool, wiki_tool]
+        wiki_tool = WikipediaQueryRun(
+            api_wrapper=api_wrapper,
+            name="wikipedia-query",
+            description="""Use this tool to search Wikipedia for general knowledge information 
+            on a wide variety of topics including history, science, geography, culture, 
+            biography, and other encyclopedic content. This tool is ideal for factual 
+            questions about topics outside of Beef Wellington recipes.""",
+        )
+
+        return [beef_wellington_tool, wiki_tool]
+
+    def _get_agent(self):
+        if self.agent:
+            return self.agent
+
+        tools = self._create_tools()
         llm_with_tools = self.llm.bind_tools(tools)
+
         prompt = ChatPromptTemplate.from_messages(
             [
-                (
-                    "system",
-                    TOOL_PROMPT,
-                ),
+                ("system", AGENT_SYSTEM_PROMPT),
                 ("user", "{input}"),
                 MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]
         )
+
         agent = (
             {
                 "input": lambda x: x["input"],
@@ -77,6 +111,7 @@ class Agent(ChainRunner):
             | llm_with_tools
             | OpenAIToolsAgentOutputParser()
         )
+
         return AgentExecutor(
             agent=agent, tools=tools, verbose=True, handle_parsing_errors=True
         )
@@ -86,11 +121,3 @@ class Agent(ChainRunner):
         response = list(self.agent.stream({"input": event.query}))
         answer = response[-1]["messages"][-1].content
         return {"answer": answer, "sources": ""}
-
-
-TOOL_PROMPT = str(
-    "You are a helpful AI assistant that can provide information about Beef Wellington recipe and general knowledge. "
-    "given a users query, you can provide information about how to cook Beef Wellington and generate an answer."
-    "first try to answer the question using the  Beef Wellington data retriever, if you can't find the answer, "
-    "try to answer the question using the wikipedia query tool."
-)
