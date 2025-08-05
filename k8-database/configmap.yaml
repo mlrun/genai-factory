@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+  namespace: gaitor-app
+data:
+  database-name: "AppDB"
+  database-user: "sa"
+  database-host: "database-service"
+  database-port: "1433"
+  database-connection-string: "Server=database-service,1433;Database=AppDB;User Id=sa;TrustServerCertificate=true;"
