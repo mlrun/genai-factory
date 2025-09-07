@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: controller-service
+  namespace: gaitor-app
+  labels:
+    app: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: controller
+  ports:
+  - port: 3001
+    targetPort: 3001
+    protocol: TCP
