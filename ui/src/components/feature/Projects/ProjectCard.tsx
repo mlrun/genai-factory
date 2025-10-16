@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Heading, Text, VStack, Badge } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import { Project } from '@shared/types/project'
-import { useAtom } from 'jotai'
-import { projectAtom } from '@atoms/index'
+import { useAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
+
+import { projectAtom } from '@atoms/index';
+import { Badge, Box, Heading, Text, VStack } from '@chakra-ui/react';
+import { Project } from '@shared/types/project';
 
 interface ProjectCardProps {
   project: Project;
@@ -24,22 +25,21 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
-  const [, setProject] = useAtom(projectAtom)
-
+  const [, setProject] = useAtom(projectAtom);
 
   const handleClick = () => {
-    setProject(project)
+    setProject(project);
     navigate(`/projects/${project.name}`);
   };
 
   const labelText =
-    typeof project.labels === "string"
+    typeof project.labels === 'string'
       ? project.labels
       : project.labels
         ? Object.entries(project.labels)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(", ")
-        : "No labels";
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(', ')
+        : 'No labels';
 
   return (
     <Box
@@ -49,15 +49,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       borderRadius="lg"
       bg="white"
       cursor="pointer"
-      _hover={{ shadow: "lg", bg: "gray.50" }}
+      _hover={{ shadow: 'lg', bg: 'gray.50' }}
       onClick={handleClick}
     >
       <VStack align="start" spacing={2}>
         <Heading fontSize="lg">{project.name}</Heading>
-        <Text>{project.description ?? "No description"}</Text>
+        <Text>{project.description ?? 'No description'}</Text>
         {project.uid && <Badge>UID: {project.uid}</Badge>}
         <Text fontSize="sm" color="gray.500">
-          Created: {project.created ? new Date(project.created).toLocaleString() : "N/A"}
+          Created:{' '}
+          {project.created ? new Date(project.created).toLocaleString() : 'N/A'}
         </Text>
         <Text fontSize="sm" color="gray.500">
           Labels: {labelText}

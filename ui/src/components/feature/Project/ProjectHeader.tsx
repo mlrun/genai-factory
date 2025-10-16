@@ -14,13 +14,13 @@
 
 import {
   Box,
-  Heading,
-  Text,
-  VStack,
   Code,
-  useColorModeValue,
+  Heading,
   Tag,
-} from "@chakra-ui/react";
+  Text,
+  useColorModeValue,
+  VStack,
+} from '@chakra-ui/react';
 
 type ProjectHeaderProps = {
   name: string;
@@ -32,20 +32,20 @@ type ProjectHeaderProps = {
 };
 
 const ProjectHeader = ({
-  name,
-  description,
-  uid,
   created,
-  updated,
+  description,
   labels,
+  name,
+  uid,
+  updated,
 }: ProjectHeaderProps) => {
-  const bg = useColorModeValue("gray.50", "gray.700");
+  const bg = useColorModeValue('gray.50', 'gray.700');
 
   const renderLabels = () => {
-    if (!labels || (typeof labels === "string" && labels.trim() === ""))
+    if (!labels || (typeof labels === 'string' && labels.trim() === ''))
       return <Text color="gray.500">No labels</Text>;
 
-    if (typeof labels === "string") {
+    if (typeof labels === 'string') {
       return (
         <Tag colorScheme="purple" variant="subtle" borderRadius="md">
           {labels}
@@ -73,36 +73,36 @@ const ProjectHeader = ({
       </Heading>
 
       <Text fontSize="lg" color="gray.600">
-        {description ?? "No description provided."}
+        {description ?? 'No description provided.'}
       </Text>
 
       <Box bg={bg} p={4} rounded="md" w="full">
         <Text fontWeight="medium" mb={1}>
           UID
         </Text>
-        <Code p={2} display="block" whiteSpace="nowrap" w="full" overflowX="auto">
+        <Code
+          p={2}
+          display="block"
+          whiteSpace="nowrap"
+          w="full"
+          overflowX="auto"
+        >
           {uid}
         </Code>
       </Box>
 
       <Box w="full">
         <Text color="gray.500">
-          <strong>Created:</strong>{" "}
-          {created ? new Date(created).toLocaleString() : "N/A"}
+          <strong>Created:</strong>{' '}
+          {created ? new Date(created).toLocaleString() : 'N/A'}
         </Text>
         <Text color="gray.500">
-          <strong>Updated:</strong>{" "}
-          {updated ? new Date(updated).toLocaleString() : "N/A"}
+          <strong>Updated:</strong>{' '}
+          {updated ? new Date(updated).toLocaleString() : 'N/A'}
         </Text>
       </Box>
 
-      <Box
-        w="full"
-        display="flex"
-        alignItems="center"
-        gap={2}
-        flexWrap="wrap"
-      >
+      <Box w="full" display="flex" alignItems="center" gap={2} flexWrap="wrap">
         <Text color="gray.500" fontWeight="semibold">
           Labels:
         </Text>
@@ -113,5 +113,3 @@ const ProjectHeader = ({
 };
 
 export default ProjectHeader;
-
-

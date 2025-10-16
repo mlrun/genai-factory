@@ -12,25 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
-import EntityTable from '@components/shared/EntityTable'
-import { PromptTemplate } from '@shared/types/promptTemplate'
-import { promptTemplatesAtom, promptTemplatesWithFetchAtom } from '@atoms/promptTemplates'
-import { useAtom } from 'jotai'
-import { publicUserAtom, projectAtom } from '@atoms/index'
-import Client from '@services/Api'
-import { TableColumn } from 'react-data-table-component'
-import { promptTemplateFields } from '@constants/index'
+import React from 'react';
+import { useAtom } from 'jotai';
+import { TableColumn } from 'react-data-table-component';
+
+import { projectAtom, publicUserAtom } from '@atoms/index';
+import {
+  promptTemplatesAtom,
+  promptTemplatesWithFetchAtom,
+} from '@atoms/promptTemplates';
+import EntityTable from '@components/shared/EntityTable';
+import Client from '@services/Api';
+import { PromptTemplate } from '@shared/types/promptTemplate';
+
+import { promptTemplateFields } from '@constants/index';
 
 const PromptTemplatesTable: React.FC = () => {
-  const [promptTemplates] = useAtom(promptTemplatesAtom)
-  const [, fetchPromptTemplates] = useAtom(promptTemplatesWithFetchAtom)
-  const [project] = useAtom(projectAtom)
-  const [publicUser] = useAtom(publicUserAtom)
+  const [promptTemplates] = useAtom(promptTemplatesAtom);
+  const [, fetchPromptTemplates] = useAtom(promptTemplatesWithFetchAtom);
+  const [project] = useAtom(projectAtom);
+  const [publicUser] = useAtom(publicUserAtom);
 
-  const base = project?.name ?? ''
-  const uid = project?.uid ?? ''
-
+  const base = project?.name ?? '';
+  const uid = project?.uid ?? '';
 
   const newEntity: PromptTemplate = {
     name: '',
@@ -38,18 +42,22 @@ const PromptTemplatesTable: React.FC = () => {
     text: '',
     arguments: ['prompt'],
     owner_id: publicUser.uid as string,
-    project_id: uid
+    project_id: uid,
   };
 
-  if(Object.keys(publicUser).length === 0) return;
+  if (Object.keys(publicUser).length === 0) return;
 
   const columns: TableColumn<Partial<PromptTemplate>>[] = [
-    { name: 'Name', selector: row => row.name ?? '', sortable: true },
-    { name: 'Description', selector: row => row.description ?? '', sortable: true },
-    { name: 'Version', selector: row => row.version ?? '', sortable: true },
-    { name: 'Text', selector: row => row.text ?? '', sortable: false },
-    { name: 'Created', selector: row => row.created ?? '', sortable: true }
-  ]
+    { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
+    { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
+    { name: 'Text', selector: (row) => row.text ?? '', sortable: false },
+    { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
+  ];
 
   return (
     <EntityTable
@@ -59,13 +67,12 @@ const PromptTemplatesTable: React.FC = () => {
       columns={columns}
       data={promptTemplates}
       fetchEntities={() => fetchPromptTemplates(base)}
-      createEntity={d => Client.createPromptTemplate(base, d)}
-      updateEntity={d => Client.updatePromptTemplate(base, d)}
-      deleteEntity={id => Client.deletePromptTemplate(base, id)}
+      createEntity={(d) => Client.createPromptTemplate(base, d)}
+      updateEntity={(d) => Client.updatePromptTemplate(base, d)}
+      deleteEntity={(id) => Client.deletePromptTemplate(base, id)}
       newEntityDefaults={newEntity}
     />
-  )
-}
+  );
+};
 
-export default PromptTemplatesTable
-
+export default PromptTemplatesTable;

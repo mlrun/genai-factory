@@ -13,8 +13,8 @@
 // limitations under the License.
 
 export type ModalField = {
-  name: string
-  label: string
-  required?: boolean
-  options?: { label: string; value: string }[]
-}
+  name: string;
+  label: string;
+  required?: boolean;
+  options?: { label: string; value: string }[];
+};

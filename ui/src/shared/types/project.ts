@@ -13,12 +13,12 @@
 // limitations under the License.
 
 export type Project = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: Record<string, string> | string
-  created?: string
-  updated?: string
-  owner_id: string
-  version?: string
-}
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: Record<string, string> | string;
+  created?: string;
+  updated?: string;
+  owner_id: string;
+  version?: string;
+};

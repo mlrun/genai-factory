@@ -12,37 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Flex } from '@chakra-ui/react'
-import Bubble from '@components/shared/Bubble'
-import Message from '@components/shared/Message'
-import Client from '@services/Api'
-import { ChatHistory } from '@shared/types'
-import { messagesAtom, sessionIdAtom, usernameAtom } from '@atoms/index'
-import { useAtom } from 'jotai'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
+import { useAtom } from 'jotai';
+
+import { messagesAtom, sessionIdAtom, usernameAtom } from '@atoms/index';
+import { Box, Flex } from '@chakra-ui/react';
+import Bubble from '@components/shared/Bubble';
+import Message from '@components/shared/Message';
+import Client from '@services/Api';
+import { ChatHistory } from '@shared/types';
 
 const Chat = () => {
-  const [messages, setMessages] = useAtom<ChatHistory[]>(messagesAtom)
-  const [sessionId] = useAtom(sessionIdAtom)
-  const [username] = useAtom(usernameAtom)
+  const [messages, setMessages] = useAtom<ChatHistory[]>(messagesAtom);
+  const [sessionId] = useAtom(sessionIdAtom);
+  const [username] = useAtom(usernameAtom);
 
   useEffect(() => {
     async function fetchData() {
-      await Client.getSession(username, sessionId)
+      await Client.getSession(username, sessionId);
     }
 
-    if(username.length > 0 && !sessionId) {
-      fetchData()
+    if (username.length > 0 && !sessionId) {
+      fetchData();
     }
-  }, [sessionId, setMessages, username])
+  }, [sessionId, setMessages, username]);
 
-  const lastMessageRef = useRef<HTMLDivElement>(null)
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      lastMessageRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
     }
-  }, [messages, setMessages])
+  }, [messages, setMessages]);
 
   return (
     <Flex
@@ -56,8 +60,8 @@ const Chat = () => {
       <Flex
         sx={{
           '::-webkit-scrollbar': {
-            display: 'none'
-          }
+            display: 'none',
+          },
         }}
         justifyContent="flex-start"
         flexGrow={1}
@@ -80,7 +84,7 @@ const Chat = () => {
         <Message />
       </Box>
     </Flex>
-  )
-}
+  );
+};
 
-export default Chat
+export default Chat;

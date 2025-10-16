@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import './index.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-import { ColorModeScript } from '@chakra-ui/react'
-import theme from '@shared/theme'
-import App from 'App'
+import { ColorModeScript } from '@chakra-ui/react';
+import theme from '@shared/theme';
+
+import './index.css';
+
+import App from 'App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <App />
-  </React.StrictMode>
-)
+  </React.StrictMode>,
+);

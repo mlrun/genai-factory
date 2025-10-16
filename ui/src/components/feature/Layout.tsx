@@ -12,46 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Flex } from '@chakra-ui/react'
-import useAuth from '@hooks/useAuth'
-import { publicUserAtom } from 'atoms'
-import { motion as m } from 'framer-motion'
-import { useAtom } from 'jotai'
-import React, { ReactNode, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import Chatbar from './Chat/Chatbar'
-import Sidebar from './Sidebar'
-import TopBar from './Topbar/Topbar'
-import Client from '@services/Api'
+import React, { ReactNode, useEffect } from 'react';
+import { publicUserAtom } from 'atoms';
+import { motion as m } from 'framer-motion';
+import { useAtom } from 'jotai';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { Box, Flex } from '@chakra-ui/react';
+import Client from '@services/Api';
+
+import Chatbar from './Chat/Chatbar';
+import TopBar from './Topbar/Topbar';
+import Sidebar from './Sidebar';
+
+import useAuth from '@hooks/useAuth';
 
 type LayoutProps = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [publicUser, setPublicUser] = useAtom(publicUserAtom)
-  const { user, logout } = useAuth()
+  const [publicUser, setPublicUser] = useAtom(publicUserAtom);
+  const { logout, user } = useAuth();
 
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (Object.keys(publicUser).length === 0 && user?.username) {
       Client.getUser(user.username)
-        .then(res => setPublicUser(res.data))
-        .catch(error => {
-          console.error('Failed to fetch user:', error)
-          logout()
-        })
+        .then((res) => setPublicUser(res.data))
+        .catch((error) => {
+          console.error('Failed to fetch user:', error);
+          logout();
+        });
     }
-  }, [])
+  }, []);
 
   const changeLogin = () => {
-    if (user?.username) logout()
-    navigate('/')
-  }
+    if (user?.username) logout();
+    navigate('/');
+  };
 
-  const showChatbar = pathname.includes('chat')
+  const showChatbar = pathname.includes('chat');
 
   return (
     <m.div
@@ -76,8 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Flex>
       </Flex>
     </m.div>
-  )
-}
+  );
+};
 
-export default Layout
-
+export default Layout;

@@ -13,21 +13,20 @@
 // limitations under the License.
 
 export type Workflow = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: { [key: string]: string }
-  owner_id: string
-  version?: string
-  project_id: string
-  workflow_type: WorkflowType
-  deployment: string
-  workflow_function?: string
-  configuration?: { [key: string]: string }
-  graph?: { [key: string]: string }
-  created?: string
-}
-
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: { [key: string]: string };
+  owner_id: string;
+  version?: string;
+  project_id: string;
+  workflow_type: WorkflowType;
+  deployment: string;
+  workflow_function?: string;
+  configuration?: { [key: string]: string };
+  graph?: { [key: string]: string };
+  created?: string;
+};
 
 export enum WorkflowType {
   INGESTION = 'ingestion',
@@ -39,7 +38,7 @@ export enum WorkflowType {
 }
 
 export type Query = {
-  question: string
-  session_name: string
-  data_source: string
-}
+  question: string;
+  session_name: string;
+  data_source: string;
+};

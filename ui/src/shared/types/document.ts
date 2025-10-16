@@ -13,14 +13,14 @@
 // limitations under the License.
 
 export type Document = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: { [key: string]: string }
-  owner_id: string
-  version?: string
-  project_id: string
-  path: string
-  origin?: string
-  created?: string
-}
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: { [key: string]: string };
+  owner_id: string;
+  version?: string;
+  project_id: string;
+  path: string;
+  origin?: string;
+  created?: string;
+};

@@ -13,22 +13,21 @@
 // limitations under the License.
 // ProjectPage.tsx
 
-import { Box, Text, Divider } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
 import { useEffect } from 'react';
-import { useAtom } from "jotai";
+import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 
-import Layout from "@components/feature/Layout";
-import Loading from "@components/shared/Loading";
-
+import { projectAtom } from '@atoms/index';
 import {
   projectsAtom,
   projectsLoadingAtom,
   projectsWithFetchAtom,
-} from "@atoms/projects";
-import { projectAtom } from "@atoms/index";
-import ProjectHeader from '@components/feature/Project/ProjectHeader'
-import ProjectTabs from '@components/feature/Project/ProjectTabs'
+} from '@atoms/projects';
+import { Box, Divider, Text } from '@chakra-ui/react';
+import Layout from '@components/feature/Layout';
+import ProjectHeader from '@components/feature/Project/ProjectHeader';
+import ProjectTabs from '@components/feature/Project/ProjectTabs';
+import Loading from '@components/shared/Loading';
 
 export const ProjectPage = () => {
   const { name } = useParams();
@@ -50,7 +49,11 @@ export const ProjectPage = () => {
 
   if (!project) {
     if (loading) return <Loading />;
-    return <Text px={6} py={4}>Project not found.</Text>;
+    return (
+      <Text px={6} py={4}>
+        Project not found.
+      </Text>
+    );
   }
 
   return (

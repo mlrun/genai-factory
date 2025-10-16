@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { Project } from '@shared/types/project';
-import { atom } from 'jotai';
 
 export const projectsAtom = atom<Project[]>([]);
 export const projectsLoadingAtom = atom<boolean>(false);
 export const projectsErrorAtom = atom<string | null>(null);
-
 
 export const projectsWithFetchAtom = atom(
   (get) => get(projectsAtom),
@@ -30,10 +30,10 @@ export const projectsWithFetchAtom = atom(
       const projects = await Client.getProjects();
       set(projectsAtom, projects.data);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(projectsErrorAtom, 'Failed to fetch projects');
     } finally {
       set(projectsLoadingAtom, false);
     }
-  }
+  },
 );
-

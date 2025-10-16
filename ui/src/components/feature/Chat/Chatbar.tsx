@@ -12,47 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { selectedSessionAtom, sessionsWithFetchAtom } from '@atoms/sessions'
-import { AddIcon } from '@chakra-ui/icons'
-import { Button, Flex, useColorMode } from '@chakra-ui/react'
-import Client from '@services/Api'
-import { colors } from '@shared/theme'
-import { generateSessionId } from '@shared/utils'
-import { sessionIdAtom, userWithTokenAtom, usernameAtom } from '@atoms/index'
-import { useAtom } from 'jotai'
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import ChatSessionList from './ChatSessionList'
-import { User } from '@shared/types'
+import { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { sessionIdAtom, usernameAtom, userWithTokenAtom } from '@atoms/index';
+import { selectedSessionAtom, sessionsWithFetchAtom } from '@atoms/sessions';
+import { AddIcon } from '@chakra-ui/icons';
+import { Button, Flex, useColorMode } from '@chakra-ui/react';
+import Client from '@services/Api';
+import { colors } from '@shared/theme';
+import { User } from '@shared/types';
+
+import ChatSessionList from './ChatSessionList';
+
+import { generateSessionId } from '@shared/utils';
 
 interface ChatbarProps {
-  publicUser: User
+  publicUser: User;
 }
 
 const Chatbar = ({ publicUser }: ChatbarProps) => {
-  const [, setSessionId] = useAtom(sessionIdAtom)
-  const [username] = useAtom(usernameAtom)
-  const [user] = useAtom(userWithTokenAtom)
-  const [, setIsNew] = useState(true)
-  const { colorMode } = useColorMode()
-  const [, setSelectedSession] = useAtom(selectedSessionAtom)
+  const [, setSessionId] = useAtom(sessionIdAtom);
+  const [username] = useAtom(usernameAtom);
+  const [user] = useAtom(userWithTokenAtom);
+  const [, setIsNew] = useState(true);
+  const { colorMode } = useColorMode();
+  const [, setSelectedSession] = useAtom(selectedSessionAtom);
 
-  const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
+  const [, fetchSessions] = useAtom(sessionsWithFetchAtom);
 
-  const { pathname } = useLocation()
-  const navigate = useNavigate()
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if(user) {
-      fetchSessions(user?.username)
+    if (user) {
+      fetchSessions(user?.username);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (pathname.includes('chat')) {
-      setSessionId(pathname.split('chat/')[1])
+      setSessionId(pathname.split('chat/')[1]);
     }
-  }, [pathname])
+  }, [pathname]);
 
   const newChat = async () => {
     try {
@@ -61,28 +64,38 @@ const Chatbar = ({ publicUser }: ChatbarProps) => {
         description: '* New Chat',
         labels: {},
         workflow_id: '1dfd7fc7c4024501850e3541abc3ed9f',
-        owner_id: publicUser.uid
-      }).then(res => {
-        setSessionId(res.data.uid)
-        setSelectedSession(res.data)
-        navigate(`/chat/${res.data.uid}`)
-      })
-      await fetchSessions(username)
+        owner_id: publicUser.uid,
+      }).then((res) => {
+        setSessionId(res.data.uid);
+        setSelectedSession(res.data);
+        navigate(`/chat/${res.data.uid}`);
+      });
+      await fetchSessions(username);
     } catch (error) {
-      console.error('Failed to create session:', error)
+      console.log(`Error: ${error}`);
+      console.error('Failed to create session:', error);
     }
-  }
+  };
 
   return (
-    <Flex gap={8} bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight} flexDirection={'column'}>
+    <Flex
+      gap={8}
+      bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight}
+      flexDirection={'column'}
+    >
       <ChatSessionList setNew={setIsNew} />
       <Flex justify={'center'}>
-        <Button width={'30%'} onClick={newChat} iconSpacing={2} leftIcon={<AddIcon />}>
+        <Button
+          width={'30%'}
+          onClick={newChat}
+          iconSpacing={2}
+          leftIcon={<AddIcon />}
+        >
           New
         </Button>
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
-export default Chatbar
+export default Chatbar;

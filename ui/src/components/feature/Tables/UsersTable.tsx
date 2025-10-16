@@ -12,34 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
-import EntityTable from '@components/shared/EntityTable'
-import { useAtom } from 'jotai'
-import { publicUserAtom } from '@atoms/index'
-import Client from '@services/Api'
-import { TableColumn } from 'react-data-table-component'
-import { User } from '@shared/types'
-import { usersAtom, usersWithFetchAtom } from '@atoms/users'
-import { userFields } from '@constants/index'
+import React from 'react';
+import { useAtom } from 'jotai';
+import { TableColumn } from 'react-data-table-component';
+
+import { publicUserAtom } from '@atoms/index';
+import { usersAtom, usersWithFetchAtom } from '@atoms/users';
+import EntityTable from '@components/shared/EntityTable';
+import Client from '@services/Api';
+import { User } from '@shared/types';
+
+import { userFields } from '@constants/index';
 
 const UsersTable: React.FC = () => {
-  const [users] = useAtom(usersAtom)
-  const [, fetchUsers] = useAtom(usersWithFetchAtom)
-  const [publicUser] = useAtom(publicUserAtom)
+  const [users] = useAtom(usersAtom);
+  const [, fetchUsers] = useAtom(usersWithFetchAtom);
+  const [publicUser] = useAtom(publicUserAtom);
 
   const newEntity: User = {
     name: '',
     email: '',
-    full_name: ''
+    full_name: '',
   };
 
-  if(Object.keys(publicUser).length === 0) return;
+  if (Object.keys(publicUser).length === 0) return;
 
   const columns: TableColumn<Partial<User>>[] = [
-    { name: 'Username', selector: row => row.name ?? '', sortable: true },
-    { name: 'Email', selector: row => row.email ?? '', sortable: true },
-    { name: 'Full Name', selector: row => row.full_name ?? '', sortable: true }
-  ]
+    { name: 'Username', selector: (row) => row.name ?? '', sortable: true },
+    { name: 'Email', selector: (row) => row.email ?? '', sortable: true },
+    {
+      name: 'Full Name',
+      selector: (row) => row.full_name ?? '',
+      sortable: true,
+    },
+  ];
 
   return (
     <EntityTable
@@ -49,13 +55,12 @@ const UsersTable: React.FC = () => {
       columns={columns}
       data={users}
       fetchEntities={() => fetchUsers()}
-      createEntity={d => Client.createUser(d)}
-      updateEntity={d => Client.updateUser(d)}
-      deleteEntity={id => Client.deleteUser(id)}
+      createEntity={(d) => Client.createUser(d)}
+      updateEntity={(d) => Client.updateUser(d)}
+      deleteEntity={(id) => Client.deleteUser(id)}
       newEntityDefaults={newEntity}
     />
-  )
-}
+  );
+};
 
-export default UsersTable
-
+export default UsersTable;

@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { PromptTemplate } from '@shared/types/promptTemplate';
-import { atom } from 'jotai';
 
 export const promptTemplatesAtom = atom<PromptTemplate[]>([]);
 
@@ -22,26 +23,38 @@ export const promptTemplatesLoadingAtom = atom<boolean>(false);
 
 export const promptTemplatesErrorAtom = atom<string | null>(null);
 
-
 export const promptTemplatesWithFetchAtom = atom(
   (get) => get(promptTemplatesAtom),
   async (_get, set, projectName) => {
     set(promptTemplatesLoadingAtom, true);
     set(promptTemplatesErrorAtom, null);
     try {
-      const promptTemplates = await Client.getPromptTemplates(projectName as string);
-      const sortedPromptTemplates = promptTemplates.data.sort((a: PromptTemplate, b: PromptTemplate) => {
-        const dateA = new Date(a.created as string);
-        const dateB = new Date(b.created as string);
-        return dateA.getTime() - dateB.getTime();
-      });
+      const promptTemplates = await Client.getPromptTemplates(
+        projectName as string,
+      );
+      const sortedPromptTemplates = promptTemplates.data.sort(
+        (a: PromptTemplate, b: PromptTemplate) => {
+          const dateA = new Date(a.created as string);
+          const dateB = new Date(b.created as string);
+          return dateA.getTime() - dateB.getTime();
+        },
+      );
       set(promptTemplatesAtom, sortedPromptTemplates);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(promptTemplatesErrorAtom, 'Failed to fetch promptTemplates');
     } finally {
       set(promptTemplatesLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedPromptTemplateAtom = atom<PromptTemplate>({ name: '', description: '', labels: {}, owner_id: '', project_id: '', text: '', arguments: [] });
+export const selectedPromptTemplateAtom = atom<PromptTemplate>({
+  name: '',
+  description: '',
+  labels: {},
+  owner_id: '',
+  project_id: '',
+  text: '',
+  arguments: [],
+});

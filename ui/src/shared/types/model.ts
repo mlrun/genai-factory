@@ -12,27 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
-
 export type Model = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: { [key: string]: string }
-  owner_id: string
-  version?: string
-  project_id: string
-  model_type: ModelType
-  base_model: string
-  task?: string
-  path?: string
-  producer?: string
-  deployment?: string
-  created?: string
-}
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: { [key: string]: string };
+  owner_id: string;
+  version?: string;
+  project_id: string;
+  model_type: ModelType;
+  base_model: string;
+  task?: string;
+  path?: string;
+  producer?: string;
+  deployment?: string;
+  created?: string;
+};
 
 export enum ModelType {
   MODEL = 'model',
-  ADAPTER = 'adapter'
+  ADAPTER = 'adapter',
 }

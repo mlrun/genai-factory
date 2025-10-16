@@ -12,86 +12,100 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { selectedRowAtom } from '@atoms/index'
-import { Box, useColorMode } from '@chakra-ui/react'
-import { colors } from '@shared/theme'
-import { User } from '@shared/types'
-import { useAtom } from 'jotai'
-import { useEffect, useState } from 'react'
-import DataTable, { Alignment, TableColumn, createTheme } from 'react-data-table-component'
+import { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+import DataTable, {
+  Alignment,
+  createTheme,
+  TableColumn,
+} from 'react-data-table-component';
+
+import { selectedRowAtom } from '@atoms/index';
+import { Box, useColorMode } from '@chakra-ui/react';
+import { colors } from '@shared/theme';
+import { User } from '@shared/types';
 
 createTheme(
   'dark',
   {
     text: {
       primary: colors.gray100,
-      secondary: colors.info
+      secondary: colors.info,
     },
     background: {
-      default: colors.gray900
+      default: colors.gray900,
     },
 
     divider: {
-      default: colors.gray800
+      default: colors.gray800,
     },
     action: {
       button: 'rgba(0,0,0,.54)',
       hover: 'rgba(0,0,0,.08)',
-      disabled: 'rgba(0,0,0,.12)'
+      disabled: 'rgba(0,0,0,.12)',
     },
     context: {
-      background: colors.gray800
-    }
+      background: colors.gray800,
+    },
   },
-  'light'
-)
+  'light',
+);
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Partial<any>[]
+  data: Partial<any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: TableColumn<Partial<any>>[]
-  title: string
-  contextActions: JSX.Element
+  columns: TableColumn<Partial<any>>[];
+  title: string;
+  contextActions: JSX.Element;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSelectedRowChange?: (e: any) => void
-  subheaderComponent?: React.ReactNode
-  filterText: string
-  user?: User
-  toggleClearRows: boolean
-  onOpenDrawer: () => void
-}
+  onSelectedRowChange?: (e: any) => void;
+  subheaderComponent?: React.ReactNode;
+  filterText: string;
+  user?: User;
+  toggleClearRows: boolean;
+  onOpenDrawer: () => void;
+};
 
 const DataTableComponent = ({
-  data,
   columns,
-  title,
   contextActions,
-  onSelectedRowChange,
-  subheaderComponent,
+  data,
   filterText,
   onOpenDrawer,
-  toggleClearRows
+  onSelectedRowChange,
+  subheaderComponent,
+  title,
+  toggleClearRows,
 }: Props) => {
-  const { colorMode } = useColorMode()
+  const { colorMode } = useColorMode();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [, setSelectedRow] = useAtom<any>(selectedRowAtom)
+  const [, setSelectedRow] = useAtom<any>(selectedRowAtom);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data)
+  const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data);
 
   useEffect(() => {
     if (data) {
       setFilteredItems(
         data.filter(
-          item =>
-            (item.name && item.name.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.email && item.email.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.full_name && item.full_name.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.description && item.description.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.version && item.version.toLowerCase().includes(filterText.toLowerCase()))
-        )
-      )
+          (item) =>
+            (item.name &&
+              item.name.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.email &&
+              item.email.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.full_name &&
+              item.full_name
+                .toLowerCase()
+                .includes(filterText.toLowerCase())) ||
+            (item.description &&
+              item.description
+                .toLowerCase()
+                .includes(filterText.toLowerCase())) ||
+            (item.version &&
+              item.version.toLowerCase().includes(filterText.toLowerCase())),
+        ),
+      );
     }
-  }, [filterText, data])
+  }, [filterText, data]);
 
   return (
     <>
@@ -113,14 +127,14 @@ const DataTableComponent = ({
           highlightOnHover
           pointerOnHover
           clearSelectedRows={toggleClearRows}
-          onRowClicked={row => {
-            setSelectedRow(row)
-            onOpenDrawer()
+          onRowClicked={(row) => {
+            setSelectedRow(row);
+            onOpenDrawer();
           }}
         />
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default DataTableComponent
+export default DataTableComponent;

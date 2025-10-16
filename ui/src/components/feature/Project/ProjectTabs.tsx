@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
-
-import ModelsTable from '@components/feature/Tables/ModelsTable';
-import DataSourcesTable from '@components/feature/Tables/DataSourcesTable';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import DatasetsTable from '@components/feature/Tables/DatasetsTable';
+import DataSourcesTable from '@components/feature/Tables/DataSourcesTable';
 import DocumentsTable from '@components/feature/Tables/DocumentsTable';
+import ModelsTable from '@components/feature/Tables/ModelsTable';
 import PromptTemplatesTable from '@components/feature/Tables/PromptTemplatesTable';
 import WorkflowsTable from '@components/feature/Tables/WorkflowsTable';
 
 const projectTabs = [
-  { label: "Models", component: <ModelsTable /> },
-  { label: "Data Sources", component: <DataSourcesTable /> },
-  { label: "Datasets", component: <DatasetsTable /> },
-  { label: "Documents", component: <DocumentsTable /> },
-  { label: "Prompt Templates", component: <PromptTemplatesTable /> },
-  { label: "Workflows", component: <WorkflowsTable /> },
+  { label: 'Models', component: <ModelsTable /> },
+  { label: 'Data Sources', component: <DataSourcesTable /> },
+  { label: 'Datasets', component: <DatasetsTable /> },
+  { label: 'Documents', component: <DocumentsTable /> },
+  { label: 'Prompt Templates', component: <PromptTemplatesTable /> },
+  { label: 'Workflows', component: <WorkflowsTable /> },
 ];
 
 const ProjectTabs = () => {
@@ -39,7 +38,7 @@ const ProjectTabs = () => {
         ))}
       </TabList>
       <TabPanels>
-        {projectTabs.map(({ label, component }) => (
+        {projectTabs.map(({ component, label }) => (
           <TabPanel key={label} px={0}>
             {component}
           </TabPanel>

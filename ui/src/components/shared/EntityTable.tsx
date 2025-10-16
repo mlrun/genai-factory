@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AddIcon,
-  DeleteIcon
-} from '@chakra-ui/icons'
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAtom } from 'jotai';
+import { TableColumn } from 'react-data-table-component';
+
+import { selectedRowAtom } from '@atoms/index';
+import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import {
   Button,
   Drawer,
@@ -27,103 +29,152 @@ import {
   FormLabel,
   Input,
   useDisclosure,
-  useToast
-} from '@chakra-ui/react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { TableColumn } from 'react-data-table-component'
-import DataTableComponent from './Datatable'
-import FilterComponent from './Filter'
-import AddEditModal from './AddEditModal'
-import { ModalField } from '@shared/types/modalFieldConfigs'
-import { useAtom } from 'jotai'
-import { selectedRowAtom } from '@atoms/index'
+  useToast,
+} from '@chakra-ui/react';
+import { ModalField } from '@shared/types/modalFieldConfigs';
 
-type EntityWithUID = { uid?: string; name?: string }
+import AddEditModal from './AddEditModal';
+import DataTableComponent from './Datatable';
+import FilterComponent from './Filter';
+
+type EntityWithUID = { uid?: string; name?: string };
 
 type Props<T extends EntityWithUID> = {
-  title: string
-  entityName: string
-  fields: ModalField[]
-  columns: TableColumn<Partial<T>>[]
-  data: T[]
-  fetchEntities: () => Promise<void>
-  createEntity: (entity: T) => Promise<void>
-  updateEntity: (entity: T) => Promise<void>
-  deleteEntity: (id: string) => Promise<void>
-  newEntityDefaults: T
-}
+  title: string;
+  entityName: string;
+  fields: ModalField[];
+  columns: TableColumn<Partial<T>>[];
+  data: T[];
+  fetchEntities: () => Promise<void>;
+  createEntity: (entity: T) => Promise<void>;
+  updateEntity: (entity: T) => Promise<void>;
+  deleteEntity: (id: string) => Promise<void>;
+  newEntityDefaults: T;
+};
 
 function EntityTable<T extends EntityWithUID>({
-  title,
-  entityName,
-  fields,
   columns,
-  data,
-  fetchEntities,
   createEntity,
-  updateEntity,
+  data,
   deleteEntity,
+  entityName,
+  fetchEntities,
+  fields,
   newEntityDefaults,
+  title,
+  updateEntity,
 }: Props<T>) {
-  const toast = useToast()
-  const [selectedRow, setSelectedRow] = useAtom<T>(selectedRowAtom)
-  const [selectedRows, setSelectedRows] = useState<T[]>([])
-  const [editRow, setEditRow] = useState<T>(newEntityDefaults)
-  const [filterText, setFilterText] = useState('')
-  const [toggledClearRows, setToggleClearRows] = useState(false)
+  const toast = useToast();
+  const [selectedRow, setSelectedRow] = useAtom<T>(selectedRowAtom);
+  const [selectedRows, setSelectedRows] = useState<T[]>([]);
+  const [editRow, setEditRow] = useState<T>(newEntityDefaults);
+  const [filterText, setFilterText] = useState('');
+  const [toggledClearRows, setToggleClearRows] = useState(false);
 
-  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure()
-  const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure()
+  const {
+    isOpen: isModalOpen,
+    onClose: onModalClose,
+    onOpen: onModalOpen,
+  } = useDisclosure();
+  const {
+    isOpen: isDrawerOpen,
+    onClose: onDrawerClose,
+    onOpen: onDrawerOpen,
+  } = useDisclosure();
 
   useEffect(() => {
-    fetchEntities()
-  }, [])
+    fetchEntities();
+  }, []);
 
   const handleSave = async (entity: T) => {
     try {
       if (entity.uid) {
-        await updateEntity(entity)
-        toast({ title: `${entityName} updated`, status: 'success', duration: 3000, isClosable: true })
+        await updateEntity(entity);
+        toast({
+          title: `${entityName} updated`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
-        await createEntity(entity)
-        toast({ title: `${entityName} created`, status: 'success', duration: 3000, isClosable: true })
+        await createEntity(entity);
+        toast({
+          title: `${entityName} created`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       }
-      await fetchEntities()
-      onModalClose()
+      await fetchEntities();
+      onModalClose();
     } catch {
-      toast({ title: `Error saving ${entityName}`, status: 'error', duration: 3000, isClosable: true })
+      toast({
+        title: `Error saving ${entityName}`,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
 
-    setEditRow(newEntityDefaults)
-  }
+    setEditRow(newEntityDefaults);
+  };
 
   const handleDelete = useCallback(async () => {
     try {
-      await Promise.all(selectedRows.map((r) => deleteEntity(r.name as string)))
-      toast({ title: `${entityName}s deleted`, status: 'success', duration: 3000, isClosable: true })
-      setSelectedRows([])
-      await fetchEntities()
+      await Promise.all(
+        selectedRows.map((r) => deleteEntity(r.name as string)),
+      );
+      toast({
+        title: `${entityName}s deleted`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      setSelectedRows([]);
+      await fetchEntities();
     } catch {
-      toast({ title: `Error deleting ${entityName}s`, status: 'error', duration: 3000, isClosable: true })
+      toast({
+        title: `Error deleting ${entityName}s`,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
-    setToggleClearRows(!toggledClearRows)
-  }, [deleteEntity, selectedRows, fetchEntities, toggledClearRows, entityName, toast])
+    setToggleClearRows(!toggledClearRows);
+  }, [
+    deleteEntity,
+    selectedRows,
+    fetchEntities,
+    toggledClearRows,
+    entityName,
+    toast,
+  ]);
 
   const handleUpdateDrawer = async () => {
     try {
-      await updateEntity(selectedRow)
-      toast({ title: `${entityName} updated`, status: 'success', duration: 3000, isClosable: true })
-      await fetchEntities()
-      onDrawerClose()
+      await updateEntity(selectedRow);
+      toast({
+        title: `${entityName} updated`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      await fetchEntities();
+      onDrawerClose();
     } catch {
-      toast({ title: `Error updating ${entityName}`, status: 'error', duration: 3000, isClosable: true })
+      toast({
+        title: `Error updating ${entityName}`,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setSelectedRow({ ...selectedRow, [name]: value })
-  }
+    const { name, value } = e.target;
+    setSelectedRow({ ...selectedRow, [name]: value });
+  };
 
   const contextActions = useMemo(
     () => (
@@ -131,26 +182,29 @@ function EntityTable<T extends EntityWithUID>({
         Delete
       </Button>
     ),
-    [handleDelete]
-  )
+    [handleDelete],
+  );
 
   const subHeaderComponentMemo = useMemo(
     () => (
       <Flex gap={4}>
-        <FilterComponent onFilter={(e) => setFilterText(e.target.value)} filterText={filterText} />
+        <FilterComponent
+          onFilter={(e) => setFilterText(e.target.value)}
+          filterText={filterText}
+        />
         <Button
           leftIcon={<AddIcon />}
           onClick={() => {
-            setEditRow(newEntityDefaults)
-            onModalOpen()
+            setEditRow(newEntityDefaults);
+            onModalOpen();
           }}
         >
           New
         </Button>
       </Flex>
     ),
-    [filterText, newEntityDefaults, onModalOpen]
-  )
+    [filterText, newEntityDefaults, onModalOpen],
+  );
 
   return (
     <Flex p={4} flexDirection="column" width="100%">
@@ -173,9 +227,16 @@ function EntityTable<T extends EntityWithUID>({
         fields={fields}
         title={entityName}
       />
-      <Drawer placement="right" size="xl" isOpen={isDrawerOpen} onClose={onDrawerClose}>
+      <Drawer
+        placement="right"
+        size="xl"
+        isOpen={isDrawerOpen}
+        onClose={onDrawerClose}
+      >
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">{selectedRow?.name}</DrawerHeader>
+          <DrawerHeader borderBottomWidth="1px">
+            {selectedRow?.name}
+          </DrawerHeader>
           <DrawerBody>
             <Flex gap={10}>
               <Flex width="100%" flexDirection="column">
@@ -185,7 +246,9 @@ function EntityTable<T extends EntityWithUID>({
                     <Input
                       type="text"
                       name={field.name}
-                      value={(selectedRow[field.name as keyof T] as string) || ''}
+                      value={
+                        (selectedRow[field.name as keyof T] as string) || ''
+                      }
                       onChange={handleChange}
                     />
                   </FormControl>
@@ -199,7 +262,7 @@ function EntityTable<T extends EntityWithUID>({
         </DrawerContent>
       </Drawer>
     </Flex>
-  )
+  );
 }
 
-export default EntityTable
+export default EntityTable;

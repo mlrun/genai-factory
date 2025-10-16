@@ -12,75 +12,92 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { sessionsAtom } from '@atoms/sessions'
-import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons'
-import { Flex, IconButton, Input, useToast } from '@chakra-ui/react'
-import Client from '@services/Api'
-import { canSendMessageAtom, isMessageErrorAtom, messagesAtom, sessionIdAtom } from 'atoms'
-import { useAtom } from 'jotai'
-import { useState } from 'react'
+import { useState } from 'react';
+import {
+  canSendMessageAtom,
+  isMessageErrorAtom,
+  messagesAtom,
+  sessionIdAtom,
+} from 'atoms';
+import { useAtom } from 'jotai';
+
+import { sessionsAtom } from '@atoms/sessions';
+import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons';
+import { Flex, IconButton, Input, useToast } from '@chakra-ui/react';
+import Client from '@services/Api';
 
 const Message = () => {
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue, setInputValue] = useState('');
 
-  const [sessionId] = useAtom(sessionIdAtom)
-  const [, setMessages] = useAtom(messagesAtom)
-  const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom)
-  const [sessions] = useAtom(sessionsAtom)
-  const [, setIsMessageError] = useAtom(isMessageErrorAtom)
+  const [sessionId] = useAtom(sessionIdAtom);
+  const [, setMessages] = useAtom(messagesAtom);
+  const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom);
+  const [sessions] = useAtom(sessionsAtom);
+  const [, setIsMessageError] = useAtom(isMessageErrorAtom);
 
-  const toast = useToast()
+  const toast = useToast();
 
   const submitMessage = async () => {
-    setCanSendMessage(false)
-    setMessages(prevMessages => {
-      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
-      return [...safeMessages, { role: 'Human', content: inputValue, sources: [] }]
-    })
-    setInputValue('')
+    setCanSendMessage(false);
+    setMessages((prevMessages) => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
+      return [
+        ...safeMessages,
+        { role: 'Human', content: inputValue, sources: [] },
+      ];
+    });
+    setInputValue('');
 
-    setMessages(prevMessages => {
-      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
-      return [...safeMessages, { role: 'AI', content: '', sources: [] }]
-    })
-    const sessionName = sessions.find(session => session.uid === sessionId)?.name || 'default'
-    const result = await Client.inferWorkflow('default',  'default', {
+    setMessages((prevMessages) => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
+      return [...safeMessages, { role: 'AI', content: '', sources: [] }];
+    });
+    const sessionName =
+      sessions.find((session) => session.uid === sessionId)?.name || 'default';
+    const result = await Client.inferWorkflow('default', 'default', {
       question: inputValue,
       session_name: sessionName,
-      data_source: 'default'
-    }).then(res => {
+      data_source: 'default',
+    }).then((res) => {
       if (res.error) {
-        setIsMessageError(true)
+        setIsMessageError(true);
         toast({
           title: 'An unexpected error occurred',
           description: res.error,
           status: 'error',
           duration: 5000,
-          isClosable: true
-        })
-        setCanSendMessage(false)
-        return res
+          isClosable: true,
+        });
+        setCanSendMessage(false);
+        return res;
       }
-      setCanSendMessage(true)
-      return res
-    })
+      setCanSendMessage(true);
+      return res;
+    });
 
-    setMessages(prevMessages => {
-      const safeMessages = Array.isArray(prevMessages) ? prevMessages : []
-      return [...safeMessages.slice(0, -1), { role: 'AI', content: result.data.data.answer, sources: result.sources }]
-    })
-  }
+    setMessages((prevMessages) => {
+      const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
+      return [
+        ...safeMessages.slice(0, -1),
+        {
+          role: 'AI',
+          content: result.data.data.answer,
+          sources: result.sources,
+        },
+      ];
+    });
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault() // Prevent the default action to avoid adding a new line
-      submitMessage()
+      e.preventDefault(); // Prevent the default action to avoid adding a new line
+      submitMessage();
     }
-  }
+  };
 
   const handleClick = () => {
-    submitMessage()
-  }
+    submitMessage();
+  };
 
   return (
     <Flex justifyContent={'center'} gap={4} maxWidth={'100%'}>
@@ -91,12 +108,17 @@ const Message = () => {
         type="text"
         placeholder="Send message..."
         value={inputValue}
-        onChange={e => setInputValue(e.target.value)}
-        onKeyDown={e => canSendMessage && handleKeyPress(e)}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={(e) => canSendMessage && handleKeyPress(e)}
       />
-      <IconButton isDisabled={!canSendMessage} aria-label="Send" icon={<ArrowUpIcon />} onClick={handleClick} />
+      <IconButton
+        isDisabled={!canSendMessage}
+        aria-label="Send"
+        icon={<ArrowUpIcon />}
+        onClick={handleClick}
+      />
     </Flex>
-  )
-}
+  );
+};
 
-export default Message
+export default Message;

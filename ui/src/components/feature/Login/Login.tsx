@@ -12,68 +12,87 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Logo from '@assets/mlrun.png'
-import { adminAtom, publicUserAtom, usernameAtom } from '@atoms/index'
-import { sessionsAtom, sessionsWithFetchAtom } from '@atoms/sessions'
-import { Box, Button, Flex, FormControl, FormLabel, Image, Input, Switch, useColorMode } from '@chakra-ui/react'
-import useAuth from '@hooks/useAuth'
-import Client from '@services/Api'
-import { colors } from '@shared/theme'
-import { useAtom } from 'jotai'
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { useAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
+
+import { adminAtom, publicUserAtom, usernameAtom } from '@atoms/index';
+import { sessionsAtom, sessionsWithFetchAtom } from '@atoms/sessions';
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Image,
+  Input,
+  Switch,
+  useColorMode,
+} from '@chakra-ui/react';
+import Client from '@services/Api';
+import { colors } from '@shared/theme';
+
+import useAuth from '@hooks/useAuth';
+
+import Logo from '@assets/mlrun.png';
 
 const Login = () => {
-  const navigate = useNavigate()
-  const { colorMode } = useColorMode()
-  const [username, setUsername] = useAtom(usernameAtom)
-  const [admin, setAdmin] = useAtom(adminAtom)
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
-  const [publicUser, setPublicUser] = useAtom(publicUserAtom)
-  const [sessions] = useAtom(sessionsAtom)
-  const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
+  const navigate = useNavigate();
+  const { colorMode } = useColorMode();
+  const [username, setUsername] = useAtom(usernameAtom);
+  const [admin, setAdmin] = useAtom(adminAtom);
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const [publicUser, setPublicUser] = useAtom(publicUserAtom);
+  const [sessions] = useAtom(sessionsAtom);
+  const [, fetchSessions] = useAtom(sessionsWithFetchAtom);
 
-  const submitFunc = async (event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsLoading(true)
+  const submitFunc = async (
+    event:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    setIsLoading(true);
 
     try {
-      login(username, password, admin)
+      login(username, password, admin);
 
-      const userResponse = await Client.getUser(username)
+      const userResponse = await Client.getUser(username);
       if (userResponse && userResponse.data) {
-        setPublicUser(userResponse.data)
+        setPublicUser(userResponse.data);
       }
 
       if (admin) {
-        navigate('/projects')
+        navigate('/projects');
       } else {
-        await handleUserNavigation()
+        await handleUserNavigation();
       }
     } catch (error) {
-      console.error('Error during submission:', error)
+      console.log(`Error: ${error}`);
+      console.error('Error during submission:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleUserNavigation = async () => {
-    navigate(`/chat`)
+    navigate(`/chat`);
 
     try {
-      await fetchSessions(username)
+      await fetchSessions(username);
 
       if (sessions.length) {
-        navigate(`/chat/${sessions[0].uid}`)
+        navigate(`/chat/${sessions[0].uid}`);
       } else {
-        await createNewSession()
+        await createNewSession();
       }
     } catch (error) {
-      console.error('Error fetching sessions:', error)
+      console.log(`Error: ${error}`);
+      console.error('Error fetching sessions:', error);
     }
-  }
+  };
 
   const createNewSession = async () => {
     try {
@@ -82,20 +101,24 @@ const Login = () => {
         description: '* New Chat',
         workflow_id: 'default',
         labels: {},
-        owner_id: publicUser?.uid || ''
-      }
+        owner_id: publicUser?.uid || '',
+      };
 
-      const newSessionResponse = await Client.createSession(username, sessionData)
+      const newSessionResponse = await Client.createSession(
+        username,
+        sessionData,
+      );
 
       if (!newSessionResponse.error) {
-        navigate(`/chat/${newSessionResponse.data.uid}`)
+        navigate(`/chat/${newSessionResponse.data.uid}`);
       } else {
-        console.error('Error creating session:', newSessionResponse.error)
+        console.error('Error creating session:', newSessionResponse.error);
       }
     } catch (error) {
-      console.error('Error creating new session:', error)
+      console.log(`Error: ${error}`);
+      console.error('Error creating new session:', error);
     }
-  }
+  };
 
   return (
     <Flex
@@ -116,10 +139,19 @@ const Login = () => {
           borderRadius={'10px'}
           gap={4}
           padding={4}
-          onKeyDown={e => username.length && password.length && e.key === 'Enter' && submitFunc(e)}
+          onKeyDown={(e) =>
+            username.length &&
+            password.length &&
+            e.key === 'Enter' &&
+            submitFunc(e)
+          }
         >
           <Flex justifyContent={'center'}>
-            <Image width={'180px'} filter={colorMode === 'dark' ? '' : 'invert(100%)'} src={Logo} />
+            <Image
+              width={'180px'}
+              filter={colorMode === 'dark' ? '' : 'invert(100%)'}
+              src={Logo}
+            />
           </Flex>
           <Box>
             <FormLabel>Username</FormLabel>
@@ -128,7 +160,7 @@ const Login = () => {
               type="text"
               placeholder="Enter your username"
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </Box>
           <Box>
@@ -138,22 +170,30 @@ const Login = () => {
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </Box>
           <Flex alignItems={'center'}>
             <FormLabel htmlFor="admin-mode" mb="0">
               Admin mode
             </FormLabel>
-            <Switch defaultChecked={!!admin} onChange={() => setAdmin(!admin)} id="admin-mode" />
+            <Switch
+              defaultChecked={!!admin}
+              onChange={() => setAdmin(!admin)}
+              id="admin-mode"
+            />
           </Flex>
-          <Button isDisabled={!username.length || !password.length} isLoading={isLoading} onClick={submitFunc}>
+          <Button
+            isDisabled={!username.length || !password.length}
+            isLoading={isLoading}
+            onClick={submitFunc}
+          >
             Login
           </Button>
         </FormControl>
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
