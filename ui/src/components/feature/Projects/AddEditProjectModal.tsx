@@ -13,9 +13,7 @@
 // limitations under the License.
 
 import React, { useEffect, useState } from 'react';
-import { useAtom } from 'jotai';
 
-import { publicUserAtom } from '@atoms/index';
 import {
   Button,
   FormControl,
@@ -29,6 +27,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
+import { useUser } from '@queries';
 import { Project } from '@shared/types/project';
 
 type ProjectModalProps = {
@@ -44,24 +43,33 @@ const AddEditProjectModal: React.FC<ProjectModalProps> = ({
   onSave,
   project,
 }) => {
-  const [publicUser] = useAtom(publicUserAtom);
+  const { data: publicUser } = useUser();
 
   const [formData, setFormData] = useState<Project>(
     project || {
       name: '',
       description: '',
-      owner_id: (publicUser.uid as string) ?? '',
+      version: '',
+      owner_id: (publicUser?.uid as string) ?? '',
     },
   );
+
   useEffect(() => {
-    if (project) {
-      setFormData(project);
-    }
+    if (project) setFormData(project);
   }, [project]);
+
+  useEffect(() => {
+    if (!project && publicUser) {
+      const uid = publicUser.uid;
+      if (uid) {
+        setFormData((prev) => ({ ...prev, owner_id: uid }));
+      }
+    }
+  }, [publicUser, project]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
@@ -74,7 +82,7 @@ const AddEditProjectModal: React.FC<ProjectModalProps> = ({
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          {project?.uid ? 'Edit' : 'Add New'} {' Project'}
+          {project ? 'Edit Project' : 'Add New Project'}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -83,29 +91,32 @@ const AddEditProjectModal: React.FC<ProjectModalProps> = ({
             <Input
               type="text"
               name="name"
-              value={formData.name || ''}
+              value={formData.name}
               onChange={handleChange}
             />
           </FormControl>
+
           <FormControl id="description" mb={4}>
             <FormLabel>Description</FormLabel>
             <Input
               type="text"
               name="description"
-              value={formData.description || ''}
+              value={formData.description}
               onChange={handleChange}
             />
           </FormControl>
+
           <FormControl id="version" mb={4}>
             <FormLabel>Version</FormLabel>
             <Input
               type="text"
               name="version"
-              value={formData.version || ''}
+              value={formData.version}
               onChange={handleChange}
             />
           </FormControl>
         </ModalBody>
+
         <ModalFooter>
           <Button
             isDisabled={

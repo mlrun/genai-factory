@@ -12,15 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useEffect } from 'react';
-import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  projectsAtom,
-  projectsLoadingAtom,
-  projectsWithFetchAtom,
-} from '@atoms/projects';
 import { AddIcon } from '@chakra-ui/icons';
 import {
   Button,
@@ -36,17 +29,16 @@ import Layout from '@components/feature/Layout';
 import AddEditProjectModal from '@components/feature/Projects/AddEditProjectModal';
 import ProjectCard from '@components/feature/Projects/ProjectCard';
 import Loading from '@components/shared/Loading';
-import Client from '@services/Api';
+import { useProjectActions, useProjects } from '@queries';
 import { Project } from '@shared/types/project';
 
 export const ProjectsPage = () => {
   const navigate = useNavigate();
+  const { createProject, updateProject } = useProjectActions();
+
   const toast = useToast();
 
-  const [projects] = useAtom(projectsAtom);
-  const [loading] = useAtom(projectsLoadingAtom);
-
-  const [, fetchProjects] = useAtom(projectsWithFetchAtom);
+  const { data: projects, isLoading } = useProjects();
 
   const {
     isOpen: isModalOpen,
@@ -54,39 +46,18 @@ export const ProjectsPage = () => {
     onOpen: onModalOpen,
   } = useDisclosure();
 
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
   const handleSave = async (project: Project) => {
     try {
       if (project.uid) {
-        await Client.updateProject(project);
-        toast({
-          title: 'Project updated.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        await updateProject.mutateAsync(project);
+        toast({ title: 'Project updated.', status: 'success' });
       } else {
-        await Client.createProject(project);
-        toast({
-          title: 'Project added successfully.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        await createProject.mutateAsync(project);
+        toast({ title: 'Project added successfully.', status: 'success' });
       }
-      await fetchProjects();
     } catch (error) {
-      console.log(`Error: ${error}`);
-      console.error('Error saving project:', error);
-      toast({
-        title: 'Error saving project.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      console.log(error);
+      toast({ title: 'Error saving project.', status: 'error' });
     }
   };
 
@@ -94,7 +65,7 @@ export const ProjectsPage = () => {
     navigate('/chat');
   };
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
 
   return (
     <Layout>
@@ -124,12 +95,16 @@ export const ProjectsPage = () => {
           </Flex>
 
           <SimpleGrid columns={[1, null, 2]} spacing={6} w="100%">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.uid ?? project.name}
-                project={project}
-              />
-            ))}
+            {projects ? (
+              projects.map((project) => (
+                <ProjectCard
+                  key={project.uid ?? project.name}
+                  project={project}
+                />
+              ))
+            ) : (
+              <div>No projects</div>
+            )}
           </SimpleGrid>
         </VStack>
       </Container>
