@@ -11,44 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ProjectPage.tsx
 
-import { useEffect } from 'react';
-import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
 
-import { projectAtom } from '@atoms/index';
-import {
-  projectsAtom,
-  projectsLoadingAtom,
-  projectsWithFetchAtom,
-} from '@atoms/projects';
 import { Box, Divider, Text } from '@chakra-ui/react';
 import Layout from '@components/feature/Layout';
 import ProjectHeader from '@components/feature/Project/ProjectHeader';
 import ProjectTabs from '@components/feature/Project/ProjectTabs';
 import Loading from '@components/shared/Loading';
+import { useProject } from '@queries';
 
 export const ProjectPage = () => {
   const { name } = useParams();
 
-  const [projects] = useAtom(projectsAtom);
-  const [loading] = useAtom(projectsLoadingAtom);
-  const [project, setProject] = useAtom(projectAtom);
-
-  const [, fetchProjects] = useAtom(projectsWithFetchAtom);
-
-  useEffect(() => {
-    if (!project && projects.length === 0) {
-      fetchProjects();
-    }
-    if (projects.length > 0 && !project) {
-      setProject(projects.find((p) => p.name === name) ?? null);
-    }
-  }, [fetchProjects, projects, project, setProject, name]);
+  const {
+    data: project,
+    isLoading
+  } = useProject(name);
 
   if (!project) {
-    if (loading) return <Loading />;
+    if (isLoading) return <Loading />;
     return (
       <Text px={6} py={4}>
         Project not found.

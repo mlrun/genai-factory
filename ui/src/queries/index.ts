@@ -11,5 +11,6 @@
 export * from './users/useUser';
 export * from './useLogin';
 
+export * from './projects/useProject';
 export * from './projects/useProjects';
 export * from './projects/useProjectActions';
