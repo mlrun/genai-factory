@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useAtom } from 'jotai';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { usernameAtom } from '@atoms/index';
 import {
   Avatar,
   Box,
@@ -29,6 +27,8 @@ import { colors } from '@shared/theme';
 
 import Rightbar from '../Rightbar';
 
+import { useAuthStore } from '@stores/authStore';
+
 import Logo from '@assets/mlrun.png';
 
 type Props = {
@@ -40,9 +40,9 @@ const Topbar = ({ onLoginChange }: Props) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();
-  const [username] = useAtom(usernameAtom);
+  const user = useAuthStore((s) => s.user);
+  const username = user?.username;
 
-  // Helper to check if current path is base or base/*
   const isPathActive = (current: string, base: string) =>
     current === base || current.startsWith(base + '/');
 

@@ -27,7 +27,9 @@
       "@services/*": ["./services/*"],
       "@atoms/*": ["./atoms/*"],
       "@icons/*": ["./assets/icons/*"],
+      "@stores/*": ["./stores/*"],
       "@hooks/*": ["./hooks/*"],
+      "@queries": ["./queries/index"],
       "@constants/*": ["./constants/*"]
     },
     "types": ["node", "jest", "@testing-library/jest-dom"],

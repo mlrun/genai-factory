@@ -12,56 +12,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactNode, useEffect } from 'react';
-import { publicUserAtom } from 'atoms';
+import React, { ReactNode, useCallback, useEffect } from 'react';
 import { motion as m } from 'framer-motion';
-import { useAtom } from 'jotai';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Box, Flex } from '@chakra-ui/react';
-import Client from '@services/Api';
+import Loading from '@components/shared/Loading';
+import { useUser } from '@queries';
 
 import Chatbar from './Chat/Chatbar';
 import TopBar from './Topbar/Topbar';
 import Sidebar from './Sidebar';
 
-import useAuth from '@hooks/useAuth';
+import { useAuthStore } from '@stores/authStore';
 
 type LayoutProps = {
   children: ReactNode;
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [publicUser, setPublicUser] = useAtom(publicUserAtom);
-  const { logout, user } = useAuth();
-
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  useEffect(() => {
-    if (Object.keys(publicUser).length === 0 && user?.username) {
-      Client.getUser(user.username)
-        .then((res) => setPublicUser(res.data))
-        .catch((error) => {
-          console.error('Failed to fetch user:', error);
-          logout();
-        });
-    }
-  }, []);
+  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
+  const username = user?.username;
 
-  const changeLogin = () => {
-    if (user?.username) logout();
+  const {
+    data: publicUser,
+    error,
+    isError,
+    isLoading,
+  } = useUser(username, !!username);
+
+  useEffect(() => {
+    if (isError || !username) {
+      console.error('Failed to fetch user:', error);
+      logout();
+      navigate('/');
+    }
+  }, [isError, error, logout, navigate, username]);
+
+  const changeLogin = useCallback(() => {
+    if (username) logout();
     navigate('/');
-  };
+  }, [username]);
 
   const showChatbar = pathname.includes('chat');
+
+  if (isLoading) return <Loading />;
 
   return (
     <m.div
       initial={{ opacity: 0 }}
-      animate={{ opacity: '100%' }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      exit={{ opacity: '50%' }}
+      exit={{ opacity: 0.5 }}
     >
       <Flex direction="column" height="100vh">
         <TopBar onLoginChange={changeLogin} />
@@ -69,7 +75,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {showChatbar && (
             <Box display={{ md: 'flex' }}>
               <Sidebar>
-                <Chatbar publicUser={publicUser} />
+                {publicUser && <Chatbar publicUser={publicUser} />}
               </Sidebar>
             </Box>
           )}
