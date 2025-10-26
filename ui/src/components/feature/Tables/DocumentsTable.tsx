@@ -17,7 +17,7 @@ import { TableColumn } from 'react-data-table-component';
 
 import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
-import { useProjectEntity,useUser} from '@queries';
+import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Document } from '@shared/types/document';
 
@@ -61,7 +61,11 @@ const DocumentsTable = () => {
 
   const columns: TableColumn<Partial<Document>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
-    { name: 'Description', selector: (row) => row.description ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
     { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
     { name: 'Path', selector: (row) => row.path ?? '', sortable: true },
     { name: 'Origin', selector: (row) => row.origin ?? '', sortable: true },

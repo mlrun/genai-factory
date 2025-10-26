@@ -30,4 +30,3 @@ export function useUser(username?: string, enabled = true) {
     staleTime: 5 * 60 * 1000,
   });
 }
-

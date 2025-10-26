@@ -64,10 +64,22 @@ const WorkflowsTable = () => {
 
   const columns: TableColumn<Partial<Workflow>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
-    { name: 'Description', selector: (row) => row.description ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
     { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
-    { name: 'Workflow Type', selector: (row) => row.workflow_type ?? '', sortable: true },
-    { name: 'Deployment', selector: (row) => row.deployment ?? '', sortable: true },
+    {
+      name: 'Workflow Type',
+      selector: (row) => row.workflow_type ?? '',
+      sortable: true,
+    },
+    {
+      name: 'Deployment',
+      selector: (row) => row.deployment ?? '',
+      sortable: true,
+    },
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
 

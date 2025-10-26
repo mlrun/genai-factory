@@ -24,10 +24,7 @@ import { useProject } from '@queries';
 export const ProjectPage = () => {
   const { name } = useParams();
 
-  const {
-    data: project,
-    isLoading
-  } = useProject(name);
+  const { data: project, isLoading } = useProject(name);
 
   if (!project) {
     if (isLoading) return <Loading />;

@@ -42,8 +42,10 @@ const PromptTemplatesTable = () => {
   } = useProjectEntity<PromptTemplate>(
     'promptTemplates',
     (projectName) => Client.getPromptTemplates(projectName),
-    (projectName, template) => Client.createPromptTemplate(projectName, template),
-    (projectName, template) => Client.updatePromptTemplate(projectName, template),
+    (projectName, template) =>
+      Client.createPromptTemplate(projectName, template),
+    (projectName, template) =>
+      Client.updatePromptTemplate(projectName, template),
     (projectName, id) => Client.deletePromptTemplate(projectName, id),
   );
 
@@ -63,7 +65,11 @@ const PromptTemplatesTable = () => {
 
   const columns: TableColumn<Partial<PromptTemplate>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
-    { name: 'Description', selector: (row) => row.description ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
     { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
     { name: 'Text', selector: (row) => row.text ?? '', sortable: false },
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },

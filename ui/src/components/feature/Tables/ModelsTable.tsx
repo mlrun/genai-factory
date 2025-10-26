@@ -17,7 +17,7 @@ import { TableColumn } from 'react-data-table-component';
 
 import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
-import { useProjectEntity,useUser } from '@queries';
+import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Model, ModelType } from '@shared/types/model';
 

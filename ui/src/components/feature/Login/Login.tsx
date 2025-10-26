@@ -39,7 +39,9 @@ const Login = () => {
   const [admin, setAdmin] = useState(false);
 
   const submitFunc = (
-    event: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLDivElement>,
+    event:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.KeyboardEvent<HTMLDivElement>,
   ) => {
     event.preventDefault();
     loginMutation.mutate({ username, password, admin });

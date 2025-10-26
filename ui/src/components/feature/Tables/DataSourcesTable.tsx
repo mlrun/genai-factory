@@ -62,9 +62,17 @@ const DataSourcesTable = () => {
 
   const columns: TableColumn<Partial<DataSource>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
-    { name: 'Description', selector: (row) => row.description ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
     { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
-    { name: 'Type', selector: (row) => row.data_source_type ?? '', sortable: true },
+    {
+      name: 'Type',
+      selector: (row) => row.data_source_type ?? '',
+      sortable: true,
+    },
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
 
