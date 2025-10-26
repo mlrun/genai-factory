@@ -12,59 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useAtom } from 'jotai';
+import { useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { projectAtom, publicUserAtom } from '@atoms/index';
-import { workflowsAtom, workflowsWithFetchAtom } from '@atoms/workflows';
 import EntityTable from '@components/shared/EntityTable';
+import Loading from '@components/shared/Loading';
+import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Workflow, WorkflowType } from '@shared/types/workflow';
 
+import { useAuthStore } from '@stores/authStore';
+
 import { workflowFields } from '@constants/index';
 
-const WorkflowsTable: React.FC = () => {
-  const [workflows] = useAtom(workflowsAtom);
-  const [, fetchWorkflows] = useAtom(workflowsWithFetchAtom);
-  const [project] = useAtom(projectAtom);
-  const [publicUser] = useAtom(publicUserAtom);
+const WorkflowsTable = () => {
+  const { user } = useAuthStore();
+  const username = user?.username;
 
-  const base = project?.name ?? '';
-  const uid = project?.uid ?? '';
+  const { data: publicUser } = useUser(username, !!username);
 
-  const newEntity: Workflow = {
-    name: '',
-    description: '',
-    deployment: '',
-    version: '',
-    workflow_type: WorkflowType.APPLICATION,
-    owner_id: publicUser.uid as string,
-    project_id: uid,
-  };
+  const {
+    create,
+    data: workflows = [],
+    error,
+    isLoading,
+    project,
+    remove,
+    update,
+  } = useProjectEntity<Workflow>(
+    'workflows',
+    (projectName) => Client.getWorkflows(projectName),
+    (projectName, workflow) => Client.createWorkflow(projectName, workflow),
+    (projectName, workflow) => Client.updateWorkflow(projectName, workflow),
+    (projectName, id) => Client.deleteWorkflow(projectName, id),
+  );
 
-  if (Object.keys(publicUser).length === 0) return;
+  const projectUid = project?.uid ?? '';
+
+  const newEntity: Workflow = useMemo(
+    () => ({
+      name: '',
+      description: '',
+      deployment: '',
+      version: '',
+      workflow_type: WorkflowType.APPLICATION,
+      owner_id: publicUser?.uid ?? '',
+      project_id: projectUid,
+    }),
+    [publicUser?.uid, projectUid],
+  );
 
   const columns: TableColumn<Partial<Workflow>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
-    {
-      name: 'Description',
-      selector: (row) => row.description ?? '',
-      sortable: true,
-    },
+    { name: 'Description', selector: (row) => row.description ?? '', sortable: true },
     { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
-    {
-      name: 'Workflow Type',
-      selector: (row) => row.workflow_type ?? '',
-      sortable: true,
-    },
-    {
-      name: 'Deployment',
-      selector: (row) => row.deployment ?? '',
-      sortable: true,
-    },
+    { name: 'Workflow Type', selector: (row) => row.workflow_type ?? '', sortable: true },
+    { name: 'Deployment', selector: (row) => row.deployment ?? '', sortable: true },
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
+
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load workflows.</div>;
 
   return (
     <EntityTable
@@ -73,10 +81,9 @@ const WorkflowsTable: React.FC = () => {
       fields={workflowFields}
       columns={columns}
       data={workflows}
-      fetchEntities={() => fetchWorkflows(base)}
-      createEntity={(d) => Client.createWorkflow(base, d)}
-      updateEntity={(d) => Client.updateWorkflow(base, d)}
-      deleteEntity={(id) => Client.deleteWorkflow(base, id)}
+      createEntity={(d) => create.mutate(d)}
+      updateEntity={(d) => update.mutate(d)}
+      deleteEntity={(id) => remove.mutate(id)}
       newEntityDefaults={newEntity}
     />
   );

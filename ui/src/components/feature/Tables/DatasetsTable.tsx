@@ -12,38 +12,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useAtom } from 'jotai';
+import { useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { datasetsAtom, datasetsWithFetchAtom } from '@atoms/datasets';
-import { projectAtom, publicUserAtom } from '@atoms/index';
 import EntityTable from '@components/shared/EntityTable';
+import Loading from '@components/shared/Loading';
+import { useProjectEntity,useUser } from '@queries';
 import Client from '@services/Api';
 import { Dataset } from '@shared/types/dataset';
 
+import { useAuthStore } from '@stores/authStore';
+
 import { datasetFields } from '@constants/index';
 
-const DatasetsTable: React.FC = () => {
-  const [datasets] = useAtom(datasetsAtom);
-  const [, fetchDatasets] = useAtom(datasetsWithFetchAtom);
-  const [project] = useAtom(projectAtom);
-  const [publicUser] = useAtom(publicUserAtom);
+const DatasetsTable = () => {
+  const { user } = useAuthStore();
+  const username = user?.username;
 
-  const base = project?.name ?? '';
-  const uid = project?.uid ?? '';
+  const { data: publicUser } = useUser(username, !!username);
 
-  const newEntity: Dataset = {
-    name: '',
-    description: '',
-    owner_id: publicUser.uid as string,
-    project_id: uid,
-    path: '',
-    task: '',
-  };
+  const {
+    create,
+    data: datasets = [],
+    error,
+    isLoading,
+    project,
+    remove,
+    update,
+  } = useProjectEntity<Dataset>(
+    'datasets',
+    (projectName) => Client.getDatasets(projectName),
+    (projectName, dataset) => Client.createDataset(projectName, dataset),
+    (projectName, dataset) => Client.updateDataset(projectName, dataset),
+    (projectName, id) => Client.deleteDataset(projectName, id),
+  );
+  const projectUid = project?.uid ?? '';
 
-  if (Object.keys(publicUser).length === 0) return;
-
+  const newEntity: Dataset = useMemo(
+    () => ({
+      name: '',
+      description: '',
+      owner_id: publicUser?.uid ?? '',
+      project_id: projectUid,
+      path: '',
+      task: '',
+    }),
+    [publicUser?.uid, projectUid],
+  );
   const columns: TableColumn<Partial<Dataset>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
     {
@@ -58,6 +73,9 @@ const DatasetsTable: React.FC = () => {
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
 
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load datasets.</div>;
+
   return (
     <EntityTable
       title="Datasets"
@@ -65,10 +83,9 @@ const DatasetsTable: React.FC = () => {
       fields={datasetFields}
       columns={columns}
       data={datasets}
-      fetchEntities={() => fetchDatasets(base)}
-      createEntity={(d) => Client.createDataset(base, d)}
-      updateEntity={(d) => Client.updateDataset(base, d)}
-      deleteEntity={(id) => Client.deleteDataset(base, id)}
+      createEntity={(d) => create.mutate(d)}
+      updateEntity={(d) => update.mutate(d)}
+      deleteEntity={(id) => remove.mutate(id)}
       newEntityDefaults={newEntity}
     />
   );

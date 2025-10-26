@@ -10,7 +10,11 @@
 
 export * from './users/useUser';
 export * from './useLogin';
+export * from './users/useUsers'
+export * from './users/useUserActions';
 
 export * from './projects/useProject';
 export * from './projects/useProjects';
 export * from './projects/useProjectActions';
+export * from './projects/useProjectEntity';
+

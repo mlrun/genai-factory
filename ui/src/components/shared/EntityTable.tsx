@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAtom } from 'jotai';
+import React, { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { selectedRowAtom } from '@atoms/index';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import {
   Button,
@@ -45,10 +43,9 @@ type Props<T extends EntityWithUID> = {
   fields: ModalField[];
   columns: TableColumn<Partial<T>>[];
   data: T[];
-  fetchEntities: () => Promise<void>;
-  createEntity: (entity: T) => Promise<void>;
-  updateEntity: (entity: T) => Promise<void>;
-  deleteEntity: (id: string) => Promise<void>;
+  createEntity: (entity: T) => void; // from useMutation.mutate
+  updateEntity: (entity: Partial<T>) => void;
+  deleteEntity: (id: string) => void;
   newEntityDefaults: T;
 };
 
@@ -58,38 +55,26 @@ function EntityTable<T extends EntityWithUID>({
   data,
   deleteEntity,
   entityName,
-  fetchEntities,
   fields,
   newEntityDefaults,
   title,
   updateEntity,
 }: Props<T>) {
   const toast = useToast();
-  const [selectedRow, setSelectedRow] = useAtom<T>(selectedRowAtom);
-  const [selectedRows, setSelectedRows] = useState<T[]>([]);
+
+  const [selectedRow, setSelectedRow] = useState<Partial<T> | null>(null);
+  const [selectedRows, setSelectedRows] = useState<Partial<T>[]>([]);
   const [editRow, setEditRow] = useState<T>(newEntityDefaults);
   const [filterText, setFilterText] = useState('');
   const [toggledClearRows, setToggleClearRows] = useState(false);
 
-  const {
-    isOpen: isModalOpen,
-    onClose: onModalClose,
-    onOpen: onModalOpen,
-  } = useDisclosure();
-  const {
-    isOpen: isDrawerOpen,
-    onClose: onDrawerClose,
-    onOpen: onDrawerOpen,
-  } = useDisclosure();
+  const modal = useDisclosure();
+  const drawer = useDisclosure();
 
-  useEffect(() => {
-    fetchEntities();
-  }, []);
-
-  const handleSave = async (entity: T) => {
+  const handleSave = (entity: T) => {
     try {
       if (entity.uid) {
-        await updateEntity(entity);
+        updateEntity(entity);
         toast({
           title: `${entityName} updated`,
           status: 'success',
@@ -97,7 +82,7 @@ function EntityTable<T extends EntityWithUID>({
           isClosable: true,
         });
       } else {
-        await createEntity(entity);
+        createEntity(entity);
         toast({
           title: `${entityName} created`,
           status: 'success',
@@ -105,8 +90,8 @@ function EntityTable<T extends EntityWithUID>({
           isClosable: true,
         });
       }
-      await fetchEntities();
-      onModalClose();
+      modal.onClose();
+      setEditRow(newEntityDefaults);
     } catch {
       toast({
         title: `Error saving ${entityName}`,
@@ -115,52 +100,40 @@ function EntityTable<T extends EntityWithUID>({
         isClosable: true,
       });
     }
-
-    setEditRow(newEntityDefaults);
   };
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = useCallback(() => {
     try {
-      await Promise.all(
-        selectedRows.map((r) => deleteEntity(r.name as string)),
-      );
+      selectedRows.forEach((r) => deleteEntity(r.name as string));
       toast({
-        title: `${entityName}s deleted`,
+        title: `${entityName}(s) deleted`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
       setSelectedRows([]);
-      await fetchEntities();
     } catch {
       toast({
-        title: `Error deleting ${entityName}s`,
+        title: `Error deleting ${entityName}(s)`,
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
     }
-    setToggleClearRows(!toggledClearRows);
-  }, [
-    deleteEntity,
-    selectedRows,
-    fetchEntities,
-    toggledClearRows,
-    entityName,
-    toast,
-  ]);
+    setToggleClearRows((prev) => !prev);
+  }, [deleteEntity, selectedRows, entityName, toast]);
 
-  const handleUpdateDrawer = async () => {
+  const handleUpdateDrawer = () => {
+    if (!selectedRow) return;
     try {
-      await updateEntity(selectedRow);
+      updateEntity(selectedRow);
       toast({
         title: `${entityName} updated`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      await fetchEntities();
-      onDrawerClose();
+      drawer.onClose();
     } catch {
       toast({
         title: `Error updating ${entityName}`,
@@ -173,7 +146,7 @@ function EntityTable<T extends EntityWithUID>({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSelectedRow({ ...selectedRow, [name]: value });
+    setSelectedRow((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
   const contextActions = useMemo(
@@ -185,7 +158,7 @@ function EntityTable<T extends EntityWithUID>({
     [handleDelete],
   );
 
-  const subHeaderComponentMemo = useMemo(
+  const subHeader = useMemo(
     () => (
       <Flex gap={4}>
         <FilterComponent
@@ -196,14 +169,14 @@ function EntityTable<T extends EntityWithUID>({
           leftIcon={<AddIcon />}
           onClick={() => {
             setEditRow(newEntityDefaults);
-            onModalOpen();
+            modal.onOpen();
           }}
         >
           New
         </Button>
       </Flex>
     ),
-    [filterText, newEntityDefaults, onModalOpen],
+    [filterText, modal.onOpen, newEntityDefaults],
   );
 
   return (
@@ -213,29 +186,32 @@ function EntityTable<T extends EntityWithUID>({
         data={data}
         columns={columns}
         contextActions={contextActions}
+        subheaderComponent={subHeader}
+        onRowSelect={(row) => setSelectedRow(row)}
         onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
-        subheaderComponent={subHeaderComponentMemo}
         filterText={filterText}
-        onOpenDrawer={onDrawerOpen}
+        onOpenDrawer={() => drawer.onOpen()}
         toggleClearRows={toggledClearRows}
       />
+
       <AddEditModal
-        isOpen={isModalOpen}
-        onClose={onModalClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         onSave={handleSave}
         entity={editRow}
         fields={fields}
         title={entityName}
       />
+
       <Drawer
         placement="right"
         size="xl"
-        isOpen={isDrawerOpen}
-        onClose={onDrawerClose}
+        isOpen={drawer.isOpen}
+        onClose={drawer.onClose}
       >
         <DrawerContent>
           <DrawerHeader borderBottomWidth="1px">
-            {selectedRow?.name}
+            {selectedRow?.name ?? 'Edit'}
           </DrawerHeader>
           <DrawerBody>
             <Flex gap={10}>
@@ -247,7 +223,7 @@ function EntityTable<T extends EntityWithUID>({
                       type="text"
                       name={field.name}
                       value={
-                        (selectedRow[field.name as keyof T] as string) || ''
+                        (selectedRow?.[field.name as keyof T] as string) ?? ''
                       }
                       onChange={handleChange}
                     />

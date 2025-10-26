@@ -241,7 +241,7 @@ class ApiClient {
     }
   }
 
-  async updateWorkflow(projectName: string, workflow: Workflow) {
+  async updateWorkflow(projectName: string, workflow: Partial<Workflow>) {
     try {
       const response = await this.client.put(
         `/projects/${projectName}/workflows/${workflow.name}`,
@@ -406,7 +406,7 @@ class ApiClient {
     }
   }
 
-  async updateDataSource(projectName: string, dataSource: DataSource) {
+  async updateDataSource(projectName: string, dataSource: Partial<DataSource>) {
     try {
       const response = await this.client.put(
         `/projects/${projectName}/data_sources/${dataSource.name}`,
@@ -512,7 +512,7 @@ class ApiClient {
     }
   }
 
-  async updateDataset(projectName: string, dataset: Dataset) {
+  async updateDataset(projectName: string, dataset: Partial<Dataset>) {
     try {
       const response = await this.client.put(
         `/projects/${projectName}/datasets/${dataset.name}`,
@@ -595,7 +595,7 @@ class ApiClient {
     }
   }
 
-  async updateModel(projectName: string, model: Model) {
+  async updateModel(projectName: string, model: Partial<Model>) {
     try {
       const response = await this.client.put(
         `/projects/${projectName}/models/${model.name}`,
@@ -677,7 +677,7 @@ class ApiClient {
     }
   }
 
-  async updateDocument(projectName: string, document: Document) {
+  async updateDocument(projectName: string, document: Partial<Document>) {
     try {
       const response = await this.client.put(
         `/projects/${projectName}/documents/${document.name}`,
@@ -764,7 +764,7 @@ class ApiClient {
 
   async updatePromptTemplate(
     projectName: string,
-    promptTemplate: PromptTemplate,
+    promptTemplate: Partial<PromptTemplate>,
   ) {
     try {
       const response = await this.client.put(
