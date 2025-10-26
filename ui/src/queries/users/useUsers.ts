@@ -21,7 +21,7 @@ export function useUsers() {
     queryKey: ['users'],
     queryFn: async () => {
       const res = await Client.getUsers();
-      const { data, error, success } = res?.data ?? {};
+      const { data, error, success } = res;
       if (!success) throw new Error(error || 'Failed to fetch users');
       return data ?? null;
     },
