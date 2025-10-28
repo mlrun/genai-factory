@@ -13,29 +13,16 @@
 // limitations under the License.
 
 import Client from '@services/Api';
-import { APIResponse } from '@shared/types';
 import { Project } from '@shared/types/project';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { validateApiResponse } from '@utils/validateApiResponse';
 
 export const useProjectActions = () => {
   const queryClient = useQueryClient();
 
-  const invalidateProjects = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['projects'] });
-  };
-
-  const validateApiResponse = async (
-    apiCall: Promise<APIResponse>,
-    action: string,
-  ) => {
-    const response = await apiCall;
-    if (!response.success) {
-      const message = response.error || `API request failed during ${action}`;
-      console.error(`[Project ${action} Error]:`, message);
-      throw new Error(message);
-    }
-    return response.data;
-  };
+  const invalidateProjects = () =>
+    queryClient.invalidateQueries({ queryKey: ['projects'] });
 
   const createProject = useMutation({
     mutationFn: (project: Project) =>

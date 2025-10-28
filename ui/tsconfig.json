@@ -30,7 +30,8 @@
       "@stores/*": ["./stores/*"],
       "@hooks/*": ["./hooks/*"],
       "@queries": ["./queries/index"],
-      "@constants/*": ["./constants/*"]
+      "@constants/*": ["./constants/*"],
+      "@utils/*": ["./utils/*"]
     },
     "types": ["node", "jest", "@testing-library/jest-dom"],
     "forceConsistentCasingInFileNames": true

@@ -13,36 +13,38 @@
 // limitations under the License.
 
 import Client from '@services/Api';
-import { APIResponse, User } from '@shared/types';
+import { User } from '@shared/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { validateApiResponse } from '@utils/validateApiResponse';
 
 export function useUserActions() {
   const queryClient = useQueryClient();
 
-  const invalidateUsers = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['users'] });
-  };
-
-  const validateApiResponse = async (apiCall: Promise<APIResponse>) => {
-    const response = await apiCall;
-    if (!response.success) {
-      throw new Error(response.error || 'API request failed');
-    }
-    return response.data;
-  };
+  const invalidateUsers = () =>
+    queryClient.invalidateQueries({ queryKey: ['users'] });
 
   const createUser = useMutation({
-    mutationFn: (user: User) => validateApiResponse(Client.createUser(user)),
+    mutationFn: (user: User) =>
+      validateApiResponse(
+        Client.createUser(user),
+        `create (${user.name})`,
+      ),
     onSuccess: invalidateUsers,
   });
 
   const updateUser = useMutation({
-    mutationFn: (user: User) => validateApiResponse(Client.updateUser(user)),
+    mutationFn: (user: User) =>
+      validateApiResponse(
+        Client.updateUser(user),
+        `update (${user.name})`,
+      ),
     onSuccess: invalidateUsers,
   });
 
   const deleteUser = useMutation({
-    mutationFn: (id: string) => validateApiResponse(Client.deleteUser(id)),
+    mutationFn: (id: string) =>
+      validateApiResponse(Client.deleteUser(id), `delete (ID: ${id})`),
     onSuccess: invalidateUsers,
   });
 

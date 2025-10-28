@@ -8,13 +8,17 @@
 // software distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+export * from './chat/useSessions';
+export * from './chat/useSession';
+export * from './chat/useSessionActions';
+export * from './chat/useSendMessage';
+
 export * from './users/useUser';
 export * from './useLogin';
-export * from './users/useUsers'
+export * from './users/useUsers';
 export * from './users/useUserActions';
 
 export * from './projects/useProject';
 export * from './projects/useProjects';
 export * from './projects/useProjectActions';
 export * from './projects/useProjectEntity';
-

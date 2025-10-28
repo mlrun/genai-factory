@@ -48,7 +48,7 @@ function App() {
       element: <ChatPage />,
     },
     {
-      path: '/chat/:sessionId',
+      path: '/chat/:sessionName',
       element: <ChatPage />,
     },
   ]);

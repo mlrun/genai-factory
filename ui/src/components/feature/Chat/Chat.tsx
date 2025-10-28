@@ -13,30 +13,22 @@
 // limitations under the License.
 
 import { useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 
-import { messagesAtom, sessionIdAtom, usernameAtom } from '@atoms/index';
 import { Box, Flex } from '@chakra-ui/react';
 import Bubble from '@components/shared/Bubble';
+import Loading from '@components/shared/Loading';
 import Message from '@components/shared/Message';
-import Client from '@services/Api';
-import { ChatHistory } from '@shared/types';
+import { useSession } from '@queries';
+
+import { useAuthStore } from '@stores/authStore';
 
 const Chat = () => {
-  const [messages, setMessages] = useAtom<ChatHistory[]>(messagesAtom);
-  const [sessionId] = useAtom(sessionIdAtom);
-  const [username] = useAtom(usernameAtom);
+  const { sessionName } = useParams<{ sessionName: string }>();
+  const { user } = useAuthStore();
+  const username = user?.username;
 
-  useEffect(() => {
-    async function fetchData() {
-      await Client.getSession(username, sessionId);
-    }
-
-    if (username.length > 0 && !sessionId) {
-      fetchData();
-    }
-  }, [sessionId, setMessages, username]);
-
+  const { data: session, error, isLoading } = useSession(username, sessionName);
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,30 +38,29 @@ const Chat = () => {
         block: 'end',
       });
     }
-  }, [messages, setMessages]);
+  }, [session?.history]);
+
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load chat.</div>;
 
   return (
     <Flex
       paddingX={{ xl: '25%', md: '10%' }}
       paddingBottom={4}
-      flexDir={'column'}
-      justifyContent={'space-between'}
+      flexDir="column"
+      justifyContent="space-between"
       flexGrow={1}
       height="calc(100vh - 92px)"
     >
       <Flex
-        sx={{
-          '::-webkit-scrollbar': {
-            display: 'none',
-          },
-        }}
+        sx={{ '::-webkit-scrollbar': { display: 'none' } }}
         justifyContent="flex-start"
         flexGrow={1}
         flexDirection="column"
         paddingBottom="92px"
         overflowY="scroll"
       >
-        {messages?.map((message, index) => (
+        {session?.history?.map((message, index) => (
           <Bubble
             key={index}
             content={message.content}
@@ -78,7 +69,7 @@ const Chat = () => {
             html={message.html as string}
           />
         ))}
-        <Box height={'2px'} ref={lastMessageRef} />
+        <Box height="2px" ref={lastMessageRef} />
       </Flex>
       <Box>
         <Message />

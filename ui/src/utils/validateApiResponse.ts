@@ -12,28 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
-import ReactMarkdown from 'react-markdown';
+import { APIResponse } from '@shared/types';
 
-import TypingText from '../TypingText';
+export async function validateApiResponse(
+  apiCall: Promise<APIResponse>,
+  context: string,
+) {
+  const response = await apiCall;
 
-import { useChatStore } from '@stores/chatStore';
-
-interface ChatMessageProps {
-  message: string;
-}
-
-const ChatMessage = ({ message }: ChatMessageProps) => {
-  const isTyping = useChatStore((state) => state.isTyping);
-
-  if (isTyping) {
-    return <TypingText text={message} />;
+  if (!response.success) {
+    const message = response.error || `API request failed during ${context}`;
+    console.error(`[${context} Error]:`, message);
+    throw new Error(message);
   }
-  return (
-    <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
-      {message}
-    </ReactMarkdown>
-  );
-};
 
-export default ChatMessage;
+  return response.data;
+}

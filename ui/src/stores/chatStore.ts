@@ -12,28 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
-import ReactMarkdown from 'react-markdown';
+import { create } from 'zustand';
 
-import TypingText from '../TypingText';
+interface ChatState {
+  isTyping: boolean;
+  setIsTyping: (value: boolean) => void;
 
-import { useChatStore } from '@stores/chatStore';
+  canSend: boolean;
+  setCanSend: (value: boolean) => void;
 
-interface ChatMessageProps {
-  message: string;
+  isMessageError: boolean;
+  setIsMessageError: (isMessageError: boolean) => void;
 }
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
-  const isTyping = useChatStore((state) => state.isTyping);
+export const useChatStore = create<ChatState>((set) => ({
+  isTyping: false,
+  setIsTyping: (value) => set({ isTyping: value }),
 
-  if (isTyping) {
-    return <TypingText text={message} />;
-  }
-  return (
-    <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
-      {message}
-    </ReactMarkdown>
-  );
-};
+  canSend: true,
+  setCanSend: (value) => set({ canSend: value }),
 
-export default ChatMessage;
+  isMessageError: false,
+  setIsMessageError: (value) => set({ isMessageError: value }),
+}));

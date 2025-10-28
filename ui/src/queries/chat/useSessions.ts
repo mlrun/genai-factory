@@ -12,28 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
-import ReactMarkdown from 'react-markdown';
+import Client from '@services/Api';
+import { Session } from '@shared/types/session';
+import { useQuery } from '@tanstack/react-query';
 
-import TypingText from '../TypingText';
-
-import { useChatStore } from '@stores/chatStore';
-
-interface ChatMessageProps {
-  message: string;
+export function useSessions(username?: string) {
+  return useQuery<Session[]>({
+    queryKey: ['sessions', username],
+    queryFn: async () => {
+      if (!username) return [];
+      const res = await Client.getSessions(username);
+      const { data, error, success } = res;
+      if (!success) throw new Error(error || 'Failed to fetch user');
+      return data ?? null;
+    },
+    enabled: !!username,
+    staleTime: 5 * 60 * 1000,
+  });
 }
-
-const ChatMessage = ({ message }: ChatMessageProps) => {
-  const isTyping = useChatStore((state) => state.isTyping);
-
-  if (isTyping) {
-    return <TypingText text={message} />;
-  }
-  return (
-    <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
-      {message}
-    </ReactMarkdown>
-  );
-};
-
-export default ChatMessage;

@@ -66,7 +66,7 @@ export type User = {
 
 export type APIResponse = {
   //eslint-disable-next-line
-  data: any[];
+  data: any[] | any;
   success: boolean;
   error: string;
 };
