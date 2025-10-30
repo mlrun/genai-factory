@@ -41,6 +41,25 @@ class WorkflowServerConfig(BaseModel):
     MLRun project name to use for the workflows. Default: default.
     """
 
+    mlrun_api_url: str = "http://localhost:30070"
+    """
+    URL to use for the mlrun API. Default: http://localhost:30070.
+    """
+
+    git_repo: str = ""
+    """
+    MLRun git repo. Default: "".
+    """
+
+    default_image_requirements: list[str] = [
+        "fastapi",
+        "uvicorn",
+        "git+https://github.com/mlrun/genai-factory/tree/main/genai_factory/src/genai_factory.git"
+    ]
+    """
+    MLRun default image requirements for creating images. Default: "".
+    """
+
     verbose: bool = True
     """
     Whether to print verbose logs. Default: True.

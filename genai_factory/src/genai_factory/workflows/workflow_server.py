@@ -15,6 +15,8 @@
 from urllib.parse import urlparse
 
 import uvicorn
+import requests
+import mlrun
 
 from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
@@ -22,10 +24,12 @@ from genai_factory.schemas import WorkflowType
 from genai_factory.sessions import SessionStore
 from genai_factory.utils import logger
 from genai_factory.workflows import Workflow
+from mlrun.projects import MlrunProject
 
 
 class WorkflowServer:
     def __init__(self, config: WorkflowServerConfig = None):
+        self._project = None
         self._config = config or WorkflowServerConfig()
         self._controller_client = None
         self._session_store = None
@@ -124,11 +128,21 @@ class WorkflowServer:
     def api_startup(self):
         print("\nstartup event\n")
 
-    def deploy(self, router=None):
+    def deploy(self, router=None, deployer=None):
         self._build()
-        self._commit()
+
+        if deployer == "nuclio":
+            print("Deploying nuclio")
+            self.deploy_nuclio()
+        else:
+            print("Deploying fastapi")
+            self.deploy_fastapi(router)
+
+    def deploy_fastapi(self, router):
         from fastapi import FastAPI
         from fastapi.middleware.cors import CORSMiddleware
+
+        self._commit()
 
         app = FastAPI()
 
@@ -150,3 +164,84 @@ class WorkflowServer:
             app.include_router(router)
         url = urlparse(self._config.deployment_url)
         uvicorn.run(app, host=url.hostname, port=url.port)
+
+    def deploy_nuclio(self):
+
+        self.validate_mlrun()
+
+        # TODO: consider adding mlrun project migration
+        project = self._project or self.init_project()
+
+        ################################################
+
+        base_image = getattr(self._config, "default_image", "mlrun/mlrun") or "mlrun/mlrun"
+        requirements = getattr(self._config, "default_image_requirements", [])
+
+        git_repo = project.source or getattr(self._config, "git_repo", project.source)
+        if not git_repo:
+            raise ValueError(
+                "Session store and configuration must be set before building workflows."
+                " Make sure to set them via the `set_config` method."
+            )
+
+        app = project.set_function(
+            name=self._config.project_name,
+            kind="application",
+            image=base_image
+        )
+
+        app.with_requirements(requirements=requirements)
+
+        # TODO: necessary?
+        app.spec.command = "genai-factory run workflow.py"
+        app.spec.args = [
+            f"{self._config.project_name}:{base_image}",
+            "--host",
+            "0.0.0.0:8000",
+        ]
+        app.set_internal_application_port(8000)
+        app.with_source_archive(
+            "git://github.com/tomerbv/workflow_example/blob/main", pull_at_runtime=False
+        )
+
+        app.deploy(create_default_api_gateway=False)
+
+        # TODO: necessary?
+        # address = app.create_api_gateway(
+        #     name=name,
+        #     direct_port_access=False,
+        #     authentication_mode=mlrun.common.schemas.api_gateway.APIGatewayAuthenticationMode.none
+        # )
+
+
+    def validate_mlrun(self) -> None:
+        """
+        Ensure MLRun API is reachable.
+        """
+        api = (getattr(self.cfg, "mlrun_api_url", "") or "").rstrip("/")
+        if not api:
+            raise ValueError("mlrun_api_url is not set in the configuration.")
+        health = f"{api}/api/v1/healthz"
+        try:
+            r = requests.get(health, timeout=5)
+            r.raise_for_status()
+        except Exception as e:
+            raise ValueError(f"Could not reach MLRun at {health}: {e}")
+        self.log.info("✅ MLRun health check passed: %s", health)
+
+    def init_project(self) -> MlrunProject:
+        """
+        Set MLRun environment and return (create if needed) the project.
+        """
+        project = mlrun.get_or_create_project(
+            name=self.cfg.project_name,
+            context=".",       # current repo context; used when packaging code
+            user_project=False # set True if your MLRun is configured with user projects
+        )
+        self._project = project
+        return project
+
+
+
+
+

@@ -109,7 +109,7 @@ def run(
 
     # Retrieve the desired object from the module
     click.echo(f"Running workflows using a '{deployer}' runner...")
-    workflow_server.deploy(router=router)
+    workflow_server.deploy(router=router, deployer=deployer)
 
 
 main.add_command(run)

@@ -53,7 +53,7 @@ class Workflow:
         self._labels = labels
         self._description = description
         self._deployment = deployment
-        self._client = client
+        self._client = client  # TODO: Remove
 
         # Prepare future instances:
         self._graph = None
