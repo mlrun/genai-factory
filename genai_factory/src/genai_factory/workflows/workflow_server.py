@@ -178,6 +178,7 @@ class WorkflowServer:
         requirements = getattr(self._config, "default_image_requirements", [])
 
         git_repo = project.source or getattr(self._config, "git_repo", project.source)
+        print(f"git repo: {git_repo}")
         if not git_repo:
             raise ValueError(
                 "Session store and configuration must be set before building workflows."
@@ -192,7 +193,7 @@ class WorkflowServer:
         )
 
         # TODO: necessary?
-        app.spec.command = "genai-factory run workflow.py"
+        app.spec.command = "genai-factory run workflow.py --deployer fastapi"
         app.spec.args = [
             f"{self._config.project_name}:{base_image}",
             "--host",
@@ -200,7 +201,8 @@ class WorkflowServer:
         ]
         app.set_internal_application_port(8000)
         app.with_source_archive(
-            "git://github.com/tomerbv/workflow_example", pull_at_runtime=False
+            git_repo,
+            pull_at_runtime=False
         )
 
         app.deploy(create_default_api_gateway=False)

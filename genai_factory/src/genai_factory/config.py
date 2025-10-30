@@ -46,7 +46,7 @@ class WorkflowServerConfig(BaseModel):
     URL to use for the mlrun API. Default: http://localhost:30070.
     """
 
-    git_repo: str = ""
+    git_repo: str = "git://github.com/tomerbv/workflow_example"
     """
     MLRun git repo. Default: "".
     """
@@ -54,7 +54,7 @@ class WorkflowServerConfig(BaseModel):
     default_image_requirements: list[str] = [
         "fastapi",
         "uvicorn",
-        "git+https://github.com/mlrun/genai-factory/tree/main/genai_factory/src/genai_factory.git"
+        "git+https://github.com/mlrun/genai-factory"
     ]
     """
     MLRun default image requirements for creating images. Default: "".
