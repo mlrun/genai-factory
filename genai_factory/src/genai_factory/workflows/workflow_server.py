@@ -218,7 +218,7 @@ class WorkflowServer:
         """
         Ensure MLRun API is reachable.
         """
-        api = (getattr(self.cfg, "mlrun_api_url", "") or "").rstrip("/")
+        api = (getattr(self._config, "mlrun_api_url", "") or "").rstrip("/")
         if not api:
             raise ValueError("mlrun_api_url is not set in the configuration.")
         health = f"{api}/api/v1/healthz"
@@ -227,14 +227,13 @@ class WorkflowServer:
             r.raise_for_status()
         except Exception as e:
             raise ValueError(f"Could not reach MLRun at {health}: {e}")
-        self.log.info("✅ MLRun health check passed: %s", health)
 
     def init_project(self) -> MlrunProject:
         """
         Set MLRun environment and return (create if needed) the project.
         """
         project = mlrun.get_or_create_project(
-            name=self.cfg.project_name,
+            name=self._config.project_name,
             context=".",       # current repo context; used when packaging code
             user_project=False # set True if your MLRun is configured with user projects
         )
