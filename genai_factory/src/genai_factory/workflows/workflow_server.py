@@ -187,10 +187,9 @@ class WorkflowServer:
         app = project.set_function(
             name=self._config.project_name,
             kind="application",
-            image=base_image
+            image=base_image,
+            requirements=requirements
         )
-
-        app.with_requirements(requirements=requirements)
 
         # TODO: necessary?
         app.spec.command = "genai-factory run workflow.py"
@@ -201,7 +200,7 @@ class WorkflowServer:
         ]
         app.set_internal_application_port(8000)
         app.with_source_archive(
-            "git://github.com/tomerbv/workflow_example/blob/main", pull_at_runtime=False
+            "git://github.com/tomerbv/workflow_example", pull_at_runtime=False
         )
 
         app.deploy(create_default_api_gateway=False)
