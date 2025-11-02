@@ -51,6 +51,11 @@ class WorkflowServerConfig(BaseModel):
     MLRun git repo. Default: "".
     """
 
+    default_image: str = "mlrun/mlrun"
+    """
+    MLRun default image. Default: "mlrun/mlrun".
+    """
+
     default_image_requirements: list[str] = [
         "fastapi",
         "uvicorn",

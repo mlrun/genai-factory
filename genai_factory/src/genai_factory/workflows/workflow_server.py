@@ -177,6 +177,8 @@ class WorkflowServer:
         base_image = getattr(self._config, "default_image", "mlrun/mlrun") or "mlrun/mlrun"
         requirements = getattr(self._config, "default_image_requirements", [])
 
+        print(base_image)
+
         git_repo = project.source or getattr(self._config, "git_repo", project.source)
         print(f"git repo: {git_repo}")
         if not git_repo:
@@ -195,7 +197,7 @@ class WorkflowServer:
         # TODO: necessary?
         app.spec.command = "genai-factory run workflow.py --deployer fastapi"
         app.spec.args = [
-            f"{self._config.project_name}:{base_image}",
+            f"{self._config.project_name}",
             "--host",
             "0.0.0.0:8000",
         ]
