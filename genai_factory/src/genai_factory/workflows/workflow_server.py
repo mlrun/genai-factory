@@ -171,6 +171,7 @@ class WorkflowServer:
 
         # TODO: consider adding mlrun project migration
         project = self._project or self.init_project()
+        print(f"Project Name: {project.name}")
 
         ################################################
 
@@ -196,11 +197,11 @@ class WorkflowServer:
 
         # TODO: necessary?
         app.spec.command = "genai-factory run workflow.py --deployer fastapi"
-        app.spec.args = [
-            f"{self._config.project_name}",
-            "--host",
-            "0.0.0.0:8000",
-        ]
+        # app.spec.args = [
+        #     f"{self._config.project_name}",
+        #     "--host",
+        #     "0.0.0.0:8000",
+        # ]
         app.set_internal_application_port(8000)
         app.with_source_archive(
             git_repo,
