@@ -36,9 +36,9 @@ class WorkflowServerConfig(BaseModel):
     Username to use for the controller API. Default: admin.
     """
 
-    project_name: str = "gator_demo"
+    project_name: str = "default"
     """
-    MLRun project name to use for the workflows. Default: gator_demo.
+    MLRun project name to use for the workflows. Default: default.
     """
 
     mlrun_api_url: str = "http://localhost:30070"
