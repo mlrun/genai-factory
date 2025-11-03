@@ -197,11 +197,11 @@ class WorkflowServer:
 
         # TODO: necessary?
         app.spec.command = "genai-factory run workflow.py --deployer fastapi"
-        # app.spec.args = [
-        #     f"{self._config.project_name}",
-        #     "--host",
-        #     "0.0.0.0:8000",
-        # ]
+        app.spec.args = [
+            f"{self._config.project_name}:{base_image}",
+            "--host",
+            "0.0.0.0:8000",
+        ]
         app.set_internal_application_port(8000)
         app.with_source_archive(
             git_repo,
