@@ -181,7 +181,7 @@ class WorkflowServer:
         print(base_image)
 
         # git_repo = getattr(self._config, "git_repo", project.source)
-        git_repo = "git://github.com/tomerbv/workflow_example.git"
+        git_repo = "git://github.com/tomerbv/workflow_example.git#main"
         print(f"git repo: {git_repo}")
         if not git_repo:
             raise ValueError(
@@ -196,7 +196,7 @@ class WorkflowServer:
             requirements=requirements
         )
 
-        app.with_source_archive(git_repo, pull_at_runtime=True)
+        app.with_source_archive(git_repo)
 
         app.set_internal_application_port(8000)
         app.spec.command = "genai-factory"
