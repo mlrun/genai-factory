@@ -196,6 +196,9 @@ class WorkflowServer:
             requirements=requirements
         )
 
+        app.with_source_archive(git_repo, pull_at_runtime=True)
+
+        app.set_internal_application_port(8000)
         app.spec.command = "genai-factory"
         app.spec.args = [
             "run",
@@ -203,13 +206,8 @@ class WorkflowServer:
             "--deployer",
             "fastapi",
         ]
-        app.set_internal_application_port(8000)
-        app.with_source_archive(
-            git_repo,
-            pull_at_runtime=False
-        )
 
-        app.deploy(create_default_api_gateway=False)
+        app.deploy(with_mlrun=False)
 
         # TODO: necessary?
         # address = app.create_api_gateway(
