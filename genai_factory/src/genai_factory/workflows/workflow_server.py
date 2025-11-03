@@ -180,7 +180,9 @@ class WorkflowServer:
 
         print(base_image)
 
-        git_repo = project.source or getattr(self._config, "git_repo", project.source)
+        # git_repo = getattr(self._config, "git_repo", project.source)
+        git_repo = "https://github.com/tomerbv/workflow_example/blob/main/workflow.py"
+
         print(f"git repo: {git_repo}")
         if not git_repo:
             raise ValueError(
@@ -196,17 +198,17 @@ class WorkflowServer:
         )
 
         # TODO: necessary?
-        app.spec.command = f"genai-factory run {git_repo}/workflow.py --deployer fastapi"
+        app.spec.command = f"genai-factory run {git_repo} --deployer fastapi"
         app.spec.args = [
             f"{self._config.project_name}:{base_image}",
             "--host",
             "0.0.0.0:8000",
         ]
         app.set_internal_application_port(8000)
-        app.with_source_archive(
-            git_repo,
-            pull_at_runtime=False
-        )
+        # app.with_source_archive(
+        #     git_repo,
+        #     pull_at_runtime=False
+        # )
 
         app.deploy(create_default_api_gateway=False)
 
