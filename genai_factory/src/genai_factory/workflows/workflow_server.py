@@ -196,7 +196,7 @@ class WorkflowServer:
         )
 
         # TODO: necessary?
-        app.spec.command = "genai-factory run workflow.py --deployer fastapi"
+        app.spec.command = f"genai-factory run {git_repo}/workflow.py --deployer fastapi"
         app.spec.args = [
             f"{self._config.project_name}:{base_image}",
             "--host",
