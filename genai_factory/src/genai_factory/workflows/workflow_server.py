@@ -207,7 +207,7 @@ class WorkflowServer:
             "fastapi",
         ]
 
-        app.deploy(with_mlrun=False)
+        app.deploy(with_mlrun=True)
 
         # TODO: necessary?
         # address = app.create_api_gateway(
