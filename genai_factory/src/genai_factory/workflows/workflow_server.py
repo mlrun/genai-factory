@@ -202,7 +202,7 @@ class WorkflowServer:
         app.spec.command = "genai-factory"
         app.spec.args = [
             "run",
-            "workflow.py",
+            "home/mlrun_code/workflow.py",
             "--deployer",
             "fastapi",
         ]
