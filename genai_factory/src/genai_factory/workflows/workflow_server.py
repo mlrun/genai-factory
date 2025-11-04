@@ -199,13 +199,13 @@ class WorkflowServer:
         app.with_source_archive(git_repo)
 
         app.set_internal_application_port(8000)
-        # app.spec.command = "genai-factory"
-        # app.spec.args = [
-        #     "run",
-        #     "home/mlrun_code/workflow.py",
-        #     "--deployer",
-        #     "fastapi",
-        # ]
+        app.spec.command = "genai-factory"
+        app.spec.args = [
+            "run",
+            "workflow_example/workflow.py",
+            "--deployer",
+            "fastapi",
+        ]
 
         app.deploy(with_mlrun=True)
 
