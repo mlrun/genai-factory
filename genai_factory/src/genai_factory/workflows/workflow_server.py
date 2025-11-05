@@ -173,9 +173,11 @@ class WorkflowServer:
         project = self._project or self.init_project()
         print(f"Project Name: {project.name}")
 
+        # TODO: validate mlrun project git source does not differ form gator git source
+
         ################################################
 
-        base_image = getattr(self._config, "default_image", "mlrun/mlrun") or "mlrun/mlrun"
+        base_image = getattr(self._config, "default_image", "mlrun/mlrun") or None
         requirements = getattr(self._config, "default_image_requirements", [])
 
         print(base_image)
@@ -189,20 +191,28 @@ class WorkflowServer:
                 " Make sure to set them via the `set_config` method."
             )
 
+        project.set_source(
+            git_repo,
+            pull_at_runtime=False
+        )
+        # TODO: remove build once pull_at_runtime is supported in application runtime
+        # TODO: decide if allowing image name other than default
+        image = project.build_image().outputs.get("image")
+        print(f"Image: {image}")
+
         app = project.set_function(
             name=self._config.project_name,
             kind="application",
-            image=base_image,
-            requirements=requirements
+            image=image,
+            requirements=requirements,
+            with_repo=True
         )
-
-        app.with_source_archive(git_repo)
 
         app.set_internal_application_port(8000)
         app.spec.command = "genai-factory"
         app.spec.args = [
             "run",
-            "workflow_example/workflow.py",
+            "/home/mlrun_code/workflow.py",
             "--deployer",
             "fastapi",
         ]
