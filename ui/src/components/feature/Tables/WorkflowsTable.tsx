@@ -21,15 +21,10 @@ import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Workflow, WorkflowType } from '@shared/types/workflow';
 
-import { useAuthStore } from '@stores/authStore';
-
-import { workflowFields } from '@constants/index';
+import { workflowFields } from '@constants';
 
 const WorkflowsTable = () => {
-  const { user } = useAuthStore();
-  const username = user?.username;
-
-  const { data: publicUser } = useUser(username, !!username);
+  const { data: publicUser } = useUser();
 
   const {
     create,

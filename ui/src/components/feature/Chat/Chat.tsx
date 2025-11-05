@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { Box, Flex } from '@chakra-ui/react';
 import Bubble from '@components/shared/Bubble';
@@ -21,14 +20,8 @@ import Loading from '@components/shared/Loading';
 import Message from '@components/shared/Message';
 import { useSession } from '@queries';
 
-import { useAuthStore } from '@stores/authStore';
-
 const Chat = () => {
-  const { sessionName } = useParams<{ sessionName: string }>();
-  const { user } = useAuthStore();
-  const username = user?.username;
-
-  const { data: session, error, isLoading } = useSession(username, sessionName);
+  const { data: session, error, isLoading } = useSession();
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

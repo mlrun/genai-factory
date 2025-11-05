@@ -16,10 +16,13 @@ import Client from '@services/Api';
 import { Session } from '@shared/types/session';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useAuthStore } from '@stores/authStore';
 import { validateApiResponse } from '@utils/validateApiResponse';
 
-export function useSessionActions(username?: string) {
+export function useSessionActions() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const username = user?.username;
 
   const invalidateSessions = async () => {
     if (username) {
@@ -28,13 +31,14 @@ export function useSessionActions(username?: string) {
   };
 
   const ensureUsername = (action: string) => {
-    if (!username) throw new Error(`Username is required to ${action} a session.`);
+    if (!username)
+      throw new Error(`Username is required to ${action} a session.`);
   };
 
   const createSession = useMutation({
     mutationFn: (session: Session) => {
       ensureUsername('create');
-      return validateApiResponse(
+      return validateApiResponse<Session>(
         Client.createSession(username!, session),
         `create (${session.name})`,
       );
@@ -45,7 +49,7 @@ export function useSessionActions(username?: string) {
   const updateSession = useMutation({
     mutationFn: (session: Session) => {
       ensureUsername('update');
-      return validateApiResponse(
+      return validateApiResponse<Session>(
         Client.updateSession(username!, session),
         `update (${session.name})`,
       );
@@ -56,7 +60,7 @@ export function useSessionActions(username?: string) {
   const deleteSession = useMutation({
     mutationFn: (sessionName: string) => {
       ensureUsername('delete');
-      return validateApiResponse(
+      return validateApiResponse<Session>(
         Client.deleteSession(username!, sessionName),
         `delete (${sessionName})`,
       );

@@ -21,15 +21,10 @@ import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { PromptTemplate } from '@shared/types/promptTemplate';
 
-import { useAuthStore } from '@stores/authStore';
-
-import { promptTemplateFields } from '@constants/index';
+import { promptTemplateFields } from '@constants';
 
 const PromptTemplatesTable = () => {
-  const { user } = useAuthStore();
-  const username = user?.username;
-
-  const { data: publicUser } = useUser(username, !!username);
+  const { data: publicUser } = useUser();
 
   const {
     create,

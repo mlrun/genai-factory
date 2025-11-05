@@ -26,7 +26,7 @@ export const useProjectActions = () => {
 
   const createProject = useMutation({
     mutationFn: (project: Project) =>
-      validateApiResponse(
+      validateApiResponse<Project>(
         Client.createProject(project),
         `create (${project.name})`,
       ),
@@ -35,7 +35,7 @@ export const useProjectActions = () => {
 
   const updateProject = useMutation({
     mutationFn: (project: Project) =>
-      validateApiResponse(
+      validateApiResponse<Project>(
         Client.updateProject(project),
         `update (${project.name})`,
       ),
@@ -44,7 +44,7 @@ export const useProjectActions = () => {
 
   const deleteProject = useMutation({
     mutationFn: (projectId: string) =>
-      validateApiResponse(
+      validateApiResponse<Project>(
         Client.deleteProject(projectId),
         `delete (ID: ${projectId})`,
       ),

@@ -16,15 +16,14 @@ import Client from '@services/Api';
 import { User } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
 export function useUsers() {
   return useQuery<User[]>({
     queryKey: ['users'],
-    queryFn: async () => {
-      const res = await Client.getUsers();
-      const { data, error, success } = res;
-      if (!success) throw new Error(error || 'Failed to fetch users');
-      return data ?? null;
-    },
-    staleTime: 5 * 60 * 1000,
+    queryFn: () => validateApiResponse(Client.getUsers(), 'fetch users'),
+    ...QUERY_DEFAULTS,
   });
 }

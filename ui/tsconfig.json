@@ -29,7 +29,7 @@
       "@stores/*": ["./stores/*"],
       "@hooks/*": ["./hooks/*"],
       "@queries": ["./queries/index"],
-      "@constants/*": ["./constants/*"],
+      "@constants": ["./constants/index"],
       "@utils/*": ["./utils/*"]
     },
     "types": ["node", "jest", "@testing-library/jest-dom"],

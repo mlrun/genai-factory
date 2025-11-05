@@ -14,10 +14,10 @@
 
 import { APIResponse } from '@shared/types';
 
-export async function validateApiResponse(
-  apiCall: Promise<APIResponse>,
+export async function validateApiResponse<T>(
+  apiCall: Promise<APIResponse<T>>,
   context: string,
-) {
+): Promise<T> {
   const response = await apiCall;
 
   if (!response.success) {

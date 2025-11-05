@@ -12,22 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useParams } from 'react-router-dom';
+
 import Client from '@services/Api';
 import { Project } from '@shared/types/project';
 import { useQuery } from '@tanstack/react-query';
 
-export function useProject(name?: string) {
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
+export function useProject() {
+  const { name } = useParams();
+
   return useQuery<Project>({
     queryKey: ['project', name],
     queryFn: async () => {
       if (!name) throw new Error('No project name provided');
-      const res = await Client.getProject(name);
-      const { data, error, success } = res;
-      if (!success)
-        throw new Error(error || `Failed to fetch project: ${name}`);
-      return data ?? null;
+      return validateApiResponse(
+        Client.getProject(name),
+        `fetch project: ${name}`,
+      );
     },
     enabled: !!name,
-    staleTime: 5 * 60 * 1000,
+    ...QUERY_DEFAULTS,
   });
 }

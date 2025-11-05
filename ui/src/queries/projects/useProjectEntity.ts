@@ -12,13 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
 
 import { useProject } from '@queries';
+import { APIResponse } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-type FetchFn<T> = (projectName: string) => Promise<{ data: T[] }>;
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
+type FetchFn<T> = (projectName: string) => Promise<APIResponse<T[]>>;
 type CreateFn<T> = (projectName: string, data: T) => Promise<void>;
 type UpdateFn<T> = (projectName: string, data: Partial<T>) => Promise<void>;
 type DeleteFn = (projectName: string, id: string) => Promise<void>;
@@ -31,18 +35,18 @@ export function useProjectEntity<T>(
   deleteFn: DeleteFn,
 ) {
   const queryClient = useQueryClient();
-  const { name: projectName } = useParams();
-  const { data: project } = useProject(projectName); // note: uses default project hook (no param)
+  const { data: project } = useProject();
+
+  const projectName = useMemo(() => project?.name ?? '', [project]);
 
   const query = useQuery<T[]>({
     queryKey: [key, projectName],
     queryFn: async () => {
       if (!projectName) return [];
-      const res = await fetchFn(projectName);
-      return res.data ?? [];
+      return validateApiResponse(fetchFn(projectName), `fetch ${key}`);
     },
     enabled: !!projectName,
-    staleTime: 5 * 60 * 1000,
+    ...QUERY_DEFAULTS,
   });
 
   const invalidate = useCallback(
@@ -52,12 +56,10 @@ export function useProjectEntity<T>(
 
   const create = useMutation({
     mutationFn: async (entity: T) => {
-      console.log({ entity, projectName });
-      if (!projectName) {
+      if (!projectName)
         throw new Error(
           `[useProjectEntity:${key}] create called without a project selected`,
         );
-      }
       return createFn(projectName, entity);
     },
     onSuccess: invalidate,
@@ -65,11 +67,10 @@ export function useProjectEntity<T>(
 
   const update = useMutation({
     mutationFn: async (entity: Partial<T>) => {
-      if (!projectName) {
+      if (!projectName)
         throw new Error(
           `[useProjectEntity:${key}] update called without a project selected`,
         );
-      }
       return updateFn(projectName, entity);
     },
     onSuccess: invalidate,
@@ -77,11 +78,10 @@ export function useProjectEntity<T>(
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      if (!projectName) {
+      if (!projectName)
         throw new Error(
           `[useProjectEntity:${key}] remove called without a project selected`,
         );
-      }
       return deleteFn(projectName, id);
     },
     onSuccess: invalidate,

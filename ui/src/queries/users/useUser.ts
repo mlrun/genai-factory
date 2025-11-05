@@ -16,17 +16,25 @@ import Client from '@services/Api';
 import { User } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 
-export function useUser(username?: string, enabled = true) {
+import { useAuthStore } from '@stores/authStore';
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
+export function useUser(enabled = true) {
+  const user = useAuthStore((s) => s.user);
+  const username = user?.username;
+
   return useQuery<User | null>({
     queryKey: ['user', username],
     queryFn: async () => {
       if (!username) return null;
-      const res = await Client.getUser(username);
-      const { data, error, success } = res;
-      if (!success) throw new Error(error || 'Failed to fetch user');
-      return data ?? null;
+      return validateApiResponse(
+        Client.getUser(username),
+        `fetch user: ${username}`,
+      );
     },
     enabled: !!username && enabled,
-    staleTime: 5 * 60 * 1000,
+    ...QUERY_DEFAULTS,
   });
 }

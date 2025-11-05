@@ -13,29 +13,24 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons';
 import { Flex, IconButton, Input, useToast } from '@chakra-ui/react';
 import { useSendMessage, useSession } from '@queries';
 
-import { useAuthStore } from '@stores/authStore';
 import { useChatStore } from '@stores/chatStore';
 
 const Message = () => {
   const toast = useToast();
-  const { sessionName } = useParams<{ sessionName: string }>();
   const { canSend, setCanSend, setIsMessageError } = useChatStore();
-  const { user } = useAuthStore();
-  const username = user?.username;
 
-  const { data: session, refetch } = useSession(username, sessionName);
+  const { data: session, refetch } = useSession();
   const [inputValue, setInputValue] = useState('');
 
   const { mutateAsync: sendMessage } = useSendMessage();
 
   const submitMessage = async () => {
-    if (!session || !username || !inputValue.trim()) return;
+    if (!session || !inputValue.trim()) return;
 
     setCanSend(false);
     await sendMessage(

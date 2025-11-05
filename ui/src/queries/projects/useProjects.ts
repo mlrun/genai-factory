@@ -16,15 +16,14 @@ import Client from '@services/Api';
 import { Project } from '@shared/types/project';
 import { useQuery } from '@tanstack/react-query';
 
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
 export function useProjects() {
   return useQuery<Project[]>({
     queryKey: ['projects'],
-    queryFn: async () => {
-      const res = await Client.getProjects();
-      const { data, error, success } = res;
-      if (!success) throw new Error(error || 'Failed to fetch projects');
-      return data ?? null;
-    },
-    staleTime: 5 * 60 * 1000,
+    queryFn: () => validateApiResponse(Client.getProjects(), 'fetch projects'),
+    ...QUERY_DEFAULTS,
   });
 }

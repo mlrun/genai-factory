@@ -26,7 +26,7 @@ export function useUserActions() {
 
   const createUser = useMutation({
     mutationFn: (user: User) =>
-      validateApiResponse(
+      validateApiResponse<User>(
         Client.createUser(user),
         `create (${user.name})`,
       ),
@@ -35,7 +35,7 @@ export function useUserActions() {
 
   const updateUser = useMutation({
     mutationFn: (user: User) =>
-      validateApiResponse(
+      validateApiResponse<User>(
         Client.updateUser(user),
         `update (${user.name})`,
       ),
@@ -44,7 +44,7 @@ export function useUserActions() {
 
   const deleteUser = useMutation({
     mutationFn: (id: string) =>
-      validateApiResponse(Client.deleteUser(id), `delete (ID: ${id})`),
+      validateApiResponse<User>(Client.deleteUser(id), `delete (ID: ${id})`),
     onSuccess: invalidateUsers,
   });
 

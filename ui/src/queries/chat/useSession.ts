@@ -12,22 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useParams } from 'react-router-dom';
+
 import Client from '@services/Api';
 import { Session } from '@shared/types/session';
 import { useQuery } from '@tanstack/react-query';
 
-export function useSession(username?: string, sessionName?: string) {
+import { useAuthStore } from '@stores/authStore';
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
+export function useSession() {
+  const { sessionName } = useParams<{ sessionName: string }>();
+  const { user } = useAuthStore();
+  const username = user?.username;
+
   return useQuery<Session | null>({
     queryKey: ['session', username, sessionName],
     queryFn: async () => {
       if (!username || !sessionName) return null;
-      const res = await Client.getSession(username, sessionName);
-      const { data, error, success } = res;
-      if (!success) throw new Error(error || 'Failed to fetch user');
-      return data ?? null;
+      return validateApiResponse(
+        Client.getSession(username, sessionName),
+        `fetch session ${sessionName}`,
+      );
     },
     enabled: !!username && !!sessionName,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    ...QUERY_DEFAULTS,
   });
 }

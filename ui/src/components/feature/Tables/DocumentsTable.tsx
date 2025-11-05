@@ -21,14 +21,10 @@ import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Document } from '@shared/types/document';
 
-import { useAuthStore } from '@stores/authStore';
-
-import { documentFields } from '@constants/index';
+import { documentFields } from '@constants';
 
 const DocumentsTable = () => {
-  const { user } = useAuthStore();
-  const username = user?.username;
-  const { data: publicUser } = useUser(username, !!username);
+  const { data: publicUser } = useUser();
 
   const {
     create,

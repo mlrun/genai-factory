@@ -16,17 +16,22 @@ import Client from '@services/Api';
 import { Session } from '@shared/types/session';
 import { useQuery } from '@tanstack/react-query';
 
-export function useSessions(username?: string) {
+import { useAuthStore } from '@stores/authStore';
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
+export function useSessions() {
+  const { user } = useAuthStore();
+  const username = user?.username;
+
   return useQuery<Session[]>({
     queryKey: ['sessions', username],
     queryFn: async () => {
       if (!username) return [];
-      const res = await Client.getSessions(username);
-      const { data, error, success } = res;
-      if (!success) throw new Error(error || 'Failed to fetch user');
-      return data ?? null;
+      return validateApiResponse(Client.getSessions(username), 'sessions');
     },
     enabled: !!username,
-    staleTime: 5 * 60 * 1000,
+    ...QUERY_DEFAULTS,
   });
 }

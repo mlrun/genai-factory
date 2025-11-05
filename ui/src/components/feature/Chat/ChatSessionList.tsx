@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { ChevronDownIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import {
@@ -32,25 +32,20 @@ import { useSession, useSessionActions, useSessions } from '@queries';
 import { colors } from '@shared/theme';
 import { Session } from '@shared/types/session';
 
-import { useAuthStore } from '@stores/authStore';
 import { useChatStore } from '@stores/chatStore';
 
 const ChatSessionList = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { sessionName } = useParams<{ sessionName: string }>();
   const { colorMode } = useColorMode();
   const toast = useToast();
 
-  const { user } = useAuthStore();
-  const username = user?.username;
-
   const { setCanSend, setIsTyping } = useChatStore();
 
-  const { data: sessions = [] } = useSessions(username);
-  const { data: selectedSession } = useSession(username, sessionName);
+  const { data: sessions = [] } = useSessions();
+  const { data: selectedSession } = useSession();
 
-  const { deleteSession, updateSession } = useSessionActions(username);
+  const { deleteSession, updateSession } = useSessionActions();
 
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState('');
@@ -119,6 +114,7 @@ const ChatSessionList = () => {
       maxHeight="680px"
       overflow="scroll"
       flexFlow="column"
+      display="table"
       gap={4}
       alignItems="flex-start"
     >

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { motion as m } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -35,18 +35,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { pathname } = useLocation();
 
   const logout = useAuthStore((s) => s.logout);
-  const user = useAuthStore((s) => s.user);
-  const username = user?.username;
 
-  const {
-    data: publicUser,
-    error,
-    isError,
-    isLoading,
-  } = useUser(username, !!username);
+  const { data: publicUser, error, isError, isLoading } = useUser();
+
+  const username = useMemo(() => publicUser?.name || '', [publicUser]);
 
   useEffect(() => {
-    if (isError || !username) {
+    if (isError) {
       console.error('Failed to fetch user:', error);
       logout();
       navigate('/');

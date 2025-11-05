@@ -24,19 +24,16 @@ import { User } from '@shared/types';
 import ChatSessionList from './ChatSessionList';
 
 import { generateSessionId } from '@shared/utils';
-import { useAuthStore } from '@stores/authStore';
 
 interface ChatbarProps {
   publicUser: User;
 }
 
 const Chatbar = ({ publicUser }: ChatbarProps) => {
-  const { user } = useAuthStore();
-  const username = user?.username;
   const navigate = useNavigate();
   const { colorMode } = useColorMode();
 
-  const { createSession } = useSessionActions(username);
+  const { createSession } = useSessionActions();
 
   const newChat = useCallback(async () => {
     try {

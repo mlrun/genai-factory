@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useParams } from 'react-router-dom';
-
 import { Box, Divider, Text } from '@chakra-ui/react';
 import Layout from '@components/feature/Layout';
 import ProjectHeader from '@components/feature/Project/ProjectHeader';
@@ -22,9 +20,7 @@ import Loading from '@components/shared/Loading';
 import { useProject } from '@queries';
 
 export const ProjectPage = () => {
-  const { name } = useParams();
-
-  const { data: project, isLoading } = useProject(name);
+  const { data: project, isLoading } = useProject();
 
   if (!project) {
     if (isLoading) return <Loading />;

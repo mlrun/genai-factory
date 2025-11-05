@@ -19,3 +19,9 @@ export * from './modelFields';
 export * from './promptTemplateFields';
 export * from './userFields';
 export * from './workflowFields';
+
+export const QUERY_DEFAULTS = {
+  staleTime: 5 * 60 * 1000,
+  retry: 1,
+  refetchOnWindowFocus: false,
+} as const;

@@ -19,7 +19,7 @@ import Loading from '@components/shared/Loading';
 import { useUserActions, useUsers } from '@queries';
 import { User } from '@shared/types';
 
-import { userFields } from '@constants/index';
+import { userFields } from '@constants';
 
 const UsersTable = () => {
   const { data: users = [], error, isLoading } = useUsers();
