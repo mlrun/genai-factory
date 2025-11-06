@@ -70,3 +70,32 @@ Chakra UI is a simple and accessible component library that provides a set of cu
 
 To get started with Chakra UI, visit the official documentation [Chakra UI Documentation](https://chakra-ui.com/docs/getting-started).
 
+
+
+### 5. Shadcn UI Components
+
+We are also using [shadcn/ui](https://ui.shadcn.com/) for a set of composable, customizable React components.
+
+Shadcn provides a flexible system with a modern design and supports custom alias configurations for seamless integration with our project structure.
+
+#### Adding Components
+
+Add new components with:
+
+```bash
+npx shadcn add <component-name>
+```
+
+**Aliases used in this project:**
+
+```json
+{
+  "components": "@shared/components",
+  "utils": "@shared/cn/utils",
+  "ui": "@components/shared",
+  "hooks": "hooks",
+  "lib": "@shared/cn"
+},
+```
+
+> Generated components follow these aliases. Lint errors may appear after generation—resolve them as needed.
