@@ -12,5 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="vite/client" />
-/// <reference types="vite-plugin-svgr/client" />
+export function filterTableData<T extends Record<string, unknown>>(
+  data: T[],
+  filterText: string,
+): T[] {
+  if (!filterText) return data;
+
+  const lowerFilter = filterText.toLowerCase();
+
+  return data.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(lowerFilter),
+    ),
+  );
+}

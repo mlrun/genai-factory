@@ -12,24 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Flex, Input } from '@chakra-ui/react';
+import { ChangeEvent } from 'react';
+
+import { Input } from '@components/shared/Input';
+
+import Search from '@assets/icons/search.svg?react';
 
 type Props = {
   filterText: string;
-  onFilter: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFilter: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
 };
 
-const FilterComponent = ({ filterText, onFilter }: Props) => (
-  <Flex>
+const FilterComponent = ({ filterText, onFilter, placeholder }: Props) => (
+  <div className="relative max-w-60">
+    <span className="absolute top-1/2 -translate-y-1/2 right-3 flex items-center justify-center pointer-events-none">
+      <Search />
+    </span>
     <Input
       id="search"
       type="text"
-      placeholder="Search..."
+      placeholder={placeholder}
       aria-label="Search Input"
       value={filterText}
       onChange={onFilter}
+      className="pr-9 pl-4"
     />
-  </Flex>
+  </div>
 );
 
 export default FilterComponent;

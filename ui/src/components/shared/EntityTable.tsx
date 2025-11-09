@@ -35,6 +35,10 @@ import AddEditModal from './AddEditModal';
 import DataTableComponent from './Datatable';
 import FilterComponent from './Filter';
 
+import { filterTableData } from '@utils/table.utils';
+
+import { FILTER_PLACEHOLDER_PREFIX } from '@constants';
+
 type EntityWithUID = { uid?: string; name?: string };
 
 type Props<T extends EntityWithUID> = {
@@ -70,6 +74,11 @@ function EntityTable<T extends EntityWithUID>({
 
   const modal = useDisclosure();
   const drawer = useDisclosure();
+
+  const filteredData = useMemo(
+    () => filterTableData(data, filterText),
+    [data, filterText],
+  );
 
   const handleSave = (entity: T) => {
     try {
@@ -160,8 +169,9 @@ function EntityTable<T extends EntityWithUID>({
 
   const subHeader = useMemo(
     () => (
-      <Flex gap={4}>
+      <div className="flex w-full justify-between items-center gap-4 flex-wrap">
         <FilterComponent
+          placeholder={`${FILTER_PLACEHOLDER_PREFIX} ${title}...`}
           onFilter={(e) => setFilterText(e.target.value)}
           filterText={filterText}
         />
@@ -174,7 +184,7 @@ function EntityTable<T extends EntityWithUID>({
         >
           New
         </Button>
-      </Flex>
+      </div>
     ),
     [filterText, modal.onOpen, newEntityDefaults],
   );
@@ -183,13 +193,12 @@ function EntityTable<T extends EntityWithUID>({
     <Flex p={4} flexDirection="column" width="100%">
       <DataTableComponent
         title={title}
-        data={data}
+        data={filteredData}
         columns={columns}
         contextActions={contextActions}
         subheaderComponent={subHeader}
         onRowSelect={(row) => setSelectedRow(row)}
         onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
-        filterText={filterText}
         onOpenDrawer={() => drawer.onOpen()}
         toggleClearRows={toggledClearRows}
       />
