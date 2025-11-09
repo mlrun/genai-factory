@@ -12,31 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react'
-import Markdown from 'react-markdown'
+import { useEffect, useState } from 'react';
+import Markdown from 'react-markdown';
 
 interface TypingTextProps {
-  text: string
-  speed?: number // typing speed in ms per character
+  text: string;
+  speed?: number; // typing speed in ms per character
 }
 
-const TypingText: React.FC<TypingTextProps> = ({ text, speed = 12 }) => {
-  const [displayedText, setDisplayedText] = useState('')
+const TypingText = ({ speed = 12, text }: TypingTextProps) => {
+  const [displayedText, setDisplayedText] = useState('');
 
   useEffect(() => {
-    let index = 0
+    let index = 0;
     const interval = setInterval(() => {
-      setDisplayedText(prev => prev + text[index])
-      ++index
+      setDisplayedText((prev) => prev + text[index]);
+      ++index;
       if (index === text.length - 1) {
-        clearInterval(interval)
+        clearInterval(interval);
       }
-    }, speed)
+    }, speed);
 
-    return () => clearInterval(interval)
-  }, [text, speed])
+    return () => clearInterval(interval);
+  }, [text, speed]);
 
-  return <Markdown>{displayedText}</Markdown>
-}
+  return <Markdown>{displayedText}</Markdown>;
+};
 
-export default TypingText
+export default TypingText;

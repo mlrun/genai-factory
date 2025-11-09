@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { Model, ModelType } from '@shared/types/model';
-import { atom } from 'jotai';
 
 export const modelsAtom = atom<Model[]>([]);
 
 export const modelsLoadingAtom = atom<boolean>(false);
 
 export const modelsErrorAtom = atom<string | null>(null);
-
 
 export const modelsWithFetchAtom = atom(
   (get) => get(modelsAtom),
@@ -37,11 +37,20 @@ export const modelsWithFetchAtom = atom(
       });
       set(modelsAtom, sortedModels);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(modelsErrorAtom, 'Failed to fetch models');
     } finally {
       set(modelsLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedModelAtom = atom<Model>({ name: '', description: '', labels: {}, owner_id: '', project_id: '', model_type: ModelType.MODEL, base_model: '' });
+export const selectedModelAtom = atom<Model>({
+  name: '',
+  description: '',
+  labels: {},
+  owner_id: '',
+  project_id: '',
+  model_type: ModelType.MODEL,
+  base_model: '',
+});

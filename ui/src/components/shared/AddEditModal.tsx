@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import React, { useEffect, useState } from 'react';
+
 import {
   Button,
   FormControl,
@@ -24,61 +26,68 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select
-} from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
-import { ModalField } from '@shared/types/modalFieldConfigs'
+  Select,
+} from '@chakra-ui/react';
+import { ModalField } from '@shared/types/modalFieldConfigs';
 
 type AddEditModalProps<T> = {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (data: T) => void
-  entity: T
-  fields: ModalField[]
-  title: string
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: T) => void;
+  entity: T;
+  fields: ModalField[];
+  title: string;
+};
 
 function AddEditModal<T extends { uid?: string }>({
+  entity,
+  fields,
   isOpen,
   onClose,
   onSave,
-  entity,
-  fields,
-  title
+  title,
 }: AddEditModalProps<T>) {
-
-  const [formData, setFormData] = useState<T>(entity)
+  const [formData, setFormData] = useState<T>(entity);
 
   useEffect(() => {
-    setFormData(entity)
-  }, [entity])
+    setFormData(entity);
+  }, [entity]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const isSaveDisabled = fields.some(
-    (field) => field.required && !(formData[field.name as keyof T] ?? '').toString().trim()
-  )
+    (field) =>
+      field.required &&
+      !(formData[field.name as keyof T] ?? '').toString().trim(),
+  );
 
   const handleSubmit = () => {
-    onSave(formData)
-    onClose()
-  }
+    onSave(formData);
+    onClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{entity?.uid ? 'Edit' : 'Add New'} {title}</ModalHeader>
+        <ModalHeader>
+          {entity?.uid ? 'Edit' : 'Add New'} {title}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {fields.map((field) => (
-            <FormControl key={field.name} id={field.name} mb={4} isRequired={field.required}>
-              <FormLabel>
-                {field.label}
-              </FormLabel>
+            <FormControl
+              key={field.name}
+              id={field.name}
+              mb={4}
+              isRequired={field.required}
+            >
+              <FormLabel>{field.label}</FormLabel>
 
               {field.options ? (
                 <Select
@@ -104,7 +113,12 @@ function AddEditModal<T extends { uid?: string }>({
           ))}
         </ModalBody>
         <ModalFooter>
-          <Button isDisabled={isSaveDisabled} colorScheme="blue" mr={3} onClick={handleSubmit}>
+          <Button
+            isDisabled={isSaveDisabled}
+            colorScheme="blue"
+            mr={3}
+            onClick={handleSubmit}
+          >
             {entity?.uid ? 'Save Changes' : `Add ${title}`}
           </Button>
           <Button variant="ghost" onClick={onClose}>
@@ -113,7 +127,7 @@ function AddEditModal<T extends { uid?: string }>({
         </ModalFooter>
       </ModalContent>
     </Modal>
-  )
+  );
 }
 
-export default AddEditModal
+export default AddEditModal;

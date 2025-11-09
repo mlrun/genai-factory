@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { publicUserAtom } from '@atoms/index'
+import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+
+import { publicUserAtom } from '@atoms/index';
 import {
   Button,
   FormControl,
@@ -24,40 +27,47 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay
-} from '@chakra-ui/react'
-import { Project } from '@shared/types/project'
-import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+  ModalOverlay,
+} from '@chakra-ui/react';
+import { Project } from '@shared/types/project';
 
 type ProjectModalProps = {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (project: Project) => void
-  project?: Project
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (project: Project) => void;
+  project?: Project;
+};
 
-const AddEditProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose, onSave, project }) => {
-  const [publicUser] = useAtom(publicUserAtom)
+const AddEditProjectModal: React.FC<ProjectModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  project,
+}) => {
+  const [publicUser] = useAtom(publicUserAtom);
 
   const [formData, setFormData] = useState<Project>(
-    project || { name: '', description: '', owner_id: publicUser.uid as string ?? '' }
-  )
+    project || {
+      name: '',
+      description: '',
+      owner_id: (publicUser.uid as string) ?? '',
+    },
+  );
   useEffect(() => {
     if (project) {
-      setFormData(project)
+      setFormData(project);
     }
-  }, [project])
+  }, [project]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = () => {
-    onSave(formData)
-    onClose()
-  }
+    onSave(formData);
+    onClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -70,20 +80,37 @@ const AddEditProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose, onS
         <ModalBody>
           <FormControl id="name" mb={4}>
             <FormLabel>Project</FormLabel>
-            <Input type="text" name="name" value={formData.name || ''} onChange={handleChange} />
+            <Input
+              type="text"
+              name="name"
+              value={formData.name || ''}
+              onChange={handleChange}
+            />
           </FormControl>
           <FormControl id="description" mb={4}>
             <FormLabel>Description</FormLabel>
-            <Input type="text" name="description" value={formData.description || ''} onChange={handleChange} />
+            <Input
+              type="text"
+              name="description"
+              value={formData.description || ''}
+              onChange={handleChange}
+            />
           </FormControl>
           <FormControl id="version" mb={4}>
             <FormLabel>Version</FormLabel>
-            <Input type="text" name="version" value={formData.version || ''} onChange={handleChange} />
+            <Input
+              type="text"
+              name="version"
+              value={formData.version || ''}
+              onChange={handleChange}
+            />
           </FormControl>
         </ModalBody>
         <ModalFooter>
           <Button
-            isDisabled={!formData.description || !formData.name || !formData.version}
+            isDisabled={
+              !formData.description || !formData.name || !formData.version
+            }
             colorScheme="blue"
             mr={3}
             onClick={handleSubmit}
@@ -96,7 +123,7 @@ const AddEditProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose, onS
         </ModalFooter>
       </ModalContent>
     </Modal>
-  )
-}
+  );
+};
 
-export default AddEditProjectModal
+export default AddEditProjectModal;

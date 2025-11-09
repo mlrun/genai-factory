@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModalField } from '@shared/types/modalFieldConfigs'
-import { DataSourceType } from '@shared/types/dataSource'
+import { DataSourceType } from '@shared/types/dataSource';
+import { ModalField } from '@shared/types/modalFieldConfigs';
 
 export const dataSourceFields: ModalField[] = [
   { name: 'name', label: 'Name', required: true },
@@ -30,7 +30,7 @@ export const dataSourceFields: ModalField[] = [
       { label: 'Key-Value', value: DataSourceType.KEY_VALUE },
       { label: 'Column Family', value: DataSourceType.COLUMN_FAMILY },
       { label: 'Storage', value: DataSourceType.STORAGE },
-      { label: 'Other', value: DataSourceType.OTHER }
-    ]
+      { label: 'Other', value: DataSourceType.OTHER },
+    ],
   },
-]
+];

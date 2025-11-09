@@ -12,45 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChakraProvider } from '@chakra-ui/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Provider as JotaiProvider } from 'jotai'
-import { ChatPage } from 'pages/ChatPage'
-import { LoginPage } from 'pages/LoginPage'
-import { UsersTablePage } from 'pages/UsersTablePage'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { ProjectsPage } from 'pages/ProjectsPage'
-import { ProjectPage } from 'pages/ProjectPage'
+import { Provider as JotaiProvider } from 'jotai';
+import { ChatPage } from 'pages/ChatPage';
+import { LoginPage } from 'pages/LoginPage';
+import { ProjectPage } from 'pages/ProjectPage';
+import { ProjectsPage } from 'pages/ProjectsPage';
+import { UsersTablePage } from 'pages/UsersTablePage';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import { ChakraProvider } from '@chakra-ui/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function App() {
-  const queryClient = new QueryClient()
+  const queryClient = new QueryClient();
 
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <LoginPage />
+      element: <LoginPage />,
     },
     {
       path: '/projects',
-      element: <ProjectsPage />
+      element: <ProjectsPage />,
     },
     {
       path: '/projects/:name',
-      element: <ProjectPage />
+      element: <ProjectPage />,
     },
     {
       path: '/users',
-      element: <UsersTablePage />
+      element: <UsersTablePage />,
     },
     {
       path: '/chat',
-      element: <ChatPage />
+      element: <ChatPage />,
     },
     {
       path: '/chat/:sessionId',
-      element: <ChatPage />
-    }
-  ])
+      element: <ChatPage />,
+    },
+  ]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -60,7 +61,7 @@ function App() {
         </ChakraProvider>
       </JotaiProvider>
     </QueryClientProvider>
-  )
+  );
 }
 
-export default App
+export default App;

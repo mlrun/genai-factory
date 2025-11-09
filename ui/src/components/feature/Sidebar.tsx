@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Flex, useColorMode } from '@chakra-ui/react'
-import { colors } from '@shared/theme'
-import { ReactNode } from 'react'
+import { ReactNode } from 'react';
+
+import { Flex, useColorMode } from '@chakra-ui/react';
+import { colors } from '@shared/theme';
 
 type SidebarProps = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 const Sidebar = ({ children }: SidebarProps) => {
-  const { colorMode } = useColorMode()
+  const { colorMode } = useColorMode();
 
   return (
     <Flex
@@ -34,7 +35,7 @@ const Sidebar = ({ children }: SidebarProps) => {
     >
       {children}
     </Flex>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

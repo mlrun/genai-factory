@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Logo from '@assets/mlrun.png'
-import { usernameAtom } from '@atoms/index'
+import { useAtom } from 'jotai';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { usernameAtom } from '@atoms/index';
 import {
   Avatar,
   Box,
@@ -21,33 +23,34 @@ import {
   Flex,
   Image,
   useColorMode,
-  useDisclosure
-} from '@chakra-ui/react'
-import { colors } from '@shared/theme'
-import { useAtom } from 'jotai'
-import Rightbar from '../Rightbar'
-import { useNavigate, useLocation } from 'react-router-dom'
+  useDisclosure,
+} from '@chakra-ui/react';
+import { colors } from '@shared/theme';
+
+import Rightbar from '../Rightbar';
+
+import Logo from '@assets/mlrun.png';
 
 type Props = {
-  onLoginChange: (value: boolean) => void
-}
+  onLoginChange: (value: boolean) => void;
+};
 
 const Topbar = ({ onLoginChange }: Props) => {
-  const { colorMode } = useColorMode()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [username] = useAtom(usernameAtom)
+  const { colorMode } = useColorMode();
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [username] = useAtom(usernameAtom);
 
   // Helper to check if current path is base or base/*
   const isPathActive = (current: string, base: string) =>
-    current === base || current.startsWith(base + '/')
+    current === base || current.startsWith(base + '/');
 
   const navItems = [
     { label: 'Projects', path: '/projects' },
     { label: 'Chat', path: '/chat' },
-    { label: 'Users', path: '/users' }
-  ]
+    { label: 'Users', path: '/users' },
+  ];
 
   return (
     <Flex
@@ -71,7 +74,7 @@ const Topbar = ({ onLoginChange }: Props) => {
         />
         <Box paddingLeft={4} display="flex" gap={2}>
           {navItems.map(({ label, path }) => {
-            const isActive = isPathActive(location.pathname, path)
+            const isActive = isPathActive(location.pathname, path);
             return (
               <Button
                 key={path}
@@ -82,7 +85,7 @@ const Topbar = ({ onLoginChange }: Props) => {
               >
                 {label}
               </Button>
-            )
+            );
           })}
         </Box>
       </Flex>
@@ -102,9 +105,7 @@ const Topbar = ({ onLoginChange }: Props) => {
         />
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
-export default Topbar
-
-
+export default Topbar;

@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { Document } from '@shared/types/document';
-import { atom } from 'jotai';
 
 export const documentsAtom = atom<Document[]>([]);
 
 export const documentsLoadingAtom = atom<boolean>(false);
 
 export const documentsErrorAtom = atom<string | null>(null);
-
 
 export const documentsWithFetchAtom = atom(
   (get) => get(documentsAtom),
@@ -30,18 +30,28 @@ export const documentsWithFetchAtom = atom(
     set(documentsErrorAtom, null);
     try {
       const documents = await Client.getDocuments(projectName as string);
-      const sortedDocuments = documents.data.sort((a: Document, b: Document) => {
-        const dateA = new Date(a.created as string);
-        const dateB = new Date(b.created as string);
-        return dateA.getTime() - dateB.getTime();
-      });
+      const sortedDocuments = documents.data.sort(
+        (a: Document, b: Document) => {
+          const dateA = new Date(a.created as string);
+          const dateB = new Date(b.created as string);
+          return dateA.getTime() - dateB.getTime();
+        },
+      );
       set(documentsAtom, sortedDocuments);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(documentsErrorAtom, 'Failed to fetch documents');
     } finally {
       set(documentsLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedDocumentAtom = atom<Document>({ name: '', description: '', labels: {}, owner_id: '', project_id: '', path: '' });
+export const selectedDocumentAtom = atom<Document>({
+  name: '',
+  description: '',
+  labels: {},
+  owner_id: '',
+  project_id: '',
+  path: '',
+});

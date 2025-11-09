@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
-import { datasetsAtom, datasetsWithFetchAtom } from '@atoms/datasets'
-import { useAtom } from 'jotai'
-import { publicUserAtom, projectAtom } from '@atoms/index'
-import Client from '@services/Api'
-import { TableColumn } from 'react-data-table-component'
-import { Dataset } from '@shared/types/dataset'
-import EntityTable from '@components/shared/EntityTable'
-import { datasetFields } from '@constants/index'
+import React from 'react';
+import { useAtom } from 'jotai';
+import { TableColumn } from 'react-data-table-component';
+
+import { datasetsAtom, datasetsWithFetchAtom } from '@atoms/datasets';
+import { projectAtom, publicUserAtom } from '@atoms/index';
+import EntityTable from '@components/shared/EntityTable';
+import Client from '@services/Api';
+import { Dataset } from '@shared/types/dataset';
+
+import { datasetFields } from '@constants/index';
 
 const DatasetsTable: React.FC = () => {
-  const [datasets] = useAtom(datasetsAtom)
-  const [, fetchDatasets] = useAtom(datasetsWithFetchAtom)
-  const [project] = useAtom(projectAtom)
-  const [publicUser] = useAtom(publicUserAtom)
+  const [datasets] = useAtom(datasetsAtom);
+  const [, fetchDatasets] = useAtom(datasetsWithFetchAtom);
+  const [project] = useAtom(projectAtom);
+  const [publicUser] = useAtom(publicUserAtom);
 
-  const base = project?.name ?? ''
-  const uid = project?.uid ?? ''
+  const base = project?.name ?? '';
+  const uid = project?.uid ?? '';
 
   const newEntity: Dataset = {
     name: '',
@@ -37,20 +39,24 @@ const DatasetsTable: React.FC = () => {
     owner_id: publicUser.uid as string,
     project_id: uid,
     path: '',
-    task: ''
-  }
+    task: '',
+  };
 
-  if(Object.keys(publicUser).length === 0) return;
+  if (Object.keys(publicUser).length === 0) return;
 
   const columns: TableColumn<Partial<Dataset>>[] = [
-    { name: 'Name', selector: row => row.name ?? '', sortable: true },
-    { name: 'Description', selector: row => row.description ?? '', sortable: true },
-    { name: 'Version', selector: row => row.version ?? '', sortable: true },
-    { name: 'Task', selector: row => row.task ?? '', sortable: true },
-    { name: 'Path', selector: row => row.path ?? '', sortable: true },
-    { name: 'Producer', selector: row => row.producer ?? '', sortable: true },
-    { name: 'Created', selector: row => row.created ?? '', sortable: true }
-  ]
+    { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
+    { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
+    { name: 'Task', selector: (row) => row.task ?? '', sortable: true },
+    { name: 'Path', selector: (row) => row.path ?? '', sortable: true },
+    { name: 'Producer', selector: (row) => row.producer ?? '', sortable: true },
+    { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
+  ];
 
   return (
     <EntityTable
@@ -65,7 +71,7 @@ const DatasetsTable: React.FC = () => {
       deleteEntity={(id) => Client.deleteDataset(base, id)}
       newEntityDefaults={newEntity}
     />
-  )
-}
+  );
+};
 
-export default DatasetsTable
+export default DatasetsTable;

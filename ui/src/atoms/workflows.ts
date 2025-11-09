@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { Workflow, WorkflowType } from '@shared/types/workflow';
-import { atom } from 'jotai';
 
 export const workflowsAtom = atom<Workflow[]>([]);
 
 export const workflowsLoadingAtom = atom<boolean>(false);
 
 export const workflowsErrorAtom = atom<string | null>(null);
-
 
 export const workflowsWithFetchAtom = atom(
   (get) => get(workflowsAtom),
@@ -30,18 +30,29 @@ export const workflowsWithFetchAtom = atom(
     set(workflowsErrorAtom, null);
     try {
       const workflows = await Client.getWorkflows(projectName as string);
-      const sortedWorkflows = workflows.data.sort((a: Workflow, b: Workflow) => {
-        const dateA = new Date(a.created as string);
-        const dateB = new Date(b.created as string);
-        return dateA.getTime() - dateB.getTime();
-      });
+      const sortedWorkflows = workflows.data.sort(
+        (a: Workflow, b: Workflow) => {
+          const dateA = new Date(a.created as string);
+          const dateB = new Date(b.created as string);
+          return dateA.getTime() - dateB.getTime();
+        },
+      );
       set(workflowsAtom, sortedWorkflows);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(workflowsErrorAtom, 'Failed to fetch workflows');
     } finally {
       set(workflowsLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedWorkflowAtom = atom<Workflow>({ name: '', description: '', labels: {}, owner_id: '', project_id: '', workflow_type: WorkflowType.APPLICATION, deployment: '' });
+export const selectedWorkflowAtom = atom<Workflow>({
+  name: '',
+  description: '',
+  labels: {},
+  owner_id: '',
+  project_id: '',
+  workflow_type: WorkflowType.APPLICATION,
+  deployment: '',
+});

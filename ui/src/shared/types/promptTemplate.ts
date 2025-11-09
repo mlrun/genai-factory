@@ -12,18 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
-
 export type PromptTemplate = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: { [key: string]: string }
-  owner_id: string
-  version?: string
-  project_id: string
-  text: string
-  arguments: string[]
-  created?: string
-}
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: { [key: string]: string };
+  owner_id: string;
+  version?: string;
+  project_id: string;
+  text: string;
+  arguments: string[];
+  created?: string;
+};

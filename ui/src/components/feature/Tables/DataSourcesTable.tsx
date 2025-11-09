@@ -12,42 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
-import { dataSourcesAtom, dataSourcesWithFetchAtom } from '@atoms/dataSources'
-import { useAtom } from 'jotai'
-import { publicUserAtom, projectAtom } from '@atoms/index'
-import Client from '@services/Api'
-import { TableColumn } from 'react-data-table-component'
-import { DataSource, DataSourceType } from '@shared/types/dataSource'
-import EntityTable from '@components/shared/EntityTable'
+import React from 'react';
+import { useAtom } from 'jotai';
+import { TableColumn } from 'react-data-table-component';
+
+import { dataSourcesAtom, dataSourcesWithFetchAtom } from '@atoms/dataSources';
+import { projectAtom, publicUserAtom } from '@atoms/index';
+import EntityTable from '@components/shared/EntityTable';
+import Client from '@services/Api';
+import { DataSource, DataSourceType } from '@shared/types/dataSource';
+
 import { dataSourceFields } from '@constants/index';
 
 const DataSourcesTable: React.FC = () => {
-  const [dataSources] = useAtom(dataSourcesAtom)
-  const [, fetchDataSources] = useAtom(dataSourcesWithFetchAtom)
-  const [project] = useAtom(projectAtom)
-  const [publicUser] = useAtom(publicUserAtom)
+  const [dataSources] = useAtom(dataSourcesAtom);
+  const [, fetchDataSources] = useAtom(dataSourcesWithFetchAtom);
+  const [project] = useAtom(projectAtom);
+  const [publicUser] = useAtom(publicUserAtom);
 
-  const base = project?.name ?? ''
-  const uid = project?.uid ?? ''
+  const base = project?.name ?? '';
+  const uid = project?.uid ?? '';
 
   const newEntity: DataSource = {
     name: '',
     description: '',
     owner_id: publicUser.uid as string,
     project_id: uid,
-    data_source_type: DataSourceType.OTHER
-  }
+    data_source_type: DataSourceType.OTHER,
+  };
 
-  if(Object.keys(publicUser).length === 0) return;
+  if (Object.keys(publicUser).length === 0) return;
 
   const columns: TableColumn<Partial<DataSource>>[] = [
-    { name: 'Name', selector: row => row.name ?? '', sortable: true },
-    { name: 'Description', selector: row => row.description ?? '', sortable: true },
-    { name: 'Version', selector: row => row.version ?? '', sortable: true },
-    { name: 'Type', selector: row => row.data_source_type ?? '', sortable: true },
-    { name: 'Created', selector: row => row.created ?? '', sortable: true }
-  ]
+    { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
+    { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
+    {
+      name: 'Type',
+      selector: (row) => row.data_source_type ?? '',
+      sortable: true,
+    },
+    { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
+  ];
 
   return (
     <EntityTable
@@ -57,12 +67,12 @@ const DataSourcesTable: React.FC = () => {
       columns={columns}
       data={dataSources}
       fetchEntities={() => fetchDataSources(base)}
-      createEntity={d => Client.createDataSource(base, d)}
-      updateEntity={d => Client.updateDataSource(base, d)}
-      deleteEntity={id => Client.deleteDataSource(base, id)}
+      createEntity={(d) => Client.createDataSource(base, d)}
+      updateEntity={(d) => Client.updateDataSource(base, d)}
+      deleteEntity={(id) => Client.deleteDataSource(base, id)}
       newEntityDefaults={newEntity}
     />
-  )
-}
+  );
+};
 
-export default DataSourcesTable
+export default DataSourcesTable;

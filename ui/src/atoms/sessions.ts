@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { Session } from '@shared/types/session';
-import { atom } from 'jotai';
 
 export const sessionsAtom = atom<Session[]>([]);
 
 export const sessionsLoadingAtom = atom<boolean>(false);
 
 export const sessionsErrorAtom = atom<string | null>(null);
-
 
 export const sessionsWithFetchAtom = atom(
   (get) => get(sessionsAtom),
@@ -37,11 +37,16 @@ export const sessionsWithFetchAtom = atom(
       });
       set(sessionsAtom, sortedSessions);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(sessionsErrorAtom, 'Failed to fetch sessions');
     } finally {
       set(sessionsLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedSessionAtom = atom<Session>({ name: '', description: '', labels: {} });
+export const selectedSessionAtom = atom<Session>({
+  name: '',
+  description: '',
+  labels: {},
+});

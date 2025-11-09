@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Flex, Input } from '@chakra-ui/react'
+import { Flex, Input } from '@chakra-ui/react';
 
 type Props = {
-  filterText: string
-  onFilter: (e: React.ChangeEvent<HTMLInputElement>) => void
-}
+  filterText: string;
+  onFilter: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
 
 const FilterComponent = ({ filterText, onFilter }: Props) => (
   <Flex>
@@ -30,6 +30,6 @@ const FilterComponent = ({ filterText, onFilter }: Props) => (
       onChange={onFilter}
     />
   </Flex>
-)
+);
 
-export default FilterComponent
+export default FilterComponent;

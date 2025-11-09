@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModalField } from '@shared/types/modalFieldConfigs'
+import { ModalField } from '@shared/types/modalFieldConfigs';
 
 export const userFields: ModalField[] = [
   { name: 'name', label: 'Username', required: true },
   { name: 'email', label: 'Email' },
   { name: 'full_name', label: 'Full Name' },
-]
+];

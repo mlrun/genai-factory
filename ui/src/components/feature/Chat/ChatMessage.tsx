@@ -12,28 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isTypingAtom } from '@atoms/index'
-import ChakraUIRenderer from 'chakra-ui-markdown-renderer'
-import { useAtom } from 'jotai'
-import React from 'react'
-import ReactMarkdown from 'react-markdown'
-import TypingText from '../TypingText'
+import React from 'react';
+import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
+import { useAtom } from 'jotai';
+import ReactMarkdown from 'react-markdown';
+
+import { isTypingAtom } from '@atoms/index';
+
+import TypingText from '../TypingText';
 
 interface ChatMessageProps {
-  message: string
+  message: string;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  const [isTyping] = useAtom(isTypingAtom)
+  const [isTyping] = useAtom(isTypingAtom);
 
   if (isTyping) {
-    return <TypingText text={message} />
+    return <TypingText text={message} />;
   }
   return (
     <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
       {message}
     </ReactMarkdown>
-  )
-}
+  );
+};
 
-export default ChatMessage
+export default ChatMessage;

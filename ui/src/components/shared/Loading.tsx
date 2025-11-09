@@ -1,11 +1,14 @@
-import { Center, Spinner, VStack, Text } from "@chakra-ui/react";
+import { Center, Spinner, Text, VStack } from '@chakra-ui/react';
 
 interface LoadingProps {
   message?: string;
   fullPage?: boolean;
 }
 
-export default function Loading({ message = "Loading...", fullPage = true }: LoadingProps) {
+export default function Loading({
+  fullPage = true,
+  message = 'Loading...',
+}: LoadingProps) {
   const content = (
     <VStack spacing={3}>
       <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
@@ -18,8 +21,6 @@ export default function Loading({ message = "Loading...", fullPage = true }: Loa
       {content}
     </Center>
   ) : (
-    <Center>
-      {content}
-    </Center>
+    <Center>{content}</Center>
   );
 }

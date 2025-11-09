@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { DataSource, DataSourceType } from '@shared/types/dataSource';
-import { atom } from 'jotai';
 
 export const dataSourcesAtom = atom<DataSource[]>([]);
 
 export const dataSourcesLoadingAtom = atom<boolean>(false);
 
 export const dataSourcesErrorAtom = atom<string | null>(null);
-
 
 export const dataSourcesWithFetchAtom = atom(
   (get) => get(dataSourcesAtom),
@@ -30,18 +30,28 @@ export const dataSourcesWithFetchAtom = atom(
     set(dataSourcesErrorAtom, null);
     try {
       const dataSources = await Client.getDataSources(projectName as string);
-      const sortedDataSources = dataSources.data.sort((a: DataSource, b: DataSource) => {
-        const dateA = new Date(a.created as string);
-        const dateB = new Date(b.created as string);
-        return dateA.getTime() - dateB.getTime();
-      });
+      const sortedDataSources = dataSources.data.sort(
+        (a: DataSource, b: DataSource) => {
+          const dateA = new Date(a.created as string);
+          const dateB = new Date(b.created as string);
+          return dateA.getTime() - dateB.getTime();
+        },
+      );
       set(dataSourcesAtom, sortedDataSources);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(dataSourcesErrorAtom, 'Failed to fetch dataSources');
     } finally {
       set(dataSourcesLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedDataSourceAtom = atom<DataSource>({ name: '', description: '', labels: {}, owner_id: '', data_source_type: DataSourceType.OTHER, project_id: '' });
+export const selectedDataSourceAtom = atom<DataSource>({
+  name: '',
+  description: '',
+  labels: {},
+  owner_id: '',
+  data_source_type: DataSourceType.OTHER,
+  project_id: '',
+});

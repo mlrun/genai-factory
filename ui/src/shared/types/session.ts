@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChatHistory } from "."
-
+import { ChatHistory } from '.';
 
 export type Session = {
-  uid?: string
-  name: string
-  description: string
-  labels: { [key: string]: string }
-  owner_id?: string
-  workflow_id?: string
-  history?: ChatHistory[]
-  created?: string
-}
+  uid?: string;
+  name: string;
+  description: string;
+  labels: { [key: string]: string };
+  owner_id?: string;
+  workflow_id?: string;
+  history?: ChatHistory[];
+  created?: string;
+};

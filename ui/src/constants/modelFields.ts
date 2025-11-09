@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModalField } from '@shared/types/modalFieldConfigs'
-import { ModelType } from '@shared/types/model'
+import { ModalField } from '@shared/types/modalFieldConfigs';
+import { ModelType } from '@shared/types/model';
 
 export const modelFields: ModalField[] = [
   { name: 'name', label: 'Name', required: true },
   { name: 'description', label: 'Description', required: true },
   { name: 'version', label: 'Version' },
-  { name: 'base_model', label: 'Base Model' ,required: true},
+  { name: 'base_model', label: 'Base Model', required: true },
   {
     name: 'model_type',
     label: 'Model Type',
     required: true,
     options: [
       { label: 'Model', value: ModelType.MODEL },
-      { label: 'Adapter', value: ModelType.ADAPTER }
-    ]
-  },  { name: 'task', label: 'Task' },
+      { label: 'Adapter', value: ModelType.ADAPTER },
+    ],
+  },
+  { name: 'task', label: 'Task' },
   { name: 'path', label: 'Path' },
-  { name: 'deployment', label: 'Deployment' ,required: true},
-]
+  { name: 'deployment', label: 'Deployment', required: true },
+];

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { User } from '@shared/types';
-import { atom } from 'jotai';
 
 export const usersAtom = atom<User[]>([]);
 export const usersLoadingAtom = atom<boolean>(false);
 export const usersErrorAtom = atom<string | null>(null);
-
 
 export const usersWithFetchAtom = atom(
   (get) => get(usersAtom),
@@ -30,11 +30,12 @@ export const usersWithFetchAtom = atom(
       const users = await Client.getUsers();
       set(usersAtom, users.data);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(usersErrorAtom, 'Failed to fetch users');
     } finally {
       set(usersLoadingAtom, false);
     }
-  }
+  },
 );
 
 export const publicUserAtom = atom<User>({});
@@ -50,9 +51,10 @@ export const userWithFetchAtom = atom(
       const user = await Client.getUser(username);
       set(publicUserAtom, user.data);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(userErrorAtom, 'Failed to fetch user');
     } finally {
       set(userLoadingAtom, false);
     }
-  }
+  },
 );

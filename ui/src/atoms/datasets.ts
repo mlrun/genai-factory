@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { atom } from 'jotai';
+
 import Client from '@services/Api';
 import { Dataset } from '@shared/types/dataset';
-import { atom } from 'jotai';
 
 export const datasetsAtom = atom<Dataset[]>([]);
 
 export const datasetsLoadingAtom = atom<boolean>(false);
 
 export const datasetsErrorAtom = atom<string | null>(null);
-
 
 export const datasetsWithFetchAtom = atom(
   (get) => get(datasetsAtom),
@@ -37,11 +37,20 @@ export const datasetsWithFetchAtom = atom(
       });
       set(datasetsAtom, sortedDatasets);
     } catch (error) {
+      console.log(`Error: ${error}`);
       set(datasetsErrorAtom, 'Failed to fetch datasets');
     } finally {
       set(datasetsLoadingAtom, false);
     }
-  }
+  },
 );
 
-export const selectedDatasetAtom = atom<Dataset>({ name: '', description: '', labels: {}, owner_id: '', project_id: '', path: '', task: '' });
+export const selectedDatasetAtom = atom<Dataset>({
+  name: '',
+  description: '',
+  labels: {},
+  owner_id: '',
+  project_id: '',
+  path: '',
+  task: '',
+});

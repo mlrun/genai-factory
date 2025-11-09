@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MoonIcon, SunIcon } from '@chakra-ui/icons'
+import { useState } from 'react';
+
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import {
   Accordion,
   AccordionButton,
@@ -54,20 +56,19 @@ import {
   Switch,
   Text,
   Tooltip,
-  useColorMode
-} from '@chakra-ui/react'
-import { useState } from 'react'
+  useColorMode,
+} from '@chakra-ui/react';
 
 interface RightbarProps {
-  isOpen: boolean
-  onClose: () => void
-  onLoginChange: (value: boolean) => void
+  isOpen: boolean;
+  onClose: () => void;
+  onLoginChange: (value: boolean) => void;
 }
 
 const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
-  const { colorMode, toggleColorMode } = useColorMode()
-  const [sliderValue, setSliderValue] = useState(25)
-  const [showTooltip, setShowTooltip] = useState(false)
+  const { colorMode, toggleColorMode } = useColorMode();
+  const [sliderValue, setSliderValue] = useState(25);
+  const [showTooltip, setShowTooltip] = useState(false);
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
       <DrawerOverlay />
@@ -78,7 +79,10 @@ const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
           <Flex gap={8} width={'100%'} flexDirection={'column'}>
             <Flex alignItems={'center'} gap={2}>
               <SunIcon />
-              <Switch defaultChecked={colorMode === 'dark'} onChange={toggleColorMode} />
+              <Switch
+                defaultChecked={colorMode === 'dark'}
+                onChange={toggleColorMode}
+              />
               <MoonIcon />
             </Flex>
             <Menu>
@@ -95,9 +99,10 @@ const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                  dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                  aliquip ex ea commodo consequat.
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
@@ -109,7 +114,7 @@ const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
                 min={0}
                 max={100}
                 colorScheme="teal"
-                onChange={v => setSliderValue(v)}
+                onChange={(v) => setSliderValue(v)}
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
               >
@@ -160,7 +165,11 @@ const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
             </Flex>
             <Flex flexDirection={'column'}>
               <Text>Range Slider</Text>
-              <RangeSlider aria-label={['min', 'max']} colorScheme="pink" defaultValue={[10, 30]}>
+              <RangeSlider
+                aria-label={['min', 'max']}
+                colorScheme="pink"
+                defaultValue={[10, 30]}
+              >
                 <RangeSliderTrack>
                   <RangeSliderFilledTrack />
                 </RangeSliderTrack>
@@ -193,8 +202,17 @@ const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
           <Flex flexDirection={'column'}>
             <Text>Skeleton</Text>
             <Box padding="6" boxShadow="lg" bg="white">
-              <SkeletonCircle startColor="pink.500" endColor="orange.500" size="10" />
-              <SkeletonText mt="4" noOfLines={4} spacing="4" skeletonHeight="2" />
+              <SkeletonCircle
+                startColor="pink.500"
+                endColor="orange.500"
+                size="10"
+              />
+              <SkeletonText
+                mt="4"
+                noOfLines={4}
+                spacing="4"
+                skeletonHeight="2"
+              />
             </Box>
           </Flex>
         </DrawerBody>
@@ -204,7 +222,7 @@ const Rightbar = ({ isOpen, onClose, onLoginChange }: RightbarProps) => {
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  )
-}
+  );
+};
 
-export default Rightbar
+export default Rightbar;

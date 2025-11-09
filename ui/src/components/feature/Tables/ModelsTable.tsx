@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
-import EntityTable from '@components/shared/EntityTable'
-import { Model, ModelType } from '@shared/types/model'
-import { modelsAtom, modelsWithFetchAtom } from '@atoms/models'
-import { useAtom } from 'jotai'
-import { publicUserAtom, projectAtom } from '@atoms/index'
-import Client from '@services/Api'
-import { TableColumn } from 'react-data-table-component'
-import { modelFields } from '@constants/index'
+import React from 'react';
+import { useAtom } from 'jotai';
+import { TableColumn } from 'react-data-table-component';
+
+import { projectAtom, publicUserAtom } from '@atoms/index';
+import { modelsAtom, modelsWithFetchAtom } from '@atoms/models';
+import EntityTable from '@components/shared/EntityTable';
+import Client from '@services/Api';
+import { Model, ModelType } from '@shared/types/model';
+
+import { modelFields } from '@constants/index';
 
 const ModelsTable: React.FC = () => {
-  const [models] = useAtom(modelsAtom)
-  const [, fetchModels] = useAtom(modelsWithFetchAtom)
-  const [project] = useAtom(projectAtom)
-  const [publicUser] = useAtom(publicUserAtom)
+  const [models] = useAtom(modelsAtom);
+  const [, fetchModels] = useAtom(modelsWithFetchAtom);
+  const [project] = useAtom(projectAtom);
+  const [publicUser] = useAtom(publicUserAtom);
 
-  const base = project?.name ?? ''
-  const uid = project?.uid ?? ''
+  const base = project?.name ?? '';
+  const uid = project?.uid ?? '';
 
   const newEntity: Model = {
     name: '',
@@ -37,23 +39,39 @@ const ModelsTable: React.FC = () => {
     base_model: '',
     model_type: ModelType.MODEL,
     owner_id: publicUser.uid as string,
-    project_id: uid
-  }
+    project_id: uid,
+  };
 
-  if(Object.keys(publicUser).length === 0) return;
+  if (Object.keys(publicUser).length === 0) return;
 
   const columns: TableColumn<Partial<Model>>[] = [
-    { name: 'Name', selector: row => row.name ?? '', sortable: true },
-    { name: 'Description', selector: row => row.description ?? '', sortable: true },
-    { name: 'Version', selector: row => row.version ?? '', sortable: true },
-    { name: 'Base Model', selector: row => row.base_model ?? '', sortable: true },
-    { name: 'Model Type', selector: row => row.model_type ?? '', sortable: true },
-    { name: 'Task', selector: row => row.task ?? '', sortable: true },
-    { name: 'Path', selector: row => row.path ?? '', sortable: true },
-    { name: 'Producer', selector: row => row.producer ?? '', sortable: true },
-    { name: 'Deployment', selector: row => row.deployment ?? '', sortable: true },
-    { name: 'Created', selector: row => row.created ?? '', sortable: true }
-  ]
+    { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
+    {
+      name: 'Description',
+      selector: (row) => row.description ?? '',
+      sortable: true,
+    },
+    { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
+    {
+      name: 'Base Model',
+      selector: (row) => row.base_model ?? '',
+      sortable: true,
+    },
+    {
+      name: 'Model Type',
+      selector: (row) => row.model_type ?? '',
+      sortable: true,
+    },
+    { name: 'Task', selector: (row) => row.task ?? '', sortable: true },
+    { name: 'Path', selector: (row) => row.path ?? '', sortable: true },
+    { name: 'Producer', selector: (row) => row.producer ?? '', sortable: true },
+    {
+      name: 'Deployment',
+      selector: (row) => row.deployment ?? '',
+      sortable: true,
+    },
+    { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
+  ];
 
   return (
     <EntityTable
@@ -63,12 +81,12 @@ const ModelsTable: React.FC = () => {
       columns={columns}
       data={models}
       fetchEntities={() => fetchModels(base)}
-      createEntity={d => Client.createModel(base, d)}
-      updateEntity={d => Client.updateModel(base, d)}
-      deleteEntity={id => Client.deleteModel(base, id)}
+      createEntity={(d) => Client.createModel(base, d)}
+      updateEntity={(d) => Client.updateModel(base, d)}
+      deleteEntity={(id) => Client.deleteModel(base, id)}
       newEntityDefaults={newEntity}
     />
-  )
-}
+  );
+};
 
-export default ModelsTable
+export default ModelsTable;
