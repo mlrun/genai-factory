@@ -128,7 +128,7 @@ class WorkflowServer:
     def api_startup(self):
         print("\nstartup event\n")
 
-    def deploy(self, router=None, deployer=None):
+    def deploy(self, router=None, deployer=None, environment=None):
         self._build()
 
         if deployer == "nuclio":
@@ -136,13 +136,14 @@ class WorkflowServer:
             self.deploy_nuclio()
         else:
             print("Deploying fastapi")
-            self.deploy_fastapi(router)
+            self.deploy_fastapi(router, environment)
 
-    def deploy_fastapi(self, router):
+    def deploy_fastapi(self, router, environment):
         from fastapi import FastAPI
         from fastapi.middleware.cors import CORSMiddleware
 
-        self._commit()
+        if environment and environment == "local":
+            self._commit()
 
         app = FastAPI()
 
@@ -213,8 +214,12 @@ class WorkflowServer:
         app.spec.args = [
             "run",
             "/home/mlrun_code/workflow.py",
+            "--config-path",
+            "/home/mlrun_code/workflow-config.yaml",
             "--deployer",
             "fastapi",
+            "--environment",
+            "remote"
         ]
 
         app.deploy(with_mlrun=True)

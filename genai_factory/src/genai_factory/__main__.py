@@ -60,10 +60,21 @@ def main():
     default="fastapi",
     help="How to deploy the workflow server with the added workflows in the given script.",
 )
+
+# TODO: Move to enviorment variable
+@click.option(
+    "-e",
+    "--environment",
+    type=click.Choice(choices=["local", "remote"]),
+    default="local",
+    help="Enable or disable environment mode."
+)
+
 def run(
     workflows_path: pathlib.Path,
     config_path: pathlib.Path,
     deployer: str,
+    environment: str,
 ):
     """
     Run given workflows from file.
@@ -109,7 +120,7 @@ def run(
 
     # Retrieve the desired object from the module
     click.echo(f"Running workflows using a '{deployer}' runner...")
-    workflow_server.deploy(router=router, deployer=deployer)
+    workflow_server.deploy(router=router, deployer=deployer, environment=environment)
 
 
 main.add_command(run)
