@@ -57,10 +57,15 @@ class WorkflowServerConfig(BaseModel):
     """
 
     default_image_requirements: list[str] = [
-        "mlrun",
-        "fastapi",
-        "uvicorn",
-        "git+https://github.com/mlrun/genai-factory"
+        "git+https://github.com/tomerbv/genai-factory.git@nuclio_deployment",
+        "langchain==0.3.*",
+        "langchain-community==0.3.*",
+        "langchain-openai==0.2.*",
+        "langchain-milvus==0.1.7",
+        "pymilvus>=2.4.3,<2.6",
+        "fastapi>=0.103,<0.111",
+        "uvicorn==0.30.6",
+        "mlrun==1.9.1"
     ]
     """
     MLRun default image requirements for creating images. Default: "".
@@ -76,9 +81,9 @@ class WorkflowServerConfig(BaseModel):
     The log level. Default: INFO.
     """
 
-    deployment_url: str = "http://localhost:8000"
+    deployment_url: str = "http://0.0.0.0:8000"
     """
-    URL to use for the workflows server deployment API. Default: http://localhost:8000.
+    URL to use for the workflows server deployment API. Default: http://0.0.0.0:8000.
     """
 
     workflows_kwargs: dict[str, dict] = {}
