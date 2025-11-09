@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
-import svgr from 'vite-plugin-svgr'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
+import svgr from 'vite-plugin-svgr';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
-import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   base: '/',
-  plugins: [react(), tsconfigPaths(), svgr()],
+  plugins: [react(), tsconfigPaths(), svgr(), tailwindcss()],
   resolve: {
     alias: {
       '@icons': resolve(__dirname, 'src/assets/icons'),
@@ -37,5 +38,5 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  }
-})
+  },
+});
