@@ -163,6 +163,7 @@ class WorkflowServer:
         if router:
             router.add_event_handler("startup", self.api_startup)
             app.include_router(router)
+        print(f"deployment url: {self._config.deployment_url}")
         url = urlparse(self._config.deployment_url)
         uvicorn.run(app, host=url.hostname, port=url.port)
 
