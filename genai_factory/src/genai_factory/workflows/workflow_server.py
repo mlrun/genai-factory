@@ -161,6 +161,7 @@ class WorkflowServer:
         extra["app_server"] = self
         app.extra = extra
         if router:
+            print(f"adding router")
             router.add_event_handler("startup", self.api_startup)
             app.include_router(router)
         print(f"deployment url: {self._config.deployment_url}")
