@@ -46,20 +46,16 @@ class WorkflowServerConfig(BaseModel):
     URL to use for the mlrun API. Default: http://localhost:30070.
     """
 
-    git_repo: str = "git://github.com/tomerbv/workflow_example.git"
+    workflow_source_url: str = ""
     """
-    MLRun git repo. Default: "".
-    """
-
-    default_image: str = "mlrun/mlrun"
-    """
-    MLRun default image. Default: "mlrun/mlrun".
+    Workflow source code git repository. Default: "".
     """
 
     default_image_requirements: list[str] = [
         "langchain==0.3.*",
         "langchain-community==0.3.*",
         "langchain-openai==0.2.*",
+        "langchain-huggingface==0.1.*",
         "langchain-milvus==0.1.7",
         "pymilvus>=2.4.3,<2.6",
         "fastapi>=0.103,<0.111",
@@ -69,7 +65,7 @@ class WorkflowServerConfig(BaseModel):
         "sentence_transformers"
     ]
     """
-    MLRun default image requirements for creating images. Default: "".
+    MLRun default image requirements for creating images. Default: [].
     """
 
     verbose: bool = True

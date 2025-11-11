@@ -180,28 +180,22 @@ class WorkflowServer:
 
         ################################################
 
-        base_image = getattr(self._config, "default_image", "mlrun/mlrun") or None
         requirements = getattr(self._config, "default_image_requirements", [])
 
-        print(base_image)
-
-        # git_repo = getattr(self._config, "git_repo", project.source)
-        git_repo = "git://github.com/tomerbv/workflow_example.git#main"
-        print(f"git repo: {git_repo}")
-        if not git_repo:
+        workflow_source_url = getattr(self._config, "workflow_source_url", project.source)
+        if not workflow_source_url:
             raise ValueError(
                 "Session store and configuration must be set before building workflows."
                 " Make sure to set them via the `set_config` method."
             )
 
         project.set_source(
-            git_repo,
+            workflow_source_url,
             pull_at_runtime=False
         )
         # TODO: remove build once pull_at_runtime is supported in application runtime
         # TODO: decide if allowing image name other than default
         image = project.build_image().outputs.get("image")
-        print(f"Image: {image}")
 
         app = project.set_function(
             name=self._config.project_name,
@@ -225,14 +219,6 @@ class WorkflowServer:
         ]
 
         app.deploy(with_mlrun=True)
-
-        # TODO: necessary?
-        # address = app.create_api_gateway(
-        #     name=name,
-        #     direct_port_access=False,
-        #     authentication_mode=mlrun.common.schemas.api_gateway.APIGatewayAuthenticationMode.none
-        # )
-
 
     def validate_mlrun(self) -> None:
         """
