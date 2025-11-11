@@ -60,7 +60,6 @@ class WorkflowServerConfig(BaseModel):
         "langchain==0.3.*",
         "langchain-community==0.3.*",
         "langchain-openai==0.2.*",
-        "langchain-huggingface==0.1.*",
         "langchain-milvus==0.1.7",
         "pymilvus>=2.4.3,<2.6",
         "fastapi>=0.103,<0.111",
