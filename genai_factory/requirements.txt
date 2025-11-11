@@ -1,8 +1,10 @@
-langchain_community
-langchain_openai
-langchain_huggingface
-pymilvus
-langchain-milvus
-fastapi>=0.103.0
-mlrun==1.9.1
+langchain==0.3.*
+langchain-community==0.3.*
+langchain-openai==0.2.*
+langchain-huggingface==0.1.*
+langchain-milvus==0.1.7
+
+pymilvus>=2.4.3,<2.6
+fastapi>=0.103,<0.111
 uvicorn==0.30.6
+mlrun==1.9.1
