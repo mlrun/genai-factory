@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import { ChangeEvent, useState } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -45,8 +45,8 @@ describe('FilterComponent', () => {
 
   it('calls onFilter when user types in the input', async () => {
     const Wrapper = () => {
-      const [filterText, setFilterText] = React.useState('');
-      const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const [filterText, setFilterText] = useState('');
+      const handleFilter = (e: ChangeEvent<HTMLInputElement>) => {
         setFilterText(e.target.value);
         mockOnFilter(e);
       };
