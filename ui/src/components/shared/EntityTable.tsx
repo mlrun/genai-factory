@@ -15,9 +15,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import {
-  Button,
   Drawer,
   DrawerBody,
   DrawerContent,
@@ -29,6 +27,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { Button } from '@components/shared/Button';
 import { ModalField } from '@shared/types/modalFieldConfigs';
 
 import AddEditModal from './AddEditModal';
@@ -37,7 +36,7 @@ import FilterComponent from './Filter';
 
 import { filterTableData } from '@utils/table.utils';
 
-import { FILTER_PLACEHOLDER_PREFIX } from '@constants';
+import { FILTER_PLACEHOLDER_PREFIX, NEW_BUTTON_TEXT_PREFIX } from '@constants';
 
 type EntityWithUID = { uid?: string; name?: string };
 
@@ -159,11 +158,7 @@ function EntityTable<T extends EntityWithUID>({
   };
 
   const contextActions = useMemo(
-    () => (
-      <Button leftIcon={<DeleteIcon />} onClick={handleDelete}>
-        Delete
-      </Button>
-    ),
+    () => <Button onClick={handleDelete}>Delete</Button>,
     [handleDelete],
   );
 
@@ -176,13 +171,13 @@ function EntityTable<T extends EntityWithUID>({
           filterText={filterText}
         />
         <Button
-          leftIcon={<AddIcon />}
+          className="capitalize min-w-24"
           onClick={() => {
             setEditRow(newEntityDefaults);
             modal.onOpen();
           }}
         >
-          New
+          {`${NEW_BUTTON_TEXT_PREFIX} ${title}`}
         </Button>
       </div>
     ),
@@ -240,7 +235,7 @@ function EntityTable<T extends EntityWithUID>({
                 ))}
               </Flex>
             </Flex>
-            <Button mt={4} onClick={handleUpdateDrawer}>
+            <Button className="mt-1" onClick={handleUpdateDrawer}>
               Save changes
             </Button>
           </DrawerBody>

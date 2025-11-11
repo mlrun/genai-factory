@@ -27,3 +27,5 @@ export const QUERY_DEFAULTS = {
 } as const;
 
 export const FILTER_PLACEHOLDER_PREFIX = 'Find';
+
+export const NEW_BUTTON_TEXT_PREFIX = 'New';
