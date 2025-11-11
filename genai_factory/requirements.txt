@@ -8,3 +8,6 @@ pymilvus>=2.4.3,<2.6
 fastapi>=0.103,<0.111
 uvicorn==0.30.6
 mlrun==1.9.1
+
+chromadb==0.5.3
+sentence_transformers
