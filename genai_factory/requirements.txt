@@ -3,7 +3,7 @@ langchain-community
 langchain-openai
 langchain-milvus
 
-pymilvus>=2.4.3,<2.6
-fastapi>=0.103,<0.111
+pymilvus
+fastapi>=0.103.0
 uvicorn==0.30.6
 mlrun==1.9.1
