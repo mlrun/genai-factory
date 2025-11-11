@@ -28,15 +28,17 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Button } from '@components/shared/Button';
+import { SortOption } from '@shared/types';
 import { ModalField } from '@shared/types/modalFieldConfigs';
 
 import AddEditModal from './AddEditModal';
 import DataTableComponent from './Datatable';
 import FilterComponent from './Filter';
+import Sort from './Sort';
 
-import { filterTableData } from '@utils/table.utils';
+import { filterTableData, sortTableData } from '@utils/table.utils';
 
-import { FILTER_PLACEHOLDER_PREFIX, NEW_BUTTON_TEXT_PREFIX } from '@constants';
+import { NEW_BUTTON_TEXT_PREFIX } from '@constants';
 
 type EntityWithUID = { uid?: string; name?: string };
 
@@ -50,6 +52,7 @@ type Props<T extends EntityWithUID> = {
   updateEntity: (entity: Partial<T>) => void;
   deleteEntity: (id: string) => void;
   newEntityDefaults: T;
+  sortOptions?: SortOption<T>[];
 };
 
 function EntityTable<T extends EntityWithUID>({
@@ -60,6 +63,7 @@ function EntityTable<T extends EntityWithUID>({
   entityName,
   fields,
   newEntityDefaults,
+  sortOptions = [],
   title,
   updateEntity,
 }: Props<T>) {
@@ -70,14 +74,24 @@ function EntityTable<T extends EntityWithUID>({
   const [editRow, setEditRow] = useState<T>(newEntityDefaults);
   const [filterText, setFilterText] = useState('');
   const [toggledClearRows, setToggleClearRows] = useState(false);
+  const [sortKey, setSortKey] = useState<SortOption<T>['accessorKey'] | null>(
+    () => {
+      if (sortOptions.length === 0) return null;
+      return (
+        sortOptions.find((opt) => opt.isDefault)?.accessorKey ??
+        sortOptions[0].accessorKey
+      );
+    },
+  );
 
   const modal = useDisclosure();
   const drawer = useDisclosure();
 
-  const filteredData = useMemo(
-    () => filterTableData(data, filterText),
-    [data, filterText],
-  );
+  const filteredData = useMemo(() => {
+    const filteredDate = filterTableData(data, filterText);
+
+    return sortTableData(filteredDate, sortKey);
+  }, [data, filterText, sortKey]);
 
   const handleSave = (entity: T) => {
     try {
@@ -162,41 +176,44 @@ function EntityTable<T extends EntityWithUID>({
     [handleDelete],
   );
 
-  const subHeader = useMemo(
-    () => (
+  return (
+    <div className="flex flex-col w-full p-[32px_56px]">
       <div className="flex w-full justify-between items-center gap-4 flex-wrap">
         <FilterComponent
-          placeholder={`${FILTER_PLACEHOLDER_PREFIX} ${title}...`}
+          placeholder={`Find ${title}...`}
           onFilter={(e) => setFilterText(e.target.value)}
           filterText={filterText}
         />
-        <Button
-          className="capitalize min-w-24"
-          onClick={() => {
-            setEditRow(newEntityDefaults);
-            modal.onOpen();
-          }}
-        >
-          {`${NEW_BUTTON_TEXT_PREFIX} ${title}`}
-        </Button>
+        <div className="flex items-center gap-3">
+          {sortOptions && sortKey && (
+            <Sort
+              sortOptions={sortOptions}
+              sortKey={sortKey}
+              onSortChange={(value) => setSortKey(value)}
+            />
+          )}
+          <Button
+            className="capitalize min-w-24"
+            onClick={() => {
+              setEditRow(newEntityDefaults);
+              modal.onOpen();
+            }}
+          >
+            {`${NEW_BUTTON_TEXT_PREFIX} ${title}`}
+          </Button>
+        </div>
       </div>
-    ),
-    [filterText, modal.onOpen, newEntityDefaults],
-  );
-
-  return (
-    <Flex p={4} flexDirection="column" width="100%">
-      <DataTableComponent
-        title={title}
-        data={filteredData}
-        columns={columns}
-        contextActions={contextActions}
-        subheaderComponent={subHeader}
-        onRowSelect={(row) => setSelectedRow(row)}
-        onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
-        onOpenDrawer={() => drawer.onOpen()}
-        toggleClearRows={toggledClearRows}
-      />
+      <div className="mt-5">
+        <DataTableComponent
+          data={filteredData}
+          columns={columns}
+          contextActions={contextActions}
+          onRowSelect={(row) => setSelectedRow(row)}
+          onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
+          onOpenDrawer={() => drawer.onOpen()}
+          toggleClearRows={toggledClearRows}
+        />
+      </div>
 
       <AddEditModal
         isOpen={modal.isOpen}
@@ -241,7 +258,7 @@ function EntityTable<T extends EntityWithUID>({
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-    </Flex>
+    </div>
   );
 }
 

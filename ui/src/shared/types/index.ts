@@ -69,3 +69,9 @@ export type APIResponse<T> = {
   success: boolean;
   error: string;
 };
+
+export type SortOption<T> = {
+  label: string;
+  accessorKey: Extract<keyof T, string>;
+  isDefault?: boolean;
+};
