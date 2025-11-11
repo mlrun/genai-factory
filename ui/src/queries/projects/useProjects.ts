@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasetFields';
-export * from './dataSourceFields';
-export * from './documentFields';
-export * from './modelFields';
-export * from './promptTemplateFields';
-export * from './userFields';
-export * from './workflowFields';
+import Client from '@services/Api';
+import { Project } from '@shared/types/project';
+import { useQuery } from '@tanstack/react-query';
 
-export const QUERY_DEFAULTS = {
-  staleTime: 5 * 60 * 1000,
-  retry: 1,
-  refetchOnWindowFocus: false,
-} as const;
+import { validateApiResponse } from '@utils/validateApiResponse';
+
+import { QUERY_DEFAULTS } from '@constants';
+
+export function useProjects() {
+  return useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: () => validateApiResponse(Client.getProjects(), 'fetch projects'),
+    ...QUERY_DEFAULTS,
+  });
+}

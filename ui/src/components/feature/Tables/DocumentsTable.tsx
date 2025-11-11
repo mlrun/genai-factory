@@ -12,36 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useAtom } from 'jotai';
+import { useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { documentsAtom, documentsWithFetchAtom } from '@atoms/documents';
-import { projectAtom, publicUserAtom } from '@atoms/index';
 import EntityTable from '@components/shared/EntityTable';
+import Loading from '@components/shared/Loading';
+import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Document } from '@shared/types/document';
 
-import { documentFields } from '@constants/index';
+import { documentFields } from '@constants';
 
-const DocumentsTable: React.FC = () => {
-  const [documents] = useAtom(documentsAtom);
-  const [, fetchDocuments] = useAtom(documentsWithFetchAtom);
-  const [project] = useAtom(projectAtom);
-  const [publicUser] = useAtom(publicUserAtom);
+const DocumentsTable = () => {
+  const { data: publicUser } = useUser();
 
-  const base = project?.name ?? '';
-  const uid = project?.uid ?? '';
+  const {
+    create,
+    data: documents = [],
+    error,
+    isLoading,
+    project,
+    remove,
+    update,
+  } = useProjectEntity<Document>(
+    'documents',
+    (projectName) => Client.getDocuments(projectName),
+    (projectName, document) => Client.createDocument(projectName, document),
+    (projectName, document) => Client.updateDocument(projectName, document),
+    (projectName, id) => Client.deleteDocument(projectName, id),
+  );
 
-  const newEntity: Document = {
-    name: '',
-    description: '',
-    path: '',
-    owner_id: publicUser.uid as string,
-    project_id: uid,
-  };
+  const projectUid = project?.uid ?? '';
 
-  if (Object.keys(publicUser).length === 0) return;
+  const newEntity: Document = useMemo(
+    () => ({
+      name: '',
+      description: '',
+      path: '',
+      owner_id: publicUser?.uid ?? '',
+      project_id: projectUid,
+    }),
+    [publicUser?.uid, projectUid],
+  );
 
   const columns: TableColumn<Partial<Document>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
@@ -56,6 +68,9 @@ const DocumentsTable: React.FC = () => {
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
 
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load documents.</div>;
+
   return (
     <EntityTable
       title="Documents"
@@ -63,10 +78,9 @@ const DocumentsTable: React.FC = () => {
       fields={documentFields}
       columns={columns}
       data={documents}
-      fetchEntities={() => fetchDocuments(base)}
-      createEntity={(d) => Client.createDocument(base, d)}
-      updateEntity={(d) => Client.updateDocument(base, d)}
-      deleteEntity={(id) => Client.deleteDocument(base, id)}
+      createEntity={(d) => create.mutate(d)}
+      updateEntity={(d) => update.mutate(d)}
+      deleteEntity={(id) => remove.mutate(id)}
       newEntityDefaults={newEntity}
     />
   );

@@ -13,128 +13,106 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import { useAtom } from 'jotai';
 import DataTable, {
   Alignment,
   createTheme,
   TableColumn,
 } from 'react-data-table-component';
 
-import { selectedRowAtom } from '@atoms/index';
 import { Box, useColorMode } from '@chakra-ui/react';
 import { colors } from '@shared/theme';
-import { User } from '@shared/types';
 
 createTheme(
   'dark',
   {
-    text: {
-      primary: colors.gray100,
-      secondary: colors.info,
-    },
-    background: {
-      default: colors.gray900,
-    },
-
-    divider: {
-      default: colors.gray800,
-    },
+    text: { primary: colors.gray100, secondary: colors.info },
+    background: { default: colors.gray900 },
+    divider: { default: colors.gray800 },
+    context: { background: colors.gray800 },
     action: {
       button: 'rgba(0,0,0,.54)',
       hover: 'rgba(0,0,0,.08)',
       disabled: 'rgba(0,0,0,.12)',
     },
-    context: {
-      background: colors.gray800,
-    },
   },
   'light',
 );
-type Props = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Partial<any>[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: TableColumn<Partial<any>>[];
+
+export interface DataTableComponentProps<T extends Record<string, unknown>> {
   title: string;
-  contextActions: JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSelectedRowChange?: (e: any) => void;
+  data: T[];
+  columns: TableColumn<Partial<T>>[];
+  contextActions?: JSX.Element;
   subheaderComponent?: React.ReactNode;
   filterText: string;
-  user?: User;
   toggleClearRows: boolean;
   onOpenDrawer: () => void;
-};
+  onSelectedRowChange?: (e: { selectedRows: Partial<T>[] }) => void;
+  onRowSelect?: (row: Partial<T>) => void;
+}
 
-const DataTableComponent = ({
+export function DataTableComponent<T extends Record<string, unknown>>({
   columns,
   contextActions,
   data,
   filterText,
   onOpenDrawer,
+  onRowSelect,
   onSelectedRowChange,
   subheaderComponent,
   title,
   toggleClearRows,
-}: Props) => {
+}: DataTableComponentProps<T>) {
   const { colorMode } = useColorMode();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [, setSelectedRow] = useAtom<any>(selectedRowAtom);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [filteredItems, setFilteredItems] = useState<Partial<any>[]>(data);
+  const [filteredItems, setFilteredItems] = useState<Partial<T>[]>(data);
 
   useEffect(() => {
     if (data) {
       setFilteredItems(
-        data.filter(
-          (item) =>
-            (item.name &&
-              item.name.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.email &&
-              item.email.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.full_name &&
-              item.full_name
-                .toLowerCase()
-                .includes(filterText.toLowerCase())) ||
-            (item.description &&
-              item.description
-                .toLowerCase()
-                .includes(filterText.toLowerCase())) ||
-            (item.version &&
-              item.version.toLowerCase().includes(filterText.toLowerCase())),
-        ),
+        data.filter((item) => {
+          const search = filterText.toLowerCase();
+          return (
+            (typeof item.name === 'string' &&
+              item.name.toLowerCase().includes(search)) ||
+            (typeof item.email === 'string' &&
+              item.email.toLowerCase().includes(search)) ||
+            (typeof item.full_name === 'string' &&
+              item.full_name.toLowerCase().includes(search)) ||
+            (typeof item.description === 'string' &&
+              item.description.toLowerCase().includes(search)) ||
+            (typeof item.version === 'string' &&
+              item.version.toLowerCase().includes(search))
+          );
+        }),
       );
     }
   }, [filterText, data]);
 
   return (
-    <>
-      <Box boxShadow="md" borderRadius="md">
-        <DataTable
-          title={title}
-          theme={colorMode}
-          columns={columns}
-          data={filteredItems}
-          // progressPending={!filteredItems?.length}
-          pagination
-          subHeader
-          subHeaderComponent={subheaderComponent}
-          persistTableHead
-          subHeaderAlign={Alignment.RIGHT}
-          selectableRows
-          onSelectedRowsChange={onSelectedRowChange}
-          contextActions={contextActions}
-          highlightOnHover
-          pointerOnHover
-          clearSelectedRows={toggleClearRows}
-          onRowClicked={(row) => {
-            setSelectedRow(row);
-            onOpenDrawer();
-          }}
-        />
-      </Box>
-    </>
+    <Box boxShadow="md" borderRadius="md">
+      <DataTable
+        title={title}
+        theme={colorMode}
+        columns={columns}
+        data={filteredItems}
+        pagination
+        subHeader
+        subHeaderAlign={Alignment.RIGHT}
+        subHeaderComponent={subheaderComponent}
+        persistTableHead
+        selectableRows
+        highlightOnHover
+        pointerOnHover
+        contextActions={contextActions}
+        clearSelectedRows={toggleClearRows}
+        onSelectedRowsChange={onSelectedRowChange}
+        onRowClicked={(row) => {
+          onRowSelect?.(row);
+          onOpenDrawer();
+        }}
+      />
+    </Box>
   );
-};
+}
 
 export default DataTableComponent;

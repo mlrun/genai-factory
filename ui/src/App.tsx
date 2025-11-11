@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Provider as JotaiProvider } from 'jotai';
 import { ChatPage } from 'pages/ChatPage';
 import { LoginPage } from 'pages/LoginPage';
 import { ProjectPage } from 'pages/ProjectPage';
@@ -48,18 +47,16 @@ function App() {
       element: <ChatPage />,
     },
     {
-      path: '/chat/:sessionId',
+      path: '/chat/:sessionName',
       element: <ChatPage />,
     },
   ]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <JotaiProvider>
-        <ChakraProvider>
-          <RouterProvider router={router} />
-        </ChakraProvider>
-      </JotaiProvider>
+      <ChakraProvider>
+        <RouterProvider router={router} />
+      </ChakraProvider>
     </QueryClientProvider>
   );
 }

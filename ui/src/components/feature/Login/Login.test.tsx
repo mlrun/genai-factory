@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { Provider } from 'jotai';
 import { BrowserRouter } from 'react-router-dom';
 
 import { ChakraProvider } from '@chakra-ui/react';
-import theme from '@shared/theme'; // Ensure this path matches your theme file location
+import theme from '@shared/theme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import Login from './Login';
 
-import useAuth from '@hooks/useAuth';
+import { useAuthStore } from '@stores/authStore';
 
 const mockedNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -30,33 +29,26 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockedNavigate,
 }));
 
-jest.mock('@hooks/useAuth');
-
-const mockLogin = jest.fn();
+beforeEach(() => {
+  const { logout } = useAuthStore.getState();
+  logout();
+  jest.clearAllMocks();
+});
 
 const renderWithProviders = (ui: React.ReactElement) => {
-  const Wrapper: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
-    return (
-      <Provider>
-        <BrowserRouter>
-          <ChakraProvider theme={theme}>{children}</ChakraProvider>
-        </BrowserRouter>
-      </Provider>
-    );
-  };
-  return render(ui, { wrapper: Wrapper });
+  const queryClient = new QueryClient();
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ChakraProvider theme={theme}>{ui}</ChakraProvider>
+      </BrowserRouter>
+      ,
+    </QueryClientProvider>,
+  );
 };
 
-describe('Login Component', () => {
-  beforeEach(() => {
-    mockedNavigate.mockReset();
-    (useAuth as jest.Mock).mockReturnValue({
-      user: null,
-      login: mockLogin,
-      logout: jest.fn(),
-    });
-  });
-
+describe('Login Component (Zustand)', () => {
   it('renders Login component', () => {
     renderWithProviders(<Login />);
 
@@ -66,7 +58,7 @@ describe('Login Component', () => {
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
   });
 
-  it('handles input change', () => {
+  it('handles input changes', () => {
     renderWithProviders(<Login />);
 
     const usernameInput = screen.getByTestId('username');
@@ -119,13 +111,16 @@ describe('Login Component', () => {
     fireEvent.click(loginButton);
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalled();
+      const state = useAuthStore.getState();
+      expect(state.user).toEqual({
+        username: 'testuser',
+        admin: false,
+        token: 'dummyToken',
+      });
     });
 
-    setTimeout(async () => {
-      await waitFor(() => {
-        expect(mockedNavigate).toHaveBeenCalledWith('/chat');
-      });
-    }, 1000);
+    await waitFor(() => {
+      expect(mockedNavigate).toHaveBeenCalledWith('/chat');
+    });
   });
 });

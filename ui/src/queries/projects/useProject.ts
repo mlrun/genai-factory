@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { atom } from 'jotai';
+import { useParams } from 'react-router-dom';
 
 import Client from '@services/Api';
 import { Project } from '@shared/types/project';
+import { useQuery } from '@tanstack/react-query';
 
-export const projectsAtom = atom<Project[]>([]);
-export const projectsLoadingAtom = atom<boolean>(false);
-export const projectsErrorAtom = atom<string | null>(null);
+import { validateApiResponse } from '@utils/validateApiResponse';
 
-export const projectsWithFetchAtom = atom(
-  (get) => get(projectsAtom),
-  async (_get, set) => {
-    set(projectsLoadingAtom, true);
-    set(projectsErrorAtom, null);
-    try {
-      const projects = await Client.getProjects();
-      set(projectsAtom, projects.data);
-    } catch (error) {
-      console.log(`Error: ${error}`);
-      set(projectsErrorAtom, 'Failed to fetch projects');
-    } finally {
-      set(projectsLoadingAtom, false);
-    }
-  },
-);
+import { QUERY_DEFAULTS } from '@constants';
+
+export function useProject() {
+  const { name } = useParams();
+
+  return useQuery<Project>({
+    queryKey: ['project', name],
+    queryFn: async () => {
+      if (!name) throw new Error('No project name provided');
+      return validateApiResponse(
+        Client.getProject(name),
+        `fetch project: ${name}`,
+      );
+    },
+    enabled: !!name,
+    ...QUERY_DEFAULTS,
+  });
+}

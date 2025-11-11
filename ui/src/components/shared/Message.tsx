@@ -13,79 +13,51 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import {
-  canSendMessageAtom,
-  isMessageErrorAtom,
-  messagesAtom,
-  sessionIdAtom,
-} from 'atoms';
-import { useAtom } from 'jotai';
 
-import { sessionsAtom } from '@atoms/sessions';
 import { ArrowUpIcon, AttachmentIcon } from '@chakra-ui/icons';
 import { Flex, IconButton, Input, useToast } from '@chakra-ui/react';
-import Client from '@services/Api';
+import { useSendMessage, useSession } from '@queries';
+
+import { useChatStore } from '@stores/chatStore';
 
 const Message = () => {
+  const toast = useToast();
+  const { canSend, setCanSend, setIsMessageError } = useChatStore();
+
+  const { data: session, refetch } = useSession();
   const [inputValue, setInputValue] = useState('');
 
-  const [sessionId] = useAtom(sessionIdAtom);
-  const [, setMessages] = useAtom(messagesAtom);
-  const [canSendMessage, setCanSendMessage] = useAtom(canSendMessageAtom);
-  const [sessions] = useAtom(sessionsAtom);
-  const [, setIsMessageError] = useAtom(isMessageErrorAtom);
-
-  const toast = useToast();
+  const { mutateAsync: sendMessage } = useSendMessage();
 
   const submitMessage = async () => {
-    setCanSendMessage(false);
-    setMessages((prevMessages) => {
-      const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
-      return [
-        ...safeMessages,
-        { role: 'Human', content: inputValue, sources: [] },
-      ];
-    });
-    setInputValue('');
+    if (!session || !inputValue.trim()) return;
 
-    setMessages((prevMessages) => {
-      const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
-      return [...safeMessages, { role: 'AI', content: '', sources: [] }];
-    });
-    const sessionName =
-      sessions.find((session) => session.uid === sessionId)?.name || 'default';
-    const result = await Client.inferWorkflow('default', 'default', {
-      question: inputValue,
-      session_name: sessionName,
-      data_source: 'default',
-    }).then((res) => {
-      if (res.error) {
-        setIsMessageError(true);
-        toast({
-          title: 'An unexpected error occurred',
-          description: res.error,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-        setCanSendMessage(false);
-        return res;
-      }
-      setCanSendMessage(true);
-      return res;
-    });
-
-    setMessages((prevMessages) => {
-      const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
-      return [
-        ...safeMessages.slice(0, -1),
-        {
-          role: 'AI',
-          content: result.data.data.answer,
-          sources: result.sources,
+    setCanSend(false);
+    await sendMessage(
+      {
+        question: inputValue,
+        session_name: session.name,
+      },
+      {
+        onSuccess: async () => {
+          setCanSend(false);
+          await refetch();
         },
-      ];
-    });
+        onError: (error) => {
+          setIsMessageError(true);
+          toast({
+            title: 'An unexpected error occurred',
+            description: error.message,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+          setCanSend(true);
+        },
+      },
+    );
+
+    setInputValue('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -95,27 +67,22 @@ const Message = () => {
     }
   };
 
-  const handleClick = () => {
-    submitMessage();
-  };
-
   return (
-    <Flex justifyContent={'center'} gap={4} maxWidth={'100%'}>
+    <Flex justifyContent="center" gap={4} maxWidth="100%">
       <IconButton aria-label="Send" icon={<AttachmentIcon />} />
-
       <Input
-        maxWidth={'576px'}
+        maxWidth="576px"
         type="text"
         placeholder="Send message..."
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={(e) => canSendMessage && handleKeyPress(e)}
+        onKeyDown={(e) => canSend && handleKeyPress(e)}
       />
       <IconButton
-        isDisabled={!canSendMessage}
+        isDisabled={!canSend}
         aria-label="Send"
         icon={<ArrowUpIcon />}
-        onClick={handleClick}
+        onClick={submitMessage}
       />
     </Flex>
   );

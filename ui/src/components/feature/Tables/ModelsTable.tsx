@@ -12,37 +12,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useAtom } from 'jotai';
+import { useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { projectAtom, publicUserAtom } from '@atoms/index';
-import { modelsAtom, modelsWithFetchAtom } from '@atoms/models';
 import EntityTable from '@components/shared/EntityTable';
+import Loading from '@components/shared/Loading';
+import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Model, ModelType } from '@shared/types/model';
 
-import { modelFields } from '@constants/index';
+import { modelFields } from '@constants';
 
-const ModelsTable: React.FC = () => {
-  const [models] = useAtom(modelsAtom);
-  const [, fetchModels] = useAtom(modelsWithFetchAtom);
-  const [project] = useAtom(projectAtom);
-  const [publicUser] = useAtom(publicUserAtom);
+const ModelsTable = () => {
+  const { data: publicUser } = useUser();
 
-  const base = project?.name ?? '';
-  const uid = project?.uid ?? '';
+  const {
+    create,
+    data: models = [],
+    error,
+    isLoading,
+    project,
+    remove,
+    update,
+  } = useProjectEntity<Model>(
+    'models',
+    (projectName) => Client.getModels(projectName),
+    (projectName, model) => Client.createModel(projectName, model),
+    (projectName, model) => Client.updateModel(projectName, model),
+    (projectName, id) => Client.deleteModel(projectName, id),
+  );
 
-  const newEntity: Model = {
-    name: '',
-    description: '',
-    base_model: '',
-    model_type: ModelType.MODEL,
-    owner_id: publicUser.uid as string,
-    project_id: uid,
-  };
+  const projectUid = project?.uid ?? '';
 
-  if (Object.keys(publicUser).length === 0) return;
+  const newEntity: Model = useMemo(
+    () => ({
+      name: '',
+      description: '',
+      base_model: '',
+      model_type: ModelType.MODEL,
+      owner_id: publicUser?.uid ?? '',
+      project_id: projectUid,
+      path: '',
+      task: '',
+      producer: '',
+      deployment: '',
+    }),
+    [publicUser?.uid, projectUid],
+  );
 
   const columns: TableColumn<Partial<Model>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
@@ -73,6 +89,9 @@ const ModelsTable: React.FC = () => {
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
 
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load models.</div>;
+
   return (
     <EntityTable
       title="Models"
@@ -80,10 +99,9 @@ const ModelsTable: React.FC = () => {
       fields={modelFields}
       columns={columns}
       data={models}
-      fetchEntities={() => fetchModels(base)}
-      createEntity={(d) => Client.createModel(base, d)}
-      updateEntity={(d) => Client.updateModel(base, d)}
-      deleteEntity={(id) => Client.deleteModel(base, id)}
+      createEntity={(d) => create.mutate(d)}
+      updateEntity={(d) => update.mutate(d)}
+      deleteEntity={(id) => remove.mutate(id)}
       newEntityDefaults={newEntity}
     />
   );

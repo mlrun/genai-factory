@@ -12,36 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useAtom } from 'jotai';
+import { useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
 
-import { dataSourcesAtom, dataSourcesWithFetchAtom } from '@atoms/dataSources';
-import { projectAtom, publicUserAtom } from '@atoms/index';
 import EntityTable from '@components/shared/EntityTable';
+import Loading from '@components/shared/Loading';
+import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { DataSource, DataSourceType } from '@shared/types/dataSource';
 
-import { dataSourceFields } from '@constants/index';
+import { dataSourceFields } from '@constants';
 
-const DataSourcesTable: React.FC = () => {
-  const [dataSources] = useAtom(dataSourcesAtom);
-  const [, fetchDataSources] = useAtom(dataSourcesWithFetchAtom);
-  const [project] = useAtom(projectAtom);
-  const [publicUser] = useAtom(publicUserAtom);
+const DataSourcesTable = () => {
+  const { data: publicUser } = useUser();
 
-  const base = project?.name ?? '';
-  const uid = project?.uid ?? '';
+  const {
+    create,
+    data: dataSources = [],
+    error,
+    isLoading,
+    project,
+    remove,
+    update,
+  } = useProjectEntity<DataSource>(
+    'dataSources',
+    (projectName) => Client.getDataSources(projectName),
+    (projectName, data) => Client.createDataSource(projectName, data),
+    (projectName, data) => Client.updateDataSource(projectName, data),
+    (projectName, id) => Client.deleteDataSource(projectName, id),
+  );
 
-  const newEntity: DataSource = {
-    name: '',
-    description: '',
-    owner_id: publicUser.uid as string,
-    project_id: uid,
-    data_source_type: DataSourceType.OTHER,
-  };
+  const projectUid = project?.uid ?? '';
 
-  if (Object.keys(publicUser).length === 0) return;
+  const newEntity: DataSource = useMemo(
+    () => ({
+      name: '',
+      description: '',
+      owner_id: publicUser?.uid ?? '',
+      project_id: projectUid,
+      data_source_type: DataSourceType.OTHER,
+    }),
+    [publicUser?.uid, projectUid],
+  );
 
   const columns: TableColumn<Partial<DataSource>>[] = [
     { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
@@ -59,6 +71,9 @@ const DataSourcesTable: React.FC = () => {
     { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
   ];
 
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load data sources.</div>;
+
   return (
     <EntityTable
       title="DataSources"
@@ -66,10 +81,9 @@ const DataSourcesTable: React.FC = () => {
       fields={dataSourceFields}
       columns={columns}
       data={dataSources}
-      fetchEntities={() => fetchDataSources(base)}
-      createEntity={(d) => Client.createDataSource(base, d)}
-      updateEntity={(d) => Client.updateDataSource(base, d)}
-      deleteEntity={(id) => Client.deleteDataSource(base, id)}
+      createEntity={(d) => create.mutate(d)}
+      updateEntity={(d) => update.mutate(d)}
+      deleteEntity={(id) => remove.mutate(id)}
       newEntityDefaults={newEntity}
     />
   );

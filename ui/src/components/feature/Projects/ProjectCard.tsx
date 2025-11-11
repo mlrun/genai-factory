@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 
-import { projectAtom } from '@atoms/index';
 import { Badge, Box, Heading, Text, VStack } from '@chakra-ui/react';
 import { Project } from '@shared/types/project';
 
@@ -25,10 +23,8 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
-  const [, setProject] = useAtom(projectAtom);
 
   const handleClick = () => {
-    setProject(project);
     navigate(`/projects/${project.name}`);
   };
 

@@ -64,9 +64,8 @@ export type User = {
   full_name?: string;
 };
 
-export type APIResponse = {
-  //eslint-disable-next-line
-  data: any[];
+export type APIResponse<T> = {
+  data: T;
   success: boolean;
   error: string;
 };

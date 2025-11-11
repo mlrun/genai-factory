@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasetFields';
-export * from './dataSourceFields';
-export * from './documentFields';
-export * from './modelFields';
-export * from './promptTemplateFields';
-export * from './userFields';
-export * from './workflowFields';
+import { APIResponse } from '@shared/types';
 
-export const QUERY_DEFAULTS = {
-  staleTime: 5 * 60 * 1000,
-  retry: 1,
-  refetchOnWindowFocus: false,
-} as const;
+export async function validateApiResponse<T>(
+  apiCall: Promise<APIResponse<T>>,
+  context: string,
+): Promise<T> {
+  const response = await apiCall;
+
+  if (!response.success) {
+    const message = response.error || `API request failed during ${context}`;
+    console.error(`[${context} Error]:`, message);
+    throw new Error(message);
+  }
+
+  return response.data;
+}

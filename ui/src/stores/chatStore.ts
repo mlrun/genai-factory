@@ -12,16 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasetFields';
-export * from './dataSourceFields';
-export * from './documentFields';
-export * from './modelFields';
-export * from './promptTemplateFields';
-export * from './userFields';
-export * from './workflowFields';
+import { create } from 'zustand';
 
-export const QUERY_DEFAULTS = {
-  staleTime: 5 * 60 * 1000,
-  retry: 1,
-  refetchOnWindowFocus: false,
-} as const;
+interface ChatState {
+  isTyping: boolean;
+  setIsTyping: (value: boolean) => void;
+
+  canSend: boolean;
+  setCanSend: (value: boolean) => void;
+
+  isMessageError: boolean;
+  setIsMessageError: (isMessageError: boolean) => void;
+}
+
+export const useChatStore = create<ChatState>((set) => ({
+  isTyping: false,
+  setIsTyping: (value) => set({ isTyping: value }),
+
+  canSend: true,
+  setCanSend: (value) => set({ canSend: value }),
+
+  isMessageError: false,
+  setIsMessageError: (value) => set({ isMessageError: value }),
+}));

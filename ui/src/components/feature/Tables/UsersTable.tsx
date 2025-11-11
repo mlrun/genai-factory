@@ -12,30 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useAtom } from 'jotai';
 import { TableColumn } from 'react-data-table-component';
 
-import { publicUserAtom } from '@atoms/index';
-import { usersAtom, usersWithFetchAtom } from '@atoms/users';
 import EntityTable from '@components/shared/EntityTable';
-import Client from '@services/Api';
+import Loading from '@components/shared/Loading';
+import { useUserActions, useUsers } from '@queries';
 import { User } from '@shared/types';
 
-import { userFields } from '@constants/index';
+import { userFields } from '@constants';
 
-const UsersTable: React.FC = () => {
-  const [users] = useAtom(usersAtom);
-  const [, fetchUsers] = useAtom(usersWithFetchAtom);
-  const [publicUser] = useAtom(publicUserAtom);
+const UsersTable = () => {
+  const { data: users = [], error, isLoading } = useUsers();
+  const { createUser, deleteUser, updateUser } = useUserActions();
 
   const newEntity: User = {
     name: '',
     email: '',
     full_name: '',
   };
-
-  if (Object.keys(publicUser).length === 0) return;
 
   const columns: TableColumn<Partial<User>>[] = [
     { name: 'Username', selector: (row) => row.name ?? '', sortable: true },
@@ -47,17 +41,19 @@ const UsersTable: React.FC = () => {
     },
   ];
 
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load users.</div>;
+
   return (
     <EntityTable
       title="Users"
-      entityName="Users"
+      entityName="User"
       fields={userFields}
       columns={columns}
       data={users}
-      fetchEntities={() => fetchUsers()}
-      createEntity={(d) => Client.createUser(d)}
-      updateEntity={(d) => Client.updateUser(d)}
-      deleteEntity={(id) => Client.deleteUser(id)}
+      createEntity={(u) => createUser.mutate(u)}
+      updateEntity={(u) => updateUser.mutate(u)}
+      deleteEntity={(id) => deleteUser.mutate(id)}
       newEntityDefaults={newEntity}
     />
   );

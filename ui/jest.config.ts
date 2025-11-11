@@ -18,7 +18,12 @@ const config: Config.InitialOptions = {
   preset: 'ts-jest',
   testEnvironment: 'jest-environment-jsdom',
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': 'ts-jest',
+    '^.+\\.(js|jsx|ts|tsx)$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json',
+      },
+    ],
   },
   transformIgnorePatterns: [
     '/node_modules/(?!react-markdown|remark-parse|remark-rehype|rehype-parse|unified|bail|is-plain-obj|trough|vfile|vfile-message).+\\.(js|jsx|ts|tsx)$',
@@ -30,16 +35,9 @@ const config: Config.InitialOptions = {
     '^@services/(.*)$': '<rootDir>/src/services/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
     '^@assets/(.*)$': '<rootDir>/src/assets/$1',
-    '^@atoms/(.*)$': '<rootDir>/src/atoms/$1',
-    '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
-    '^atoms$': '<rootDir>/src/atoms',
+    '^@stores/(.*)$': '<rootDir>/src/stores/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
 };
 
 export default config;

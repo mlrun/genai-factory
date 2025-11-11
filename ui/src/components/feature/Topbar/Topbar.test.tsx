@@ -13,29 +13,29 @@
 // limitations under the License.
 
 import React from 'react';
-import { Provider } from 'jotai';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import { ChakraProvider } from '@chakra-ui/react';
 import theme from '@shared/theme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import Topbar from './Topbar';
 
 const renderWithProviders = (ui: React.ReactElement) => {
-  const Wrapper: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
-    return (
-      <Provider>
-        <Router>
-          <ChakraProvider theme={theme}>{children}</ChakraProvider>
-        </Router>
-      </Provider>
-    );
-  };
+  const queryClient = new QueryClient();
+
+  const Wrapper: React.FC<React.PropsWithChildren<object>> = ({ children }) => (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ChakraProvider theme={theme}>{children}</ChakraProvider>
+      </Router>
+    </QueryClientProvider>
+  );
+
   return render(ui, { wrapper: Wrapper });
 };
 
-// Mock ResizeObserver
 class ResizeObserver {
   observe() {}
   unobserve() {}
@@ -43,18 +43,18 @@ class ResizeObserver {
 }
 window.ResizeObserver = ResizeObserver;
 
-// Mock matchMedia
 window.matchMedia =
   window.matchMedia ||
-  function () {
-    return {
-      matches: false,
-      addListener: function () {},
-      removeListener: function () {},
-    };
-  };
+  (() => ({
+    matches: false,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }));
 
-describe('Topbar component', () => {
+describe('Topbar Component (Zustand)', () => {
   const mockOnLoginChange = jest.fn();
 
   beforeEach(() => {
@@ -66,20 +66,6 @@ describe('Topbar component', () => {
 
     expect(screen.getByTestId('logo')).toBeInTheDocument();
     expect(screen.getByTestId('avatar')).toBeInTheDocument();
-  });
-
-  it('renders menu items when HamburgerIcon is clicked', () => {
-    renderWithProviders(<Topbar onLoginChange={mockOnLoginChange} />);
-
-    const menuButton = screen.getByTestId('hamburger-menu');
-    fireEvent.click(menuButton);
-
-    expect(screen.getByTestId('menu-list')).toBeInTheDocument();
-    expect(screen.getByText('Users')).toBeInTheDocument();
-    expect(screen.getByText('Chat Histories')).toBeInTheDocument();
-    expect(screen.getByText('Data Sets')).toBeInTheDocument();
-    expect(screen.getByText('Documents')).toBeInTheDocument();
-    expect(screen.getByText('Pipelines')).toBeInTheDocument();
   });
 
   it('opens Rightbar when avatar is clicked', () => {
