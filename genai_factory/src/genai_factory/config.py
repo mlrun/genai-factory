@@ -58,6 +58,7 @@ class WorkflowServerConfig(BaseModel):
 
     default_image_requirements: list[str] = [
         "git+https://github.com/tomerbv/genai-factory.git@nuclio_deployment",
+        "chromadb==0.5.3",
         "langchain==0.3.*",
         "langchain-community==0.3.*",
         "langchain-openai==0.2.*",
