@@ -16,6 +16,6 @@ embeddings:
   model_name: all-MiniLM-L6-v2
 log_level: INFO
 project_name: default
-workflow_source_url: git://github.com/tomerbv/workflow_example.git
+workflow_source_url: git://github.com/tomerbv/workflow_example.git#main
 verbose: true
 workflows_kwargs: {}
