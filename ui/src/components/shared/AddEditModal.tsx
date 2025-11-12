@@ -14,20 +14,25 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { Button } from '@components/shared/Button';
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@components/shared/Dialog';
+import { Field, FieldLabel } from '@components/shared/Field';
+import { Input } from '@components/shared/Input';
+import {
   Select,
-} from '@chakra-ui/react';
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/shared/Select';
+import { Separator } from '@components/shared/Separator';
 import { ModalField } from '@shared/types/modalFieldConfigs';
 
 type AddEditModalProps<T> = {
@@ -39,24 +44,21 @@ type AddEditModalProps<T> = {
   title: string;
 };
 
-function AddEditModal<T extends { uid?: string }>({
+const AddEditModal = <T extends { uid?: string }>({
   entity,
   fields,
   isOpen,
   onClose,
   onSave,
   title,
-}: AddEditModalProps<T>) {
+}: AddEditModalProps<T>) => {
   const [formData, setFormData] = useState<T>(entity);
 
   useEffect(() => {
     setFormData(entity);
   }, [entity]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
+  const handleChange = (name: keyof T, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -72,62 +74,68 @@ function AddEditModal<T extends { uid?: string }>({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
-          {entity?.uid ? 'Edit' : 'Add New'} {title}
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {entity?.uid ? 'Edit' : 'New'} {title}
+          </DialogTitle>
+        </DialogHeader>
+        <Separator />
+        <div className="grid gap-7 p-8 max-h-[500px] 2xl:max-h-[700px] overflow-auto">
           {fields.map((field) => (
-            <FormControl
-              key={field.name}
-              id={field.name}
-              mb={4}
-              isRequired={field.required}
-            >
-              <FormLabel>{field.label}</FormLabel>
-
+            <Field key={field.name}>
+              <FieldLabel className="text-black gap-x-1" htmlFor={field.name}>
+                {field.label}
+                {field.required && <span className="text-red-500">*</span>}
+              </FieldLabel>
               {field.options ? (
                 <Select
-                  name={field.name}
                   value={(formData[field.name as keyof T] as string) || ''}
-                  onChange={handleChange}
+                  name={field.name}
+                  onValueChange={(value) =>
+                    handleChange(field.name as keyof T, value)
+                  }
                 >
-                  {field.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {field.options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               ) : (
                 <Input
+                  id={field.name}
                   type="text"
                   name={field.name}
                   value={(formData[field.name as keyof T] as string) || ''}
-                  onChange={handleChange}
+                  onChange={(e) =>
+                    handleChange(field.name as keyof T, e.target.value)
+                  }
                 />
               )}
-            </FormControl>
+            </Field>
           ))}
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            isDisabled={isSaveDisabled}
-            colorScheme="blue"
-            mr={3}
-            onClick={handleSubmit}
-          >
+        </div>
+
+        <DialogFooter className="flex justify-end gap-2 pt-20 pb-6 px-8">
+          <Button disabled={isSaveDisabled} onClick={handleSubmit}>
             {entity?.uid ? 'Save Changes' : `Add ${title}`}
           </Button>
-          <Button variant="ghost" onClick={onClose}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+          {entity?.uid && (
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-}
+};
 
 export default AddEditModal;
