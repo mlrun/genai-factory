@@ -181,8 +181,10 @@ class WorkflowServer:
         ################################################
 
         requirements = getattr(self._config, "default_image_requirements", [])
+        print(f"Default image requirements: {requirements}")
 
         workflow_source_url = getattr(self._config, "workflow_source_url", project.source)
+        print(f"Workflow source url: {workflow_source_url}")
         if not workflow_source_url:
             raise ValueError(
                 "Session store and configuration must be set before building workflows."
