@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import CardIcon from '@icons/cards-icon.svg?react';
+import ListIcon from '@icons/list-icon.svg?react';
+
 export * from './datasetFields';
 export * from './dataSourceFields';
 export * from './documentFields';
@@ -26,6 +29,9 @@ export const QUERY_DEFAULTS = {
   refetchOnWindowFocus: false,
 } as const;
 
-export const FILTER_PLACEHOLDER_PREFIX = 'Find';
-
 export const NEW_BUTTON_TEXT_PREFIX = 'New';
+
+export const TOGGLE_OPTIONS = [
+  { value: 'card' as const, Icon: CardIcon },
+  { value: 'list' as const, Icon: ListIcon },
+];

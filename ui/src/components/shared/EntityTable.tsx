@@ -35,6 +35,7 @@ import AddEditModal from './AddEditModal';
 import DataTableComponent from './Datatable';
 import FilterComponent from './Filter';
 import Sort from './Sort';
+import ToggleDisplay from './ToggleDisplay';
 
 import { filterTableData, sortTableData } from '@utils/table.utils';
 
@@ -53,9 +54,11 @@ type Props<T extends EntityWithUID> = {
   deleteEntity: (id: string) => void;
   newEntityDefaults: T;
   sortOptions?: SortOption<T>[];
+  CardComponent?: React.ComponentType<T>;
 };
 
 function EntityTable<T extends EntityWithUID>({
+  CardComponent,
   columns,
   createEntity,
   data,
@@ -69,6 +72,7 @@ function EntityTable<T extends EntityWithUID>({
 }: Props<T>) {
   const toast = useToast();
 
+  const [display, setDisplay] = useState<'list' | 'card'>('list');
   const [selectedRow, setSelectedRow] = useState<Partial<T> | null>(null);
   const [selectedRows, setSelectedRows] = useState<Partial<T>[]>([]);
   const [editRow, setEditRow] = useState<T>(newEntityDefaults);
@@ -185,6 +189,16 @@ function EntityTable<T extends EntityWithUID>({
           filterText={filterText}
         />
         <div className="flex items-center gap-3">
+          {CardComponent && (
+            <ToggleDisplay
+              display={display}
+              onDisplayChange={(display) => {
+                if (display) {
+                  setDisplay(display);
+                }
+              }}
+            />
+          )}
           {sortOptions && sortKey && (
             <Sort
               sortOptions={sortOptions}
@@ -204,15 +218,24 @@ function EntityTable<T extends EntityWithUID>({
         </div>
       </div>
       <div className="mt-5">
-        <DataTableComponent
-          data={filteredData}
-          columns={columns}
-          contextActions={contextActions}
-          onRowSelect={(row) => setSelectedRow(row)}
-          onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
-          onOpenDrawer={() => drawer.onOpen()}
-          toggleClearRows={toggledClearRows}
-        />
+        {display === 'list' ? (
+          <DataTableComponent
+            data={filteredData}
+            columns={columns}
+            contextActions={contextActions}
+            onRowSelect={(row) => setSelectedRow(row)}
+            onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
+            onOpenDrawer={() => drawer.onOpen()}
+            toggleClearRows={toggledClearRows}
+          />
+        ) : (
+          <div className="grid grid-cols-4 gap-6 w-full min-w-[320px]">
+            {CardComponent &&
+              filteredData.map((item) => (
+                <CardComponent key={item.uid ?? item.name} {...item} />
+              ))}
+          </div>
+        )}
       </div>
 
       <AddEditModal
