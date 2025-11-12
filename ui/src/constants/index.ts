@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CardIcon from '@icons/cards-icon.svg?react';
-import ListIcon from '@icons/list-icon.svg?react';
+import CardIcon from '@assets/icons/cards-icon.svg?react';
+import ListIcon from '@assets/icons/list-icon.svg?react';
 
 export * from './datasetFields';
 export * from './dataSourceFields';

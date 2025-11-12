@@ -35,6 +35,7 @@ const ToggleDisplay = ({ display, onDisplayChange }: ToggleDisplayProps) => {
       {TOGGLE_OPTIONS.map(({ Icon, value }, index) => (
         <Fragment key={value}>
           <ToggleGroupItem
+            aria-label={value}
             value={value}
             className={twMerge(
               `

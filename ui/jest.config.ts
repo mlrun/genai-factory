@@ -37,6 +37,7 @@ const config: Config.InitialOptions = {
     '^@assets/(.*)\\.svg\\?react$': '<rootDir>/src/__mocks__/svgrMock.tsx',
     '^@assets/(.*)$': '<rootDir>/src/assets/$1',
     '^@stores/(.*)$': '<rootDir>/src/stores/$1',
+    '^@constants$': '<rootDir>/src/constants/index.ts', // <- add this line
   },
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
 };
