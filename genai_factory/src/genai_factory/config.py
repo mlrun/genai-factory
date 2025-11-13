@@ -46,6 +46,11 @@ class WorkflowServerConfig(BaseModel):
     URL to use for the mlrun API. Default: http://localhost:30070.
     """
 
+    workflow_api_name: str = "default"
+    """
+    Workflow application name to use for the application runtime. Default: default.
+    """
+
     workflow_source_url: str = ""
     """
     Workflow source code git repository. Default: "".

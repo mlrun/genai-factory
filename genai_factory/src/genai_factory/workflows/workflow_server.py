@@ -198,9 +198,9 @@ class WorkflowServer:
         # TODO: remove build once pull_at_runtime is supported in application runtime
         # TODO: decide if allowing image name other than default
         image = project.build_image().outputs.get("image")
-
+        workflow_api_name = getattr(self._config, "workflow_api_name", "default")
         app = project.set_function(
-            name=self._config.project_name,
+            name=workflow_api_name,
             kind="application",
             image=image,
             requirements=requirements,
