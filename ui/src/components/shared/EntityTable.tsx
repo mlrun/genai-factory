@@ -199,7 +199,7 @@ function EntityTable<T extends EntityWithUID>({
               modal.onOpen();
             }}
           >
-            {`${NEW_BUTTON_TEXT_PREFIX} ${title}`}
+            {`${NEW_BUTTON_TEXT_PREFIX} ${entityName}`}
           </Button>
         </div>
       </div>
