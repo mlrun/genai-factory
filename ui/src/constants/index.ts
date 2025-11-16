@@ -25,3 +25,5 @@ export const QUERY_DEFAULTS = {
   retry: 1,
   refetchOnWindowFocus: false,
 } as const;
+
+export const FILTER_PLACEHOLDER_PREFIX = 'Find';

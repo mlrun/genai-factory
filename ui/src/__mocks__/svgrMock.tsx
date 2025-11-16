@@ -12,5 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="vite/client" />
-/// <reference types="vite-plugin-svgr/client" />
+import React from 'react';
+export default function SvgrMock() {
+  return <svg data-testid="mock-svg" />;
+}

@@ -12,5 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="vite/client" />
-/// <reference types="vite-plugin-svgr/client" />
+import Filter from './Filter';
+
+export default Filter;

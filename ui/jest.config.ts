@@ -34,6 +34,7 @@ const config: Config.InitialOptions = {
     '^@components/(.*)$': '<rootDir>/src/components/$1',
     '^@services/(.*)$': '<rootDir>/src/services/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@assets/(.*)\\.svg\\?react$': '<rootDir>/src/__mocks__/svgrMock.tsx',
     '^@assets/(.*)$': '<rootDir>/src/assets/$1',
     '^@stores/(.*)$': '<rootDir>/src/stores/$1',
   },

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
 import DataTable, {
   Alignment,
   createTheme,
@@ -44,7 +43,6 @@ export interface DataTableComponentProps<T extends Record<string, unknown>> {
   columns: TableColumn<Partial<T>>[];
   contextActions?: JSX.Element;
   subheaderComponent?: React.ReactNode;
-  filterText: string;
   toggleClearRows: boolean;
   onOpenDrawer: () => void;
   onSelectedRowChange?: (e: { selectedRows: Partial<T>[] }) => void;
@@ -55,7 +53,6 @@ export function DataTableComponent<T extends Record<string, unknown>>({
   columns,
   contextActions,
   data,
-  filterText,
   onOpenDrawer,
   onRowSelect,
   onSelectedRowChange,
@@ -64,29 +61,6 @@ export function DataTableComponent<T extends Record<string, unknown>>({
   toggleClearRows,
 }: DataTableComponentProps<T>) {
   const { colorMode } = useColorMode();
-  const [filteredItems, setFilteredItems] = useState<Partial<T>[]>(data);
-
-  useEffect(() => {
-    if (data) {
-      setFilteredItems(
-        data.filter((item) => {
-          const search = filterText.toLowerCase();
-          return (
-            (typeof item.name === 'string' &&
-              item.name.toLowerCase().includes(search)) ||
-            (typeof item.email === 'string' &&
-              item.email.toLowerCase().includes(search)) ||
-            (typeof item.full_name === 'string' &&
-              item.full_name.toLowerCase().includes(search)) ||
-            (typeof item.description === 'string' &&
-              item.description.toLowerCase().includes(search)) ||
-            (typeof item.version === 'string' &&
-              item.version.toLowerCase().includes(search))
-          );
-        }),
-      );
-    }
-  }, [filterText, data]);
 
   return (
     <Box boxShadow="md" borderRadius="md">
@@ -94,7 +68,7 @@ export function DataTableComponent<T extends Record<string, unknown>>({
         title={title}
         theme={colorMode}
         columns={columns}
-        data={filteredItems}
+        data={data}
         pagination
         subHeader
         subHeaderAlign={Alignment.RIGHT}
