@@ -90,14 +90,6 @@ const Topbar = ({ onLoginChange }: Props) => {
         </Box>
       </Flex>
       <Flex alignItems="center" paddingRight={4}>
-        <Avatar
-          _hover={{ cursor: 'pointer' }}
-          onClick={onOpen}
-          size="sm"
-          name={username}
-          src=""
-          data-testid="avatar"
-        />
         <Rightbar
           isOpen={isOpen}
           onClose={onClose}
