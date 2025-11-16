@@ -53,7 +53,7 @@ const Login = () => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      bgGradient="linear(to-b, #4b6cb7 0%, #182848 100%)"
+      // bgGradient="linear(to-b, #4b6cb7 0%, #182848 100%)"
     >
       <Flex minWidth="288px">
         <FormControl
