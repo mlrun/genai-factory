@@ -38,7 +38,7 @@ import Sort from './Sort';
 
 import { filterTableData, sortTableData } from '@utils/table.utils';
 
-import { NEW_BUTTON_TEXT_PREFIX } from '@constants';
+import { FILTER_PLACEHOLDER_PREFIX, NEW_BUTTON_TEXT_PREFIX } from '@constants';
 
 type EntityWithUID = { uid?: string; name?: string };
 
@@ -180,7 +180,7 @@ function EntityTable<T extends EntityWithUID>({
     <div className="flex flex-col w-full p-[32px_56px]">
       <div className="flex w-full justify-between items-center gap-4 flex-wrap">
         <FilterComponent
-          placeholder={`Find ${title}...`}
+          placeholder={`${FILTER_PLACEHOLDER_PREFIX} ${title}...`}
           onFilter={(e) => setFilterText(e.target.value)}
           filterText={filterText}
         />
