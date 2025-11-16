@@ -17,7 +17,7 @@ import { TableColumn } from 'react-data-table-component';
 import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useUserActions, useUsers } from '@queries';
-import { User } from '@shared/types';
+import { SortOption, User } from '@shared/types';
 
 import { userFields } from '@constants';
 
@@ -41,6 +41,12 @@ const UsersTable = () => {
     },
   ];
 
+  const sortOptions: SortOption<User>[] = [
+    { label: 'Username', accessorKey: 'name', isDefault: true },
+    { label: 'Email', accessorKey: 'email' },
+    { label: 'Full Name', accessorKey: 'full_name' },
+  ];
+
   if (isLoading) return <Loading />;
   if (error) return <div>Failed to load users.</div>;
 
@@ -55,6 +61,7 @@ const UsersTable = () => {
       updateEntity={(u) => updateUser.mutate(u)}
       deleteEntity={(id) => deleteUser.mutate(id)}
       newEntityDefaults={newEntity}
+      sortOptions={sortOptions}
     />
   );
 };
