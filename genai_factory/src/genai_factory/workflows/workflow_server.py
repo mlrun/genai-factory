@@ -222,7 +222,7 @@ class WorkflowServer:
             workflow_source_url,
             pull_at_runtime=False
         )
-        image = project.build_image(requirements=requirements).outputs.get("image")
+        image = project.build_image(requirements=requirements, base_image="python:3.11").outputs.get("image")
 
         # set and deploy application runtime with the created image
         workflow_api_name = getattr(self._config, "workflow_api_name", "default")
