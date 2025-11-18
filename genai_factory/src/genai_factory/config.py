@@ -57,17 +57,7 @@ class WorkflowServerConfig(BaseModel):
     """
 
     image_requirements: list[str] = [
-        "langchain==0.3.27",
-        "langchain-community==0.3.31",
-        "langchain-openai==0.2.14",
-        "langchain-milvus==0.1.7",
-        "langchain-huggingface==0.1.2",
-        "pymilvus == 2.5.17",
-        "fastapi == 0.110.3",
-        "uvicorn == 0.30.6",
-        "mlrun == 1.9.1",
-        "chromadb == 0.5.3",
-        "sentence_transformers"
+        "git+https://github.com/tomerbv/genai-factory.git@nuclio_deployment",
     ]
     """
     MLRun default image requirements for creating images. Default: [].
