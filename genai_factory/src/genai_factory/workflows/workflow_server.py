@@ -70,6 +70,16 @@ class WorkflowServer:
         description: str = "",
         labels: dict = None,
     ):
+        """Register a workflow for later build/deployment.
+
+        :param name:           Unique workflow name.
+        :param workflow_type:  Workflow type.
+        :param graph:          Workflow graph (skeleton).
+        :param version:        Optional workflow semantic version.
+        :param description:    Optional textual description.
+        :param labels:         Optional labels dictionary.
+        :raises ValueError:    If a workflow with the same name already exists.
+        """
         # Check if workflow already exists:
         if name in self._workflows:
             raise ValueError(f"The workflow '{name}' was already added to this server.")
@@ -86,6 +96,13 @@ class WorkflowServer:
         )
 
     async def run_workflow(self, name: str, event):
+        """Execute a registered workflow.
+
+        :param name:   Workflow name to execute.
+        :param event:  Input event payload.
+        :return:       Workflow result.
+        :raises ValueError: If the workflow name is not registered.
+        """
         # Get the workflow object:
         if name not in self._workflows:
             raise ValueError(f"workflow {name} not found")
@@ -94,6 +111,10 @@ class WorkflowServer:
         return await self._workflows[name].run(event)
 
     def _build(self):
+        """Build all registered workflows before deployment.
+
+        :raises ValueError: If no workflows exist or config/session store are missing.
+        """
         logger.info("Building workflows")
 
         # Make sure there are workflows to build:
@@ -117,17 +138,22 @@ class WorkflowServer:
             )
 
     def _commit(self):
-        """
-        Commit the workflows to the controller.
-        """
+        """ Commit the workflows to the controller.  """
         for workflow in self._workflows.values():
             workflow.set_deployment()
             self._controller_client.update_workflow(workflow.to_schema())
 
     def api_startup(self):
+        """Startup hook executed when FastAPI initializes."""
         print("\nstartup event\n")
 
     def deploy(self, router=None, deployer=None, environment=None):
+        """Build and deploy workflows based on the chosen backend.
+
+        :param router:       FastAPI router (used when `deployer="fastapi"`).
+        :param deployer:     Deployment backend ("nuclio" or "fastapi").
+        :param environment:  Deployment environment label ("local" triggers commit before API start).
+        """
         self._build()
 
         if deployer == "nuclio":
@@ -138,6 +164,11 @@ class WorkflowServer:
             self.deploy_fastapi(router, environment)
 
     def deploy_fastapi(self, router, environment):
+        """Deploy workflows as a FastAPI application.
+
+        :param router:       Optional FastAPI router containing API routes.
+        :param environment:  If "local", workflows are committed before launching the API.
+        """
         from fastapi import FastAPI
         from fastapi.middleware.cors import CORSMiddleware
 
@@ -166,43 +197,41 @@ class WorkflowServer:
         uvicorn.run(app, host=url.hostname, port=url.port)
 
     def deploy_nuclio(self):
+        """Deploy workflows as an MLRun Nuclio application.
 
+        :raises ValueError: If MLRun is unreachable or workflow source URL is missing.
+        """
+
+        # validate mlrun and get/create mlrun project.
         self.validate_mlrun()
-
         # TODO: consider adding mlrun project migration
         project = self._project or self.init_project()
         print(f"Project Name: {project.name}")
 
         # TODO: validate mlrun project git source does not differ form gator git source
 
-        ################################################
-
+        # build image with workflow source code from git and config requirements
         requirements = getattr(self._config, "image_requirements", [])
-        print(f"Default image requirements: {requirements}")
-
         workflow_source_url = getattr(self._config, "workflow_source_url", project.source)
-        print(f"Workflow source url: {workflow_source_url}")
         if not workflow_source_url:
             raise ValueError(
                 "Session store and configuration must be set before building workflows."
                 " Make sure to set them via the `set_config` method."
             )
-
         project.set_source(
             workflow_source_url,
             pull_at_runtime=False
         )
-
         image = project.build_image(requirements=requirements).outputs.get("image")
+
+        # set and deploy application runtime with the created image
         workflow_api_name = getattr(self._config, "workflow_api_name", "default")
-        print("Finished building image, started set function")
         app = project.set_function(
             name=workflow_api_name,
             kind="application",
             image=image,
             with_repo=True
         )
-
         app.set_internal_application_port(8000)
         app.spec.command = "genai-factory"
         app.spec.args = [
@@ -215,12 +244,12 @@ class WorkflowServer:
             "--environment",
             "remote"
         ]
-
         app.deploy(with_mlrun=True)
 
     def validate_mlrun(self) -> None:
-        """
-        Ensure MLRun API is reachable.
+        """Validate access to MLRun API (`/api/v1/healthz`).
+
+        :raises ValueError: If `mlrun_api_url` is missing or health check fails.
         """
         api = (getattr(self._config, "mlrun_api_url", "") or "").rstrip("/")
         if not api:
@@ -233,8 +262,9 @@ class WorkflowServer:
             raise ValueError(f"Could not reach MLRun at {health}: {e}")
 
     def init_project(self) -> mlrun.MlrunProject:
-        """
-        Set MLRun environment and return (create if needed) the project.
+        """Create or retrieve the MLRun project associated with this server.
+
+        :return: MLRun project instance.
         """
         project = mlrun.get_or_create_project(
             name=self._config.project_name,
