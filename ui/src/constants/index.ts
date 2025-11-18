@@ -29,6 +29,8 @@ export const QUERY_DEFAULTS = {
   refetchOnWindowFocus: false,
 } as const;
 
+export const FILTER_PLACEHOLDER_PREFIX = 'Find';
+
 export const NEW_BUTTON_TEXT_PREFIX = 'New';
 
 export const TOGGLE_OPTIONS = [

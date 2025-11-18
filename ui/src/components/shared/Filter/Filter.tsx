@@ -25,7 +25,7 @@ type Props = {
 };
 
 const FilterComponent = ({ filterText, onFilter, placeholder }: Props) => (
-  <div className="relative max-w-60">
+  <div className="relative bg-white max-w-60">
     <span className="absolute top-1/2 -translate-y-1/2 right-3 flex items-center justify-center pointer-events-none">
       <Search />
     </span>

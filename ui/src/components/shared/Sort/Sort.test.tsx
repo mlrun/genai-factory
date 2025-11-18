@@ -28,7 +28,6 @@ describe('Sort component', () => {
     );
 
     const trigger = screen.getByRole('combobox');
-    // Selected value is visible
     expect(trigger).toHaveTextContent('Name');
   });
 });
