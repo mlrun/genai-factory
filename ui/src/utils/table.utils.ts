@@ -26,3 +26,36 @@ export function filterTableData<T extends Record<string, unknown>>(
     ),
   );
 }
+
+export function sortTableData<T extends Record<string, string | number | Date>>(
+  rows: T[],
+  key: Extract<keyof T, string> | null,
+): T[] {
+  if (!key) return rows;
+
+  return [...rows].sort((first, second) => {
+    const firstValue = first[key];
+    const secondValue = second[key];
+
+    const firstDate =
+      firstValue instanceof Date ? firstValue : new Date(firstValue);
+    const secondDate =
+      secondValue instanceof Date ? secondValue : new Date(secondValue);
+    const isValidDate =
+      !isNaN(firstDate.getTime()) && !isNaN(secondDate.getTime());
+
+    if (isValidDate) {
+      return firstDate.getTime() - secondDate.getTime();
+    }
+
+    const firstNumber = Number(firstValue);
+    const secondNumber = Number(secondValue);
+    const isNumber = !isNaN(firstNumber) && !isNaN(secondNumber);
+
+    if (isNumber) {
+      return firstNumber - secondNumber;
+    }
+
+    return String(firstValue ?? '').localeCompare(String(secondValue ?? ''));
+  });
+}

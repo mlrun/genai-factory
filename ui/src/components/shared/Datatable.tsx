@@ -38,7 +38,6 @@ createTheme(
 );
 
 export interface DataTableComponentProps<T extends Record<string, unknown>> {
-  title: string;
   data: T[];
   columns: TableColumn<Partial<T>>[];
   contextActions?: JSX.Element;
@@ -57,7 +56,6 @@ export function DataTableComponent<T extends Record<string, unknown>>({
   onRowSelect,
   onSelectedRowChange,
   subheaderComponent,
-  title,
   toggleClearRows,
 }: DataTableComponentProps<T>) {
   const { colorMode } = useColorMode();
@@ -65,7 +63,6 @@ export function DataTableComponent<T extends Record<string, unknown>>({
   return (
     <Box boxShadow="md" borderRadius="md">
       <DataTable
-        title={title}
         theme={colorMode}
         columns={columns}
         data={data}
