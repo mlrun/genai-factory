@@ -10,7 +10,7 @@ default_vector_store:
   class_name: chroma
   collection_name: default
   persist_directory: /tmp/chromadb/chroma
-deployment_url: http://0.0.0.0:8000
+deployment_url: http://localhost:8000
 embeddings:
   class_name: huggingface
   model_name: all-MiniLM-L6-v2

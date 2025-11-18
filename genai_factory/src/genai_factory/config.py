@@ -63,9 +63,9 @@ class WorkflowServerConfig(BaseModel):
     MLRun default image requirements for creating images. Default: [].
     """
 
-    deployment_url: str = "http://0.0.0.0:8000"
+    deployment_url: str = "http://localhost:8000"
     """
-    URL to use for the workflows server deployment API. Default: http://0.0.0.0:8000.
+    URL to use for the workflows server deployment API. Default: http://localhost:8000.
     """
 
     verbose: bool = True
