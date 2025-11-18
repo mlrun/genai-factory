@@ -56,11 +56,16 @@ class WorkflowServerConfig(BaseModel):
     Workflow source code git repository. Default: "".
     """
 
-    default_image_requirements: list[str] = [
+    image_requirements: list[str] = [
         "git+https://github.com/tomerbv/genai-factory.git@nuclio_deployment",
     ]
     """
     MLRun default image requirements for creating images. Default: [].
+    """
+
+    deployment_url: str = "http://0.0.0.0:8000"
+    """
+    URL to use for the workflows server deployment API. Default: http://0.0.0.0:8000.
     """
 
     verbose: bool = True
@@ -71,11 +76,6 @@ class WorkflowServerConfig(BaseModel):
     log_level: str = "INFO"
     """
     The log level. Default: INFO.
-    """
-
-    deployment_url: str = "http://0.0.0.0:8000"
-    """
-    URL to use for the workflows server deployment API. Default: http://0.0.0.0:8000.
     """
 
     workflows_kwargs: dict[str, dict] = {}

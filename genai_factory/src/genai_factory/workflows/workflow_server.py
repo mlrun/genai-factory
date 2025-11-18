@@ -24,7 +24,6 @@ from genai_factory.schemas import WorkflowType
 from genai_factory.sessions import SessionStore
 from genai_factory.utils import logger
 from genai_factory.workflows import Workflow
-from mlrun.projects import MlrunProject
 
 
 class WorkflowServer:
@@ -161,10 +160,8 @@ class WorkflowServer:
         extra["app_server"] = self
         app.extra = extra
         if router:
-            print(f"adding router")
             router.add_event_handler("startup", self.api_startup)
             app.include_router(router)
-        print(f"deployment url: {self._config.deployment_url}")
         url = urlparse(self._config.deployment_url)
         uvicorn.run(app, host=url.hostname, port=url.port)
 
@@ -180,7 +177,7 @@ class WorkflowServer:
 
         ################################################
 
-        requirements = getattr(self._config, "default_image_requirements", [])
+        requirements = getattr(self._config, "image_requirements", [])
         print(f"Default image requirements: {requirements}")
 
         workflow_source_url = getattr(self._config, "workflow_source_url", project.source)
@@ -195,8 +192,7 @@ class WorkflowServer:
             workflow_source_url,
             pull_at_runtime=False
         )
-        # TODO: remove build once pull_at_runtime is supported in application runtime
-        # TODO: decide if allowing image name other than default
+
         image = project.build_image(requirements=requirements).outputs.get("image")
         workflow_api_name = getattr(self._config, "workflow_api_name", "default")
         print("Finished building image, started set function")
@@ -236,7 +232,7 @@ class WorkflowServer:
         except Exception as e:
             raise ValueError(f"Could not reach MLRun at {health}: {e}")
 
-    def init_project(self) -> MlrunProject:
+    def init_project(self) -> mlrun.MlrunProject:
         """
         Set MLRun environment and return (create if needed) the project.
         """
