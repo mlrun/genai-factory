@@ -39,7 +39,7 @@ const ToggleDisplay = ({ display, onDisplayChange }: ToggleDisplayProps) => {
             value={value}
             className={twMerge(
               `
-            flex min-w-[48px] p-3 justify-center items-center
+            flex min-w-[48px] p-3 justify-center items-center cursor-pointer
             first:rounded-l-md last:rounded-r-md first:border-r-0 last:border-l-0
             border text-[#7f7989]
             hover:bg-[#EBF2FF] hover:border-[#0066F3] hover:text-[#0066F3]
