@@ -34,6 +34,6 @@ export const FILTER_PLACEHOLDER_PREFIX = 'Find';
 export const NEW_BUTTON_TEXT_PREFIX = 'New';
 
 export const TOGGLE_OPTIONS = [
-  { value: 'card' as const, Icon: CardIcon },
   { value: 'list' as const, Icon: ListIcon },
+  { value: 'card' as const, Icon: CardIcon },
 ];
