@@ -18,28 +18,6 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import CardIcon from '@assets/icons/cards-icon.svg?react';
-import ListIcon from '@assets/icons/list-icon.svg?react';
+import ToggleDisplay from './ToggleDisplay';
 
-export * from './datasetFields';
-export * from './dataSourceFields';
-export * from './documentFields';
-export * from './modelFields';
-export * from './promptTemplateFields';
-export * from './userFields';
-export * from './workflowFields';
-
-export const QUERY_DEFAULTS = {
-  staleTime: 5 * 60 * 1000,
-  retry: 1,
-  refetchOnWindowFocus: false,
-} as const;
-
-export const FILTER_PLACEHOLDER_PREFIX = 'Find';
-
-export const NEW_BUTTON_TEXT_PREFIX = 'New';
-
-export const TOGGLE_OPTIONS = [
-  { value: 'list' as const, Icon: ListIcon },
-  { value: 'card' as const, Icon: CardIcon },
-];
+export default ToggleDisplay;

@@ -1,16 +1,22 @@
-// Copyright 2024 Iguazio
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright 2024 Iguazio Systems Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
@@ -35,6 +41,7 @@ import AddEditModal from './AddEditModal';
 import DataTableComponent from './Datatable';
 import FilterComponent from './Filter';
 import Sort from './Sort';
+import ToggleDisplay from './ToggleDisplay';
 
 import { filterTableData, sortTableData } from '@utils/table.utils';
 
@@ -53,9 +60,11 @@ type Props<T extends EntityWithUID> = {
   deleteEntity: (id: string) => void;
   newEntityDefaults: T;
   sortOptions?: SortOption<T>[];
+  CardComponent?: React.ComponentType<T>;
 };
 
-function EntityTable<T extends EntityWithUID>({
+const EntityTable = <T extends EntityWithUID>({
+  CardComponent,
   columns,
   createEntity,
   data,
@@ -66,9 +75,10 @@ function EntityTable<T extends EntityWithUID>({
   sortOptions = [],
   title,
   updateEntity,
-}: Props<T>) {
+}: Props<T>) => {
   const toast = useToast();
 
+  const [display, setDisplay] = useState<'list' | 'card'>('list');
   const [selectedRow, setSelectedRow] = useState<Partial<T> | null>(null);
   const [selectedRows, setSelectedRows] = useState<Partial<T>[]>([]);
   const [editRow, setEditRow] = useState<T>(newEntityDefaults);
@@ -185,6 +195,16 @@ function EntityTable<T extends EntityWithUID>({
           filterText={filterText}
         />
         <div className="flex items-center gap-3">
+          {CardComponent && (
+            <ToggleDisplay
+              display={display}
+              onDisplayChange={(display) => {
+                if (display) {
+                  setDisplay(display);
+                }
+              }}
+            />
+          )}
           {sortOptions && sortKey && (
             <Sort
               sortOptions={sortOptions}
@@ -199,20 +219,29 @@ function EntityTable<T extends EntityWithUID>({
               modal.onOpen();
             }}
           >
-            {`${NEW_BUTTON_TEXT_PREFIX} ${entityName}`}
+            {`${NEW_BUTTON_TEXT_PREFIX} ${title}`}
           </Button>
         </div>
       </div>
       <div className="mt-5">
-        <DataTableComponent
-          data={filteredData}
-          columns={columns}
-          contextActions={contextActions}
-          onRowSelect={(row) => setSelectedRow(row)}
-          onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
-          onOpenDrawer={() => drawer.onOpen()}
-          toggleClearRows={toggledClearRows}
-        />
+        {display === 'list' ? (
+          <DataTableComponent
+            data={filteredData}
+            columns={columns}
+            contextActions={contextActions}
+            onRowSelect={(row) => setSelectedRow(row)}
+            onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
+            onOpenDrawer={() => drawer.onOpen()}
+            toggleClearRows={toggledClearRows}
+          />
+        ) : (
+          <div className="grid grid-cols-4 gap-6 w-full min-w-[320px]">
+            {CardComponent &&
+              filteredData.map((item) => (
+                <CardComponent key={item.uid ?? item.name} {...item} />
+              ))}
+          </div>
+        )}
       </div>
 
       <AddEditModal
@@ -260,6 +289,6 @@ function EntityTable<T extends EntityWithUID>({
       </Drawer>
     </div>
   );
-}
+};
 
 export default EntityTable;
