@@ -57,7 +57,7 @@ type Props<T extends EntityWithUID> = {
   CardComponent?: React.ComponentType<T>;
 };
 
-function EntityTable<T extends EntityWithUID>({
+const EntityTable = <T extends EntityWithUID>({
   CardComponent,
   columns,
   createEntity,
@@ -69,7 +69,7 @@ function EntityTable<T extends EntityWithUID>({
   sortOptions = [],
   title,
   updateEntity,
-}: Props<T>) {
+}: Props<T>) => {
   const toast = useToast();
 
   const [display, setDisplay] = useState<'list' | 'card'>('list');
@@ -283,6 +283,6 @@ function EntityTable<T extends EntityWithUID>({
       </Drawer>
     </div>
   );
-}
+};
 
 export default EntityTable;
