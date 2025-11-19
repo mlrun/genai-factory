@@ -187,7 +187,7 @@ const EntityTable = <T extends EntityWithUID>({
   );
 
   return (
-    <div className="flex flex-col w-full p-[32px_56px]">
+    <div className="flex flex-col w-full">
       <div className="flex w-full justify-between items-center gap-4 flex-wrap">
         <FilterComponent
           placeholder={`${FILTER_PLACEHOLDER_PREFIX} ${title}...`}

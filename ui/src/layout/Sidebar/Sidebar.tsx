@@ -18,8 +18,30 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import Chat from '@components/feature/Chat';
+import { ReactNode } from 'react';
 
-export const ChatPage = () => {
-  return <Chat />;
+import { Flex, useColorMode } from '@chakra-ui/react';
+import { colors } from '@shared/theme';
+
+type SidebarProps = {
+  children: ReactNode;
 };
+
+const Sidebar = ({ children }: SidebarProps) => {
+  const { colorMode } = useColorMode();
+
+  return (
+    <Flex
+      minWidth={72}
+      bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight}
+      flexFlow={'column'}
+      gap={4}
+      padding={4}
+      alignItems={'flex-start'}
+    >
+      {children}
+    </Flex>
+  );
+};
+
+export default Sidebar;

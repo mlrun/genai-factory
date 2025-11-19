@@ -25,10 +25,19 @@ such restriction.
 @custom-variant dark (&:is(.dark *));
 
 body {
-  overflow-y: scroll;
-  position: inherit !important;
+  overflow-x: hidden;
+  height: 100vh;
+  background: var(--color-background);
   font-size: var(--text-size-16);
 }
+
+#root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
 :root {
   --leftbar-bg-color: #2b2d30;
   --leftbar-text-color: #ffffff;
@@ -54,15 +63,15 @@ body {
   --text-size-16: calc(var(--text-size-number) * 16);
   --text-size-24: calc(var(--text-size-number) * 24);
 
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --radius: 0.375rem;
-  --background: oklch(1 0 0);
+  --radius: 0.625rem;
+  --background: oklch(0.991 0.001 286.376);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
