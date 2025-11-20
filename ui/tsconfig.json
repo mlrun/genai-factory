@@ -42,17 +42,6 @@
 
   "project": ["./tsconfig.json", "./tsconfig.node.json"],
   "tsconfigRootDir": "__dirname",
-  "include": [
-    "src",
-    "./shared/*",
-    "./components/*",
-    "./assets/*",
-    "./services/*",
-    "./assets/icons/*",
-    "setupTests.ts",
-    "./hooks/*",
-    "./constants/*",
-    "./layout/*"
-  ],
+  "include": ["src", "setupTests.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
