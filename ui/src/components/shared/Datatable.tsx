@@ -1,89 +1,163 @@
-// Copyright 2024 Iguazio
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright 2024 Iguazio Systems Ltd.
 
-import DataTable, {
-  Alignment,
-  createTheme,
-  TableColumn,
-} from 'react-data-table-component';
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
 
-import { Box, useColorMode } from '@chakra-ui/react';
-import { colors } from '@shared/theme';
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
 
-createTheme(
-  'dark',
-  {
-    text: { primary: colors.gray100, secondary: colors.info },
-    background: { default: colors.gray900 },
-    divider: { default: colors.gray800 },
-    context: { background: colors.gray800 },
-    action: {
-      button: 'rgba(0,0,0,.54)',
-      hover: 'rgba(0,0,0,.08)',
-      disabled: 'rgba(0,0,0,.12)',
-    },
-  },
-  'light',
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
+
+import { MoreVertical, Pencil, Trash } from 'lucide-react';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@components/shared/DropdownMenu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@components/shared/Table';
+import Arrow from '@icons/arrow.svg?react';
+import type { Table as TableType } from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
+
+import { cn } from '@shared/cn/utils';
+
+import { SORT_DIRECTION, TABLE_LABELS } from '@constants';
+
+export type DataTableProps<T> = {
+  table: TableType<T>;
+  onRowClick?: (row: T) => void;
+  onUpdate?: (row: T) => void;
+  onDelete?: (row: T) => void;
+};
+
+const DataTable = <T,>({
+  onDelete,
+  onRowClick,
+  onUpdate,
+  table,
+}: DataTableProps<T>) => (
+  <div className="relative overflow-auto rounded-[8px] border border-[#483f561f]">
+    <Table className="overflow-auto">
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TableHead
+                key={header.id}
+                colSpan={header.colSpan}
+                className="relative px-4 py-2 text-left text-sm font-bold leading-6 text-[#7F7989] border-b border-[#eee]"
+              >
+                {!header.isPlaceholder && (
+                  <button
+                    type="button"
+                    onClick={header.column.getToggleSortingHandler()}
+                    disabled={!header.column.getCanSort()}
+                    className="inline-flex items-center gap-2 w-full bg-transparent border-0 py-1 cursor-pointer focus-visible:outline focus-visible:outline-[#b9d4ff] focus-visible:outline-offset-2 rounded disabled:cursor-default"
+                  >
+                    <span className="whitespace-nowrap">
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </span>
+                    {header.column.getCanSort() && (
+                      <Arrow
+                        aria-hidden="true"
+                        className={cn(
+                          'transition-transform duration-150 ease-in-out',
+                          header.column.getIsSorted() === SORT_DIRECTION.ASC &&
+                            'rotate-180 opacity-100',
+                          header.column.getIsSorted() === SORT_DIRECTION.DESC &&
+                            'rotate-0 opacity-100',
+                          !header.column.getIsSorted() && 'opacity-40',
+                        )}
+                      />
+                    )}
+                  </button>
+                )}
+              </TableHead>
+            ))}
+            <TableHead className="px-4 py-2 text-right text-sm font-bold border-b border-[#eee]" />
+          </TableRow>
+        ))}
+      </TableHeader>
+
+      <TableBody className="overflow-auto">
+        {table.getRowModel().rows.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={table.getAllColumns().length + 1}
+              className="px-4 py-2 text-left text-sm text-[#4B4760]"
+            >
+              {TABLE_LABELS.NO_ROWS}
+            </TableCell>
+          </TableRow>
+        ) : (
+          table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id}
+              className="cursor-pointer hover:bg-[#fafafa] h-12"
+              onClick={() => onRowClick?.(row.original)}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell
+                  key={cell.id}
+                  className="px-4 text-left text-[#4B4760] text-[13px] font-normal truncate h-12"
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+
+              <TableCell className="px-4 py-2 text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1 rounded-md hover:bg-gray-100 outline-none">
+                      <MoreVertical size={18} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {onUpdate && (
+                      <DropdownMenuItem onClick={() => onUpdate(row.original)}>
+                        <Pencil className="text-gray-500" />
+                        {TABLE_LABELS.UPDATE}
+                      </DropdownMenuItem>
+                    )}
+                    {onDelete && (
+                      <DropdownMenuItem
+                        onClick={() => onDelete(row.original)}
+                        className="flex items-center gap-2 text-red-500"
+                      >
+                        <Trash size={16} /> {TABLE_LABELS.DELETE}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  </div>
 );
 
-export interface DataTableComponentProps<T extends Record<string, unknown>> {
-  data: T[];
-  columns: TableColumn<Partial<T>>[];
-  contextActions?: JSX.Element;
-  subheaderComponent?: React.ReactNode;
-  toggleClearRows: boolean;
-  onOpenDrawer: () => void;
-  onSelectedRowChange?: (e: { selectedRows: Partial<T>[] }) => void;
-  onRowSelect?: (row: Partial<T>) => void;
-}
-
-export function DataTableComponent<T extends Record<string, unknown>>({
-  columns,
-  contextActions,
-  data,
-  onOpenDrawer,
-  onRowSelect,
-  onSelectedRowChange,
-  subheaderComponent,
-  toggleClearRows,
-}: DataTableComponentProps<T>) {
-  const { colorMode } = useColorMode();
-
-  return (
-    <Box boxShadow="md" borderRadius="md">
-      <DataTable
-        theme={colorMode}
-        columns={columns}
-        data={data}
-        pagination
-        subHeader
-        subHeaderAlign={Alignment.RIGHT}
-        subHeaderComponent={subheaderComponent}
-        persistTableHead
-        selectableRows
-        highlightOnHover
-        pointerOnHover
-        contextActions={contextActions}
-        clearSelectedRows={toggleClearRows}
-        onSelectedRowsChange={onSelectedRowChange}
-        onRowClicked={(row) => {
-          onRowSelect?.(row);
-          onOpenDrawer();
-        }}
-      />
-    </Box>
-  );
-}
-
-export default DataTableComponent;
+export default DataTable;

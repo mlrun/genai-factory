@@ -18,24 +18,20 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { TableColumn } from 'react-data-table-component';
+import React, { useState } from 'react';
 
-import {
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerHeader,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
+import { useDisclosure, useToast } from '@chakra-ui/react';
 import { Button } from '@components/shared/Button';
 import { SortOption } from '@shared/types';
 import { ModalField } from '@shared/types/modalFieldConfigs';
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
 
 import AddEditModal from './AddEditModal';
 import DataTableComponent from './Datatable';
@@ -43,24 +39,23 @@ import FilterComponent from './Filter';
 import Sort from './Sort';
 import ToggleDisplay from './ToggleDisplay';
 
-import { filterTableData, sortTableData } from '@utils/table.utils';
+import { NEW_BUTTON_TEXT_PREFIX } from '@constants';
 
-import { FILTER_PLACEHOLDER_PREFIX, NEW_BUTTON_TEXT_PREFIX } from '@constants';
+type EntityWithUID = { uid?: string; name: string };
 
-type EntityWithUID = { uid?: string; name?: string };
-
-type Props<T extends EntityWithUID> = {
+type EntityTableProps<T extends EntityWithUID> = {
+  data: T[];
   title: string;
   entityName: string;
   fields: ModalField[];
-  columns: TableColumn<Partial<T>>[];
-  data: T[];
-  createEntity: (entity: T) => void; // from useMutation.mutate
+  columns: ColumnDef<T>[];
+  createEntity: (entity: T) => void;
   updateEntity: (entity: Partial<T>) => void;
   deleteEntity: (id: string) => void;
   newEntityDefaults: T;
   sortOptions?: SortOption<T>[];
   CardComponent?: React.ComponentType<T>;
+  onRowClick?: (row: T) => void;
 };
 
 const EntityTable = <T extends EntityWithUID>({
@@ -72,36 +67,42 @@ const EntityTable = <T extends EntityWithUID>({
   entityName,
   fields,
   newEntityDefaults,
+  onRowClick,
   sortOptions = [],
   title,
   updateEntity,
-}: Props<T>) => {
+}: EntityTableProps<T>) => {
   const toast = useToast();
+  const modal = useDisclosure();
+  const [editingEntity, setEditingEntity] = useState<T | null>(null);
 
   const [display, setDisplay] = useState<'list' | 'card'>('list');
-  const [selectedRow, setSelectedRow] = useState<Partial<T> | null>(null);
-  const [selectedRows, setSelectedRows] = useState<Partial<T>[]>([]);
-  const [editRow, setEditRow] = useState<T>(newEntityDefaults);
-  const [filterText, setFilterText] = useState('');
-  const [toggledClearRows, setToggleClearRows] = useState(false);
-  const [sortKey, setSortKey] = useState<SortOption<T>['accessorKey'] | null>(
-    () => {
-      if (sortOptions.length === 0) return null;
-      return (
-        sortOptions.find((opt) => opt.isDefault)?.accessorKey ??
-        sortOptions[0].accessorKey
-      );
+  const [globalFilter, setGlobalFilter] = useState<string>('');
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    if (sortOptions.length === 0) return [];
+    const defaultKey =
+      sortOptions.find((opt) => opt.isDefault)?.accessorKey ??
+      sortOptions[0].accessorKey;
+    return [{ id: defaultKey, desc: false }];
+  });
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      globalFilter,
+      sorting,
     },
-  );
+    onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: true,
+    enableGlobalFilter: true,
+  });
 
-  const modal = useDisclosure();
-  const drawer = useDisclosure();
-
-  const filteredData = useMemo(() => {
-    const filteredDate = filterTableData(data, filterText);
-
-    return sortTableData(filteredDate, sortKey);
-  }, [data, filterText, sortKey]);
+  const tableData = table.getRowModel().rows.map((row) => row.original);
 
   const handleSave = (entity: T) => {
     try {
@@ -122,8 +123,8 @@ const EntityTable = <T extends EntityWithUID>({
           isClosable: true,
         });
       }
+      setEditingEntity(null);
       modal.onClose();
-      setEditRow(newEntityDefaults);
     } catch {
       toast({
         title: `Error saving ${entityName}`,
@@ -134,16 +135,15 @@ const EntityTable = <T extends EntityWithUID>({
     }
   };
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = (row: T) => {
     try {
-      selectedRows.forEach((r) => deleteEntity(r.name as string));
+      deleteEntity(row.name);
       toast({
         title: `${entityName}(s) deleted`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      setSelectedRows([]);
     } catch {
       toast({
         title: `Error deleting ${entityName}(s)`,
@@ -152,70 +152,39 @@ const EntityTable = <T extends EntityWithUID>({
         isClosable: true,
       });
     }
-    setToggleClearRows((prev) => !prev);
-  }, [deleteEntity, selectedRows, entityName, toast]);
-
-  const handleUpdateDrawer = () => {
-    if (!selectedRow) return;
-    try {
-      updateEntity(selectedRow);
-      toast({
-        title: `${entityName} updated`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      drawer.onClose();
-    } catch {
-      toast({
-        title: `Error updating ${entityName}`,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSelectedRow((prev) => (prev ? { ...prev, [name]: value } : prev));
+  const handleUpdate = (row: T) => {
+    setEditingEntity(row);
+    modal.onOpen();
   };
-
-  const contextActions = useMemo(
-    () => <Button onClick={handleDelete}>Delete</Button>,
-    [handleDelete],
-  );
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full p-[32px_56px]">
       <div className="flex w-full justify-between items-center gap-4 flex-wrap">
         <FilterComponent
-          placeholder={`${FILTER_PLACEHOLDER_PREFIX} ${title}...`}
-          onFilter={(e) => setFilterText(e.target.value)}
-          filterText={filterText}
+          placeholder={`Find ${title}...`}
+          onFilter={(e) => setGlobalFilter(e.target.value)}
+          filterText={globalFilter}
         />
         <div className="flex items-center gap-3">
           {CardComponent && (
             <ToggleDisplay
               display={display}
-              onDisplayChange={(display) => {
-                if (display) {
-                  setDisplay(display);
-                }
-              }}
+              onDisplayChange={(display) => setDisplay(display)}
             />
           )}
-          {sortOptions && sortKey && (
+          {sortOptions.length > 0 && (
             <Sort
               sortOptions={sortOptions}
-              sortKey={sortKey}
-              onSortChange={(value) => setSortKey(value)}
+              sortKey={sorting[0]?.id as SortOption<T>['accessorKey']}
+              onSortChange={(value) => setSorting([{ id: value, desc: false }])}
             />
           )}
           <Button
             className="capitalize min-w-24"
             onClick={() => {
-              setEditRow(newEntityDefaults);
+              setEditingEntity(null);
               modal.onOpen();
             }}
           >
@@ -223,21 +192,19 @@ const EntityTable = <T extends EntityWithUID>({
           </Button>
         </div>
       </div>
+
       <div className="mt-5">
         {display === 'list' ? (
           <DataTableComponent
-            data={filteredData}
-            columns={columns}
-            contextActions={contextActions}
-            onRowSelect={(row) => setSelectedRow(row)}
-            onSelectedRowChange={(e) => setSelectedRows(e.selectedRows)}
-            onOpenDrawer={() => drawer.onOpen()}
-            toggleClearRows={toggledClearRows}
+            table={table}
+            onRowClick={onRowClick}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
           />
         ) : (
           <div className="grid grid-cols-4 gap-6 w-full min-w-[320px]">
             {CardComponent &&
-              filteredData.map((item) => (
+              tableData.map((item) => (
                 <CardComponent key={item.uid ?? item.name} {...item} />
               ))}
           </div>
@@ -246,47 +213,15 @@ const EntityTable = <T extends EntityWithUID>({
 
       <AddEditModal
         isOpen={modal.isOpen}
-        onClose={modal.onClose}
+        onClose={() => {
+          setEditingEntity(null);
+          modal.onClose();
+        }}
         onSave={handleSave}
-        entity={editRow}
+        entity={editingEntity ?? newEntityDefaults}
         fields={fields}
         title={entityName}
       />
-
-      <Drawer
-        placement="right"
-        size="xl"
-        isOpen={drawer.isOpen}
-        onClose={drawer.onClose}
-      >
-        <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">
-            {selectedRow?.name ?? 'Edit'}
-          </DrawerHeader>
-          <DrawerBody>
-            <Flex gap={10}>
-              <Flex width="100%" flexDirection="column">
-                {fields.map((field) => (
-                  <FormControl key={field.name} id={field.name} mb={4}>
-                    <FormLabel>{field.label}</FormLabel>
-                    <Input
-                      type="text"
-                      name={field.name}
-                      value={
-                        (selectedRow?.[field.name as keyof T] as string) ?? ''
-                      }
-                      onChange={handleChange}
-                    />
-                  </FormControl>
-                ))}
-              </Flex>
-            </Flex>
-            <Button className="mt-1" onClick={handleUpdateDrawer}>
-              Save changes
-            </Button>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 };
