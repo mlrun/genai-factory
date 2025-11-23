@@ -30,7 +30,8 @@
       "@hooks/*": ["./hooks/*"],
       "@queries": ["./queries/index"],
       "@constants": ["./constants/index"],
-      "@utils/*": ["./utils/*"]
+      "@utils/*": ["./utils/*"],
+      "@layout/*": ["./layout/*"]
     },
     "types": ["node", "jest", "@testing-library/jest-dom"],
     "forceConsistentCasingInFileNames": true
@@ -41,6 +42,6 @@
 
   "project": ["./tsconfig.json", "./tsconfig.node.json"],
   "tsconfigRootDir": "__dirname",
-  "include": ["src", "./shared/*", "./components/*", "./assets/*", "./services/*", "./assets/icons/*", "setupTests.ts", "./hooks/*", "./constants/*"],
+  "include": ["src", "setupTests.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

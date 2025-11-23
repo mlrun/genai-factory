@@ -18,8 +18,4 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import Chat from '@components/feature/Chat';
-
-export const ChatPage = () => {
-  return <Chat />;
-};
+export { default } from './Sidebar';
