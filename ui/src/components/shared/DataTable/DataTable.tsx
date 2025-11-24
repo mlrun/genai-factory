@@ -55,7 +55,7 @@ const DataTable = <T,>({
   onUpdate,
   table,
 }: DataTableProps<T>) => (
-  <div className="relative overflow-auto rounded-[8px] border border-[#483f561f]">
+  <div className="relative overflow-auto rounded-[8px] border bg-white border-table-border">
     <Table className="overflow-auto">
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
@@ -63,15 +63,15 @@ const DataTable = <T,>({
             {headerGroup.headers.map((header) => (
               <TableHead
                 key={header.id}
-                colSpan={header.colSpan}
-                className="relative px-4 py-2 text-left text-sm font-bold leading-6 text-[#7F7989] border-b border-[#eee]"
+                aria-colspan={header.colSpan}
+                className="relative px-4 py-2 text-left text-sm font-bold leading-6 text-table-text-muted"
               >
                 {!header.isPlaceholder && (
                   <button
                     type="button"
                     onClick={header.column.getToggleSortingHandler()}
                     disabled={!header.column.getCanSort()}
-                    className="inline-flex items-center gap-2 w-full bg-transparent border-0 py-1 cursor-pointer focus-visible:outline focus-visible:outline-[#b9d4ff] focus-visible:outline-offset-2 rounded disabled:cursor-default"
+                    className="inline-flex items-center gap-2 w-full bg-transparent border-0 py-1 cursor-pointer rounded disabled:cursor-default"
                   >
                     <span className="whitespace-nowrap">
                       {flexRender(
@@ -96,7 +96,7 @@ const DataTable = <T,>({
                 )}
               </TableHead>
             ))}
-            <TableHead className="px-4 py-2 text-right text-sm font-bold border-b border-[#eee]" />
+            <TableHead className="px-4 py-2 text-right text-sm font-bold" />
           </TableRow>
         ))}
       </TableHeader>
@@ -105,8 +105,8 @@ const DataTable = <T,>({
         {table.getRowModel().rows.length === 0 ? (
           <TableRow>
             <TableCell
-              colSpan={table.getAllColumns().length + 1}
-              className="px-4 py-2 text-left text-sm text-[#4B4760]"
+              aria-colspan={table.getAllColumns().length + 1}
+              className="px-4 py-2 text-left text-sm text-table-text-default"
             >
               {TABLE_LABELS.NO_ROWS}
             </TableCell>
@@ -115,13 +115,13 @@ const DataTable = <T,>({
           table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
-              className="cursor-pointer hover:bg-[#fafafa] h-12"
+              className="cursor-pointer hover:bg-table-bg-hover h-12"
               onClick={() => onRowClick?.(row.original)}
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  className="px-4 text-left text-[#4B4760] text-[13px] font-normal truncate h-12"
+                  className="px-4 text-left text-table-text-default text-[13px] font-normal truncate h-12"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
