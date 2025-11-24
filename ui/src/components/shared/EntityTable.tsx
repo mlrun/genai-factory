@@ -34,7 +34,7 @@ import {
 } from '@tanstack/react-table';
 
 import AddEditModal from './AddEditModal';
-import DataTableComponent from './Datatable';
+import DataTableComponent from './DataTable';
 import FilterComponent from './Filter';
 import Sort from './Sort';
 import ToggleDisplay from './ToggleDisplay';

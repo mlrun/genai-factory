@@ -34,10 +34,10 @@ import {
   TableHeader,
   TableRow,
 } from '@components/shared/Table';
-import Arrow from '@icons/arrow.svg?react';
 import type { Table as TableType } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 
+import Arrow from '@assets/icons/arrow.svg?react';
 import { cn } from '@shared/cn/utils';
 
 import { SORT_DIRECTION, TABLE_LABELS } from '@constants';
@@ -130,19 +130,26 @@ const DataTable = <T,>({
               <TableCell className="px-4 py-2 text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="p-1 rounded-md hover:bg-gray-100 outline-none">
+                    <button
+                      className="p-1 rounded-md hover:bg-gray-100 outline-none"
+                      data-testid="table-select-trigger"
+                    >
                       <MoreVertical size={18} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {onUpdate && (
-                      <DropdownMenuItem onClick={() => onUpdate(row.original)}>
+                      <DropdownMenuItem
+                        data-testid="table-update-select-item"
+                        onClick={() => onUpdate(row.original)}
+                      >
                         <Pencil className="text-gray-500" />
                         {TABLE_LABELS.UPDATE}
                       </DropdownMenuItem>
                     )}
                     {onDelete && (
                       <DropdownMenuItem
+                        data-testid="table-delete-select-item"
                         onClick={() => onDelete(row.original)}
                         className="flex items-center gap-2 text-red-500"
                       >
