@@ -1,25 +1,31 @@
-// Copyright 2024 Iguazio
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright 2024 Iguazio Systems Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
 
 import { useMemo } from 'react';
-import { TableColumn } from 'react-data-table-component';
 
 import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
 import { Dataset } from '@shared/types/dataset';
+import { ColumnDef } from '@tanstack/react-table';
 
 import { datasetFields } from '@constants';
 
@@ -54,18 +60,15 @@ const DatasetsTable = () => {
     }),
     [publicUser?.uid, projectUid],
   );
-  const columns: TableColumn<Partial<Dataset>>[] = [
-    { name: 'Name', selector: (row) => row.name ?? '', sortable: true },
-    {
-      name: 'Description',
-      selector: (row) => row.description ?? '',
-      sortable: true,
-    },
-    { name: 'Version', selector: (row) => row.version ?? '', sortable: true },
-    { name: 'Task', selector: (row) => row.task ?? '', sortable: true },
-    { name: 'Path', selector: (row) => row.path ?? '', sortable: true },
-    { name: 'Producer', selector: (row) => row.producer ?? '', sortable: true },
-    { name: 'Created', selector: (row) => row.created ?? '', sortable: true },
+
+  const columns: ColumnDef<Dataset>[] = [
+    { header: 'Name', accessorKey: 'name' },
+    { header: 'Description', accessorKey: 'description' },
+    { header: 'Version', accessorKey: 'version' },
+    { header: 'Task', accessorKey: 'task' },
+    { header: 'Path', accessorKey: 'path' },
+    { header: 'Producer', accessorKey: 'producer' },
+    { header: 'Created', accessorKey: 'created' },
   ];
 
   if (isLoading) return <Loading />;
