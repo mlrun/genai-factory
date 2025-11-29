@@ -18,17 +18,33 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        'table-border': '#483f561f',
-        'table-text-muted': '#7f7989',
-        'table-text-default': '#4b4760',
-      },
-    },
-  },
-  plugins: [],
+interface ProjectLabelsProps {
+  labels?: string | Record<string, string>;
+}
+
+const ProjectLabels = ({ labels }: ProjectLabelsProps) => {
+  const parsed =
+    typeof labels === 'object' && labels && Object.keys(labels).length > 0
+      ? labels
+      : null;
+
+  if (!parsed) return <span>-</span>;
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {Object.entries(parsed).map(([key, value]) => (
+        <span
+          key={key}
+          className="text-sm font-medium px-3 py-1.5 rounded-full
+            border border-project-label-border
+            text-project-label-text
+            bg-project-label-gradient"
+        >
+          {key}: {value}
+        </span>
+      ))}
+    </div>
+  );
 };
+
+export default ProjectLabels;
