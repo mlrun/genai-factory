@@ -18,35 +18,10 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Box, Text } from '@chakra-ui/react';
-import ProjectDetails from '@components/feature/Project/ProjectDetails';
-import Loading from '@components/shared/Loading';
-import { useProject } from '@queries';
+import { Outlet } from 'react-router-dom';
 
-const ProjectPage = () => {
-  const { data: project, isLoading } = useProject();
-
-  if (!project) {
-    if (isLoading) return <Loading />;
-    return (
-      <Text px={6} py={4}>
-        Project not found.
-      </Text>
-    );
-  }
-
-  return (
-    <Box p={10} width="100%" mx="auto">
-      <ProjectDetails
-        name={project.name}
-        description={project.description}
-        uid={project.uid}
-        created={project.created}
-        updated={project.updated}
-        labels={project.labels}
-      />
-    </Box>
-  );
+const ProjectLayout = () => {
+  return <Outlet />;
 };
 
-export default ProjectPage;
+export default ProjectLayout;

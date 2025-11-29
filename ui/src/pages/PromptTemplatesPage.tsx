@@ -29,7 +29,7 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { promptTemplateFields } from '@constants';
 
-const PromptTemplatesTable = () => {
+const PromptTemplatesPage = () => {
   const { data: publicUser } = useUser();
 
   const {
@@ -64,13 +64,16 @@ const PromptTemplatesTable = () => {
     [publicUser?.uid, projectUid],
   );
 
-  const columns: ColumnDef<PromptTemplate>[] = [
-    { header: 'Name', accessorKey: 'name' },
-    { header: 'Description', accessorKey: 'description' },
-    { header: 'Version', accessorKey: 'version' },
-    { header: 'Text', accessorKey: 'text', enableSorting: false },
-    { header: 'Created', accessorKey: 'created' },
-  ];
+  const columns: ColumnDef<PromptTemplate>[] = useMemo(
+    () => [
+      { header: 'Name', accessorKey: 'name' },
+      { header: 'Description', accessorKey: 'description' },
+      { header: 'Version', accessorKey: 'version' },
+      { header: 'Text', accessorKey: 'text', enableSorting: false },
+      { header: 'Created', accessorKey: 'created' },
+    ],
+    [],
+  );
 
   if (isLoading) return <Loading />;
   if (error) return <div>Failed to load prompt templates.</div>;
@@ -90,4 +93,4 @@ const PromptTemplatesTable = () => {
   );
 };
 
-export default PromptTemplatesTable;
+export default PromptTemplatesPage;

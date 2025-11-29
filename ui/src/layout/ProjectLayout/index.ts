@@ -18,8 +18,4 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import UsersTable from '@components/feature/Tables/UsersTable';
-
-export const UsersTablePage = () => {
-  return <UsersTable />;
-};
+export { default } from './ProjectLayout';

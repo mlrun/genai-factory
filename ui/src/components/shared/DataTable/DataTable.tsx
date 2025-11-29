@@ -56,10 +56,10 @@ const DataTable = <T,>({
   table,
 }: DataTableProps<T>) => (
   <div className="relative overflow-auto rounded-[8px] border bg-white border-table-border">
-    <Table className="overflow-auto">
+    <Table className="w-full border-collapse table-fixed">
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
+          <TableRow key={headerGroup.id} className="sticky top-0 z-10 bg-white">
             {headerGroup.headers.map((header) => (
               <TableHead
                 key={header.id}
@@ -73,7 +73,7 @@ const DataTable = <T,>({
                     disabled={!header.column.getCanSort()}
                     className="inline-flex items-center gap-2 w-full bg-transparent border-0 py-1 cursor-pointer rounded disabled:cursor-default"
                   >
-                    <span className="whitespace-nowrap">
+                    <span className="whitespace-nowrap overflow-hidden text-ellipsis block">
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
@@ -96,12 +96,12 @@ const DataTable = <T,>({
                 )}
               </TableHead>
             ))}
-            <TableHead className="px-4 py-2 text-right text-sm font-bold" />
+            <TableHead className="px-4 py-2 text-right text-sm font-bold w-14" />
           </TableRow>
         ))}
       </TableHeader>
 
-      <TableBody className="overflow-auto">
+      <TableBody>
         {table.getRowModel().rows.length === 0 ? (
           <TableRow>
             <TableCell

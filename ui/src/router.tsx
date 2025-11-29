@@ -20,12 +20,20 @@ such restriction.
 
 import { ChatPage } from 'pages/ChatPage';
 import { LoginPage } from 'pages/LoginPage';
-import { ProjectPage } from 'pages/ProjectPage';
 import { ProjectsPage } from 'pages/ProjectsPage';
-import { UsersTablePage } from 'pages/UsersTablePage';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import Page from '@layout/Page';
+import ProjectLayout from '@layout/ProjectLayout';
+
+import DatasetsPage from './pages/DatasetsPage';
+import DataSourcesPage from './pages/DataSourcesPage';
+import DocumentsPage from './pages/DocumentsPage';
+import ModelsPage from './pages/ModelsPage';
+import ProjectPage from './pages/ProjectPage';
+import PromptTemplatesPage from './pages/PromptTemplatesPage';
+import UsersPage from './pages/UsersPage';
+import WorkflowsPage from './pages/WorkflowsPage';
 
 export const router = createBrowserRouter([
   {
@@ -44,9 +52,23 @@ export const router = createBrowserRouter([
     children: [
       { path: 'projects', element: <ProjectsPage /> },
       { path: 'projects/:name', element: <ProjectPage /> },
-      { path: 'users', element: <UsersTablePage /> },
       { path: 'chat', element: <ChatPage /> },
       { path: 'chat/:sessionName', element: <ChatPage /> },
+
+      {
+        path: 'projects/:name',
+        element: <ProjectLayout />,
+        children: [
+          { index: true, element: <ProjectPage /> },
+          { path: 'models', element: <ModelsPage /> },
+          { path: 'data-sources', element: <DataSourcesPage /> },
+          { path: 'datasets', element: <DatasetsPage /> },
+          { path: 'documents', element: <DocumentsPage /> },
+          { path: 'prompt-templates', element: <PromptTemplatesPage /> },
+          { path: 'workflows', element: <WorkflowsPage /> },
+          { path: 'users', element: <UsersPage /> },
+        ],
+      },
     ],
   },
 ]);

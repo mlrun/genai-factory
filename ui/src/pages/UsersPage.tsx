@@ -18,6 +18,8 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { useMemo } from 'react';
+
 import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useUserActions, useUsers } from '@queries';
@@ -26,7 +28,7 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { userFields } from '@constants';
 
-const UsersTable = () => {
+const UsersPage = () => {
   const { data: users = [], error, isLoading } = useUsers();
   const { createUser, deleteUser, updateUser } = useUserActions();
 
@@ -36,11 +38,14 @@ const UsersTable = () => {
     full_name: '',
   };
 
-  const columns: ColumnDef<User>[] = [
-    { header: 'Username', accessorKey: 'name' },
-    { header: 'Email', accessorKey: 'email' },
-    { header: 'Full Name', accessorKey: 'full_name' },
-  ];
+  const columns: ColumnDef<User>[] = useMemo(
+    () => [
+      { header: 'Username', accessorKey: 'name' },
+      { header: 'Email', accessorKey: 'email' },
+      { header: 'Full Name', accessorKey: 'full_name' },
+    ],
+    [],
+  );
 
   if (isLoading) return <Loading />;
   if (error) return <div>Failed to load users.</div>;
@@ -60,4 +65,4 @@ const UsersTable = () => {
   );
 };
 
-export default UsersTable;
+export default UsersPage;

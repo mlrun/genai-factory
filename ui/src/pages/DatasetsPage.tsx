@@ -24,71 +24,66 @@ import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
-import { Model, ModelType } from '@shared/types/model';
+import { Dataset } from '@shared/types/dataset';
 import { ColumnDef } from '@tanstack/react-table';
 
-import { modelFields } from '@constants';
+import { datasetFields } from '@constants';
 
-const ModelsTable = () => {
+const DatasetsPage = () => {
   const { data: publicUser } = useUser();
 
   const {
     create,
-    data: models = [],
+    data: datasets = [],
     error,
     isLoading,
     project,
     remove,
     update,
-  } = useProjectEntity<Model>(
-    'models',
-    (projectName) => Client.getModels(projectName),
-    (projectName, model) => Client.createModel(projectName, model),
-    (projectName, model) => Client.updateModel(projectName, model),
-    (projectName, id) => Client.deleteModel(projectName, id),
+  } = useProjectEntity<Dataset>(
+    'datasets',
+    (projectName) => Client.getDatasets(projectName),
+    (projectName, dataset) => Client.createDataset(projectName, dataset),
+    (projectName, dataset) => Client.updateDataset(projectName, dataset),
+    (projectName, id) => Client.deleteDataset(projectName, id),
   );
-
   const projectUid = project?.uid ?? '';
 
-  const newEntity: Model = useMemo(
+  const newEntity: Dataset = useMemo(
     () => ({
       name: '',
       description: '',
-      base_model: '',
-      model_type: ModelType.MODEL,
       owner_id: publicUser?.uid ?? '',
       project_id: projectUid,
       path: '',
       task: '',
-      producer: '',
-      deployment: '',
     }),
     [publicUser?.uid, projectUid],
   );
 
-  const columns: ColumnDef<Model>[] = [
-    { header: 'Name', accessorKey: 'name' },
-    { header: 'Description', accessorKey: 'description', enableSorting: true },
-    { header: 'Version', accessorKey: 'version' },
-    { header: 'Base Model', accessorKey: 'base_model', enableSorting: true },
-    { header: 'Model Type', accessorKey: 'model_type', enableSorting: true },
-    { header: 'Task', accessorKey: 'task' },
-    { header: 'Path', accessorKey: 'path' },
-    { header: 'Producer', accessorKey: 'producer' },
-    { header: 'Deployment', accessorKey: 'deployment', enableSorting: true },
-    { header: 'Created', accessorKey: 'created' },
-  ];
+  const columns: ColumnDef<Dataset>[] = useMemo(
+    () => [
+      { header: 'Name', accessorKey: 'name' },
+      { header: 'Description', accessorKey: 'description' },
+      { header: 'Version', accessorKey: 'version' },
+      { header: 'Task', accessorKey: 'task' },
+      { header: 'Path', accessorKey: 'path' },
+      { header: 'Producer', accessorKey: 'producer' },
+      { header: 'Created', accessorKey: 'created' },
+    ],
+    [],
+  );
 
   if (isLoading) return <Loading />;
-  if (error) return <div>Failed to load models.</div>;
+  if (error) return <div>Failed to load datasets.</div>;
 
   return (
     <EntityTable
-      title="Models"
-      entityName="Model"
-      fields={modelFields}
+      title="Datasets"
+      entityName="Dataset"
+      fields={datasetFields}
       columns={columns}
-      data={models}
+      data={datasets}
       createEntity={(d) => create.mutate(d)}
       updateEntity={(d) => update.mutate(d)}
       deleteEntity={(id) => remove.mutate(id)}
@@ -97,4 +92,4 @@ const ModelsTable = () => {
   );
 };
 
-export default ModelsTable;
+export default DatasetsPage;
