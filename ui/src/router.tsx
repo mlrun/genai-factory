@@ -41,7 +41,7 @@ export const router = createBrowserRouter([
     element:
       import.meta.env.VITE_ENV === 'development' ? (
         // TODO: Will be implemented GAIT-36
-        <Navigate to="/users" replace />
+        <Navigate to="/projects" replace />
       ) : (
         <LoginPage />
       ),
