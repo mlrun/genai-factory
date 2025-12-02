@@ -20,8 +20,6 @@ such restriction.
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Box, Button, Flex } from '@chakra-ui/react';
-
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,37 +33,38 @@ const Navbar = () => {
   ];
 
   return (
-    <Flex
-      position="sticky"
-      top={0}
-      alignItems="center"
-      justifyContent="space-between"
-      h={64}
-      bg="white"
-      zIndex={10}
-      borderBottom="1px solid"
-      borderColor="rgba(72, 63, 86, 0.12)"
+    <div
+      className="
+        sticky top-0
+        flex items-center justify-between
+        h-[64px] bg-white z-10
+        border-b border-[rgba(72,63,86,0.12)]
+      "
       data-testid="topbar"
     >
-      <Flex alignItems="center">
-        <Box paddingLeft={4} display="flex" gap={2}>
-          {navItems.map(({ label, path }) => {
-            const isActive = isPathActive(location.pathname, path);
-            return (
-              <Button
-                key={path}
-                variant={isActive ? 'solid' : 'ghost'}
-                onClick={() => navigate(path)}
-                fontWeight={isActive ? 'bold' : 'normal'}
-                colorScheme={isActive ? 'blue' : undefined}
-              >
-                {label}
-              </Button>
-            );
-          })}
-        </Box>
-      </Flex>
-    </Flex>
+      <div className="flex items-center pl-4 gap-2">
+        {navItems.map(({ label, path }) => {
+          const isActive = isPathActive(location.pathname, path);
+
+          return (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={`
+                px-3 py-2 rounded-md text-sm
+                ${
+                  isActive
+                    ? 'font-bold bg-blue-500 text-white'
+                    : 'font-normal hover:bg-gray-100'
+                }
+              `}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
