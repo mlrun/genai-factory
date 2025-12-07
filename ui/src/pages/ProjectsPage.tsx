@@ -54,13 +54,15 @@ export const ProjectsPage = () => {
       {
         header: 'Labels',
         accessorKey: 'labels',
-        cell: (row) => <ProjectLabels labels={row.getValue() as string} />,
+        cell: (row) => (
+          <ProjectLabels labels={row.getValue<Project['labels']>()} />
+        ),
         enableSorting: false,
       },
       {
         header: 'Last updated',
         accessorKey: 'updated',
-        cell: (info) => formatDate(info.getValue() as string),
+        cell: (row) => formatDate(row.getValue<Project['updated']>()),
       },
       {
         header: 'Description',
@@ -81,7 +83,7 @@ export const ProjectsPage = () => {
       {projects && (
         <EntityTable
           title="projects"
-          entityName="projects"
+          entityName="project"
           fields={projectFields}
           columns={columns}
           data={projects}
