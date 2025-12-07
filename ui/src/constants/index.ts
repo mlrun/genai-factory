@@ -53,3 +53,6 @@ export const TABLE_LABELS = {
   DELETE: 'Delete',
   NO_ROWS: 'No rows available',
 };
+
+export const PROJECT_TABLE_TITLE = 'projects';
+export const PROJECT_ENTITY_NAME = 'project';

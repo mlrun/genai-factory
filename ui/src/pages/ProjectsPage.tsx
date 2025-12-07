@@ -31,7 +31,11 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { formatDate } from '@utils/formatDate';
 
-import { projectFields } from '@constants';
+import {
+  PROJECT_ENTITY_NAME,
+  PROJECT_TABLE_TITLE,
+  projectFields,
+} from '@constants';
 
 export const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -82,8 +86,8 @@ export const ProjectsPage = () => {
     <div className="flex flex-col space-y-6">
       {projects && (
         <EntityTable
-          title="projects"
-          entityName="project"
+          title={PROJECT_TABLE_TITLE}
+          entityName={PROJECT_ENTITY_NAME}
           fields={projectFields}
           columns={columns}
           data={projects}
