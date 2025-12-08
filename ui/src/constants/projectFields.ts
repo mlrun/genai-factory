@@ -18,17 +18,10 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        'table-border': '#483f561f',
-        'table-text-muted': '#7f7989',
-        'table-text-default': '#4b4760',
-      },
-    },
-  },
-  plugins: [],
-};
+import { ModalField } from '@shared/types/modalFieldConfigs';
+
+export const projectFields: ModalField[] = [
+  { name: 'name', label: 'Name', required: true },
+  { name: 'description', label: 'Description', required: true },
+  { name: 'version', label: 'Version' },
+];
