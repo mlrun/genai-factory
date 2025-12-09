@@ -31,7 +31,8 @@
       "@queries": ["./queries/index"],
       "@constants": ["./constants/index"],
       "@utils/*": ["./utils/*"],
-      "@layout/*": ["./layout/*"]
+      "@layout/*": ["./layout/*"],
+      "@pages/*": ["./pages/*"]
     },
     "types": ["node", "jest", "@testing-library/jest-dom"],
     "forceConsistentCasingInFileNames": true

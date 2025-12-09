@@ -20,6 +20,8 @@ such restriction.
 
 import Chat from '@components/feature/Chat';
 
-export const ChatPage = () => {
+const ChatPage = () => {
   return <Chat />;
 };
+
+export default ChatPage;

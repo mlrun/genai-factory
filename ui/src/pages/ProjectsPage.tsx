@@ -37,7 +37,7 @@ import Loading from '@components/shared/Loading';
 import { useProjectActions, useProjects } from '@queries';
 import { Project } from '@shared/types/project';
 
-export const ProjectsPage = () => {
+const ProjectsPage = () => {
   const navigate = useNavigate();
   const { createProject, updateProject } = useProjectActions();
 
@@ -119,3 +119,5 @@ export const ProjectsPage = () => {
     </Container>
   );
 };
+
+export default ProjectsPage;
