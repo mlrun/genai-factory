@@ -24,82 +24,64 @@ import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
-import { Workflow, WorkflowType } from '@shared/types/workflow';
+import { DataSource, DataSourceType } from '@shared/types/dataSource';
 import { ColumnDef } from '@tanstack/react-table';
 
-import { workflowFields } from '@constants';
+import { dataSourceFields } from '@constants';
 
-const WorkflowsTable = () => {
+const DataSourcesPage = () => {
   const { data: publicUser } = useUser();
 
   const {
     create,
-    data: workflows = [],
+    data: dataSources = [],
     error,
     isLoading,
     project,
     remove,
     update,
-  } = useProjectEntity<Workflow>(
-    'workflows',
-    (projectName) => Client.getWorkflows(projectName),
-    (projectName, workflow) => Client.createWorkflow(projectName, workflow),
-    (projectName, workflow) => Client.updateWorkflow(projectName, workflow),
-    (projectName, id) => Client.deleteWorkflow(projectName, id),
+  } = useProjectEntity<DataSource>(
+    'dataSources',
+    (projectName) => Client.getDataSources(projectName),
+    (projectName, data) => Client.createDataSource(projectName, data),
+    (projectName, data) => Client.updateDataSource(projectName, data),
+    (projectName, id) => Client.deleteDataSource(projectName, id),
   );
 
   const projectUid = project?.uid ?? '';
 
-  const newEntity: Workflow = useMemo(
+  const newEntity: DataSource = useMemo(
     () => ({
       name: '',
       description: '',
-      deployment: '',
-      version: '',
-      workflow_type: WorkflowType.APPLICATION,
       owner_id: publicUser?.uid ?? '',
       project_id: projectUid,
+      data_source_type: DataSourceType.OTHER,
     }),
     [publicUser?.uid, projectUid],
   );
 
-  const columns: ColumnDef<Workflow>[] = [
-    {
-      header: 'Name',
-      accessorKey: 'name',
-    },
-    {
-      header: 'Description',
-      accessorKey: 'description',
-    },
-    {
-      header: 'Version',
-      accessorKey: 'version',
-    },
-    {
-      header: 'Workflow Type',
-      accessorKey: 'workflow_type',
-    },
-    {
-      header: 'Deployment',
-      accessorKey: 'deployment',
-    },
-    {
-      header: 'Created',
-      accessorKey: 'created',
-    },
-  ];
+  const columns: ColumnDef<DataSource>[] = useMemo(
+    () => [
+      { header: 'Name', accessorKey: 'name' },
+      { header: 'Description', accessorKey: 'description' },
+      { header: 'Version', accessorKey: 'version' },
+      { header: 'Type', accessorKey: 'data_source_type' },
+      { header: 'Created', accessorKey: 'created' },
+    ],
+    [],
+  );
 
   if (isLoading) return <Loading />;
-  if (error) return <div>Failed to load workflows.</div>;
+  if (error) return <div>Failed to load data sources.</div>;
 
   return (
     <EntityTable
-      title="Workflows"
-      entityName="Workflow"
-      fields={workflowFields}
+      title="DataSources"
+      entityName="DataSource"
+      fields={dataSourceFields}
       columns={columns}
-      data={workflows}
+      data={dataSources}
       createEntity={(d) => create.mutate(d)}
       updateEntity={(d) => update.mutate(d)}
       deleteEntity={(id) => remove.mutate(id)}
@@ -108,4 +90,4 @@ const WorkflowsTable = () => {
   );
 };
 
-export default WorkflowsTable;
+export default DataSourcesPage;

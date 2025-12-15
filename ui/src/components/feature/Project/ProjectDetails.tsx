@@ -31,7 +31,7 @@ type ProjectHeaderProps = {
   labels?: Record<string, string> | string | null;
 };
 
-const ProjectHeader = ({
+const ProjectDetails = ({
   created,
   description,
   labels,
@@ -112,4 +112,4 @@ const ProjectHeader = ({
   );
 };
 
-export default ProjectHeader;
+export default ProjectDetails;

@@ -24,62 +24,85 @@ import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
-import { Document } from '@shared/types/document';
+import { Workflow, WorkflowType } from '@shared/types/workflow';
 import { ColumnDef } from '@tanstack/react-table';
 
-import { documentFields } from '@constants';
+import { workflowFields } from '@constants';
 
-const DocumentsTable = () => {
+const WorkflowsPage = () => {
   const { data: publicUser } = useUser();
 
   const {
     create,
-    data: documents = [],
+    data: workflows = [],
     error,
     isLoading,
     project,
     remove,
     update,
-  } = useProjectEntity<Document>(
-    'documents',
-    (projectName) => Client.getDocuments(projectName),
-    (projectName, document) => Client.createDocument(projectName, document),
-    (projectName, document) => Client.updateDocument(projectName, document),
-    (projectName, id) => Client.deleteDocument(projectName, id),
+  } = useProjectEntity<Workflow>(
+    'workflows',
+    (projectName) => Client.getWorkflows(projectName),
+    (projectName, workflow) => Client.createWorkflow(projectName, workflow),
+    (projectName, workflow) => Client.updateWorkflow(projectName, workflow),
+    (projectName, id) => Client.deleteWorkflow(projectName, id),
   );
 
   const projectUid = project?.uid ?? '';
 
-  const newEntity: Document = useMemo(
+  const newEntity: Workflow = useMemo(
     () => ({
       name: '',
       description: '',
-      path: '',
+      deployment: '',
+      version: '',
+      workflow_type: WorkflowType.APPLICATION,
       owner_id: publicUser?.uid ?? '',
       project_id: projectUid,
     }),
     [publicUser?.uid, projectUid],
   );
 
-  const columns: ColumnDef<Document>[] = [
-    { header: 'Name', accessorKey: 'name' },
-    { header: 'Description', accessorKey: 'description' },
-    { header: 'Version', accessorKey: 'version' },
-    { header: 'Path', accessorKey: 'path' },
-    { header: 'Origin', accessorKey: 'origin' },
-    { header: 'Created', accessorKey: 'created' },
-  ];
+  const columns: ColumnDef<Workflow>[] = useMemo(
+    () => [
+      {
+        header: 'Name',
+        accessorKey: 'name',
+      },
+      {
+        header: 'Description',
+        accessorKey: 'description',
+      },
+      {
+        header: 'Version',
+        accessorKey: 'version',
+      },
+      {
+        header: 'Workflow Type',
+        accessorKey: 'workflow_type',
+      },
+      {
+        header: 'Deployment',
+        accessorKey: 'deployment',
+      },
+      {
+        header: 'Created',
+        accessorKey: 'created',
+      },
+    ],
+    [],
+  );
 
   if (isLoading) return <Loading />;
-  if (error) return <div>Failed to load documents.</div>;
+  if (error) return <div>Failed to load workflows.</div>;
 
   return (
     <EntityTable
-      title="Documents"
-      entityName="Document"
-      fields={documentFields}
+      title="Workflows"
+      entityName="Workflow"
+      fields={workflowFields}
       columns={columns}
-      data={documents}
+      data={workflows}
       createEntity={(d) => create.mutate(d)}
       updateEntity={(d) => update.mutate(d)}
       deleteEntity={(id) => remove.mutate(id)}
@@ -88,4 +111,4 @@ const DocumentsTable = () => {
   );
 };
 
-export default DocumentsTable;
+export default WorkflowsPage;

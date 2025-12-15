@@ -24,61 +24,65 @@ import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useProjectEntity, useUser } from '@queries';
 import Client from '@services/Api';
-import { DataSource, DataSourceType } from '@shared/types/dataSource';
+import { Document } from '@shared/types/document';
 import { ColumnDef } from '@tanstack/react-table';
 
-import { dataSourceFields } from '@constants';
+import { documentFields } from '@constants';
 
-const DataSourcesTable = () => {
+const DocumentsPage = () => {
   const { data: publicUser } = useUser();
 
   const {
     create,
-    data: dataSources = [],
+    data: documents = [],
     error,
     isLoading,
     project,
     remove,
     update,
-  } = useProjectEntity<DataSource>(
-    'dataSources',
-    (projectName) => Client.getDataSources(projectName),
-    (projectName, data) => Client.createDataSource(projectName, data),
-    (projectName, data) => Client.updateDataSource(projectName, data),
-    (projectName, id) => Client.deleteDataSource(projectName, id),
+  } = useProjectEntity<Document>(
+    'documents',
+    (projectName) => Client.getDocuments(projectName),
+    (projectName, document) => Client.createDocument(projectName, document),
+    (projectName, document) => Client.updateDocument(projectName, document),
+    (projectName, id) => Client.deleteDocument(projectName, id),
   );
 
   const projectUid = project?.uid ?? '';
 
-  const newEntity: DataSource = useMemo(
+  const newEntity: Document = useMemo(
     () => ({
       name: '',
       description: '',
+      path: '',
       owner_id: publicUser?.uid ?? '',
       project_id: projectUid,
-      data_source_type: DataSourceType.OTHER,
     }),
     [publicUser?.uid, projectUid],
   );
 
-  const columns: ColumnDef<DataSource>[] = [
-    { header: 'Name', accessorKey: 'name' },
-    { header: 'Description', accessorKey: 'description' },
-    { header: 'Version', accessorKey: 'version' },
-    { header: 'Type', accessorKey: 'data_source_type' },
-    { header: 'Created', accessorKey: 'created' },
-  ];
+  const columns: ColumnDef<Document>[] = useMemo(
+    () => [
+      { header: 'Name', accessorKey: 'name' },
+      { header: 'Description', accessorKey: 'description' },
+      { header: 'Version', accessorKey: 'version' },
+      { header: 'Path', accessorKey: 'path' },
+      { header: 'Origin', accessorKey: 'origin' },
+      { header: 'Created', accessorKey: 'created' },
+    ],
+    [],
+  );
 
   if (isLoading) return <Loading />;
-  if (error) return <div>Failed to load data sources.</div>;
+  if (error) return <div>Failed to load documents.</div>;
 
   return (
     <EntityTable
-      title="DataSources"
-      entityName="DataSource"
-      fields={dataSourceFields}
+      title="Documents"
+      entityName="Document"
+      fields={documentFields}
       columns={columns}
-      data={dataSources}
+      data={documents}
       createEntity={(d) => create.mutate(d)}
       updateEntity={(d) => update.mutate(d)}
       deleteEntity={(id) => remove.mutate(id)}
@@ -87,4 +91,4 @@ const DataSourcesTable = () => {
   );
 };
 
-export default DataSourcesTable;
+export default DocumentsPage;

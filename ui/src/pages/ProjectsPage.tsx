@@ -37,7 +37,7 @@ import {
   projectFields,
 } from '@constants';
 
-export const ProjectsPage = () => {
+const ProjectsPage = () => {
   const navigate = useNavigate();
   const { createProject, deleteProject, updateProject } = useProjectActions();
 
@@ -102,3 +102,5 @@ export const ProjectsPage = () => {
     </div>
   );
 };
+
+export default ProjectsPage;
