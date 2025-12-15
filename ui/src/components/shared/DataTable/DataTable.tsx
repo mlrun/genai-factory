@@ -115,7 +115,7 @@ const DataTable = <T,>({
           table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
-              className="cursor-pointer hover:bg-table-bg-hover h-12"
+              className="cursor-pointer h-12"
               onClick={() => onRowClick?.(row.original)}
             >
               {row.getVisibleCells().map((cell) => (

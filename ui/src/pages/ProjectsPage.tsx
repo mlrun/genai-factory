@@ -18,104 +18,89 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AddIcon } from '@chakra-ui/icons';
-import {
-  Button,
-  Container,
-  Flex,
-  Heading,
-  SimpleGrid,
-  useDisclosure,
-  useToast,
-  VStack,
-} from '@chakra-ui/react';
-import AddEditProjectModal from '@components/feature/Projects/AddEditProjectModal';
 import ProjectCard from '@components/feature/Projects/ProjectCard';
+import ProjectLabels from '@components/feature/Projects/ProjectLabels';
+import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
 import { useProjectActions, useProjects } from '@queries';
 import { Project } from '@shared/types/project';
+import { ColumnDef } from '@tanstack/react-table';
 
-export const ProjectsPage = () => {
+import { formatDate } from '@utils/formatDate';
+
+import {
+  PROJECT_ENTITY_NAME,
+  PROJECT_TABLE_TITLE,
+  projectFields,
+} from '@constants';
+
+const ProjectsPage = () => {
   const navigate = useNavigate();
-  const { createProject, updateProject } = useProjectActions();
-
-  const toast = useToast();
+  const { createProject, deleteProject, updateProject } = useProjectActions();
 
   const { data: projects, isLoading } = useProjects();
 
-  const {
-    isOpen: isModalOpen,
-    onClose: onModalClose,
-    onOpen: onModalOpen,
-  } = useDisclosure();
-
-  const handleSave = async (project: Project) => {
-    try {
-      if (project.uid) {
-        await updateProject.mutateAsync(project);
-        toast({ title: 'Project updated.', status: 'success' });
-      } else {
-        await createProject.mutateAsync(project);
-        toast({ title: 'Project added successfully.', status: 'success' });
-      }
-    } catch (error) {
-      console.log(error);
-      toast({ title: 'Error saving project.', status: 'error' });
-    }
+  const newEntity: Project = {
+    name: '',
+    owner_id: '',
+    updated: '',
   };
 
-  const handleOpenPlayground = () => {
-    navigate('/chat');
+  const columns: ColumnDef<Project>[] = useMemo(
+    () => [
+      {
+        header: 'Name',
+        accessorKey: 'name',
+      },
+      {
+        header: 'Labels',
+        accessorKey: 'labels',
+        cell: (row) => (
+          <ProjectLabels labels={row.getValue<Project['labels']>()} />
+        ),
+        enableSorting: false,
+      },
+      {
+        header: 'Last updated',
+        accessorKey: 'updated',
+        cell: (row) => formatDate(row.getValue<Project['updated']>()),
+      },
+      {
+        header: 'Description',
+        accessorKey: 'description',
+      },
+    ],
+    [],
+  );
+
+  const handleOnRowClick = (project: Project) => {
+    navigate(`/projects/${project.name}`);
   };
 
   if (isLoading) return <Loading />;
 
   return (
-    <Container maxW="container.lg" py={8}>
-      <VStack spacing={6} align="start">
-        <Flex width="100%" justifyContent={'space-between'}>
-          <Heading as="h2" size="lg">
-            Projects
-          </Heading>
-          <Flex gap={4}>
-            <Button
-              leftIcon={<AddIcon />}
-              onClick={() => {
-                onModalOpen();
-              }}
-            >
-              New
-            </Button>
-            <Button
-              colorScheme="blue"
-              alignSelf="end"
-              onClick={handleOpenPlayground}
-            >
-              Open Playground
-            </Button>
-          </Flex>
-        </Flex>
-
-        <SimpleGrid columns={[1, null, 2]} spacing={6} w="100%">
-          {projects ? (
-            projects.map((project) => (
-              <ProjectCard
-                key={project.uid ?? project.name}
-                project={project}
-              />
-            ))
-          ) : (
-            <div>No projects</div>
-          )}
-        </SimpleGrid>
-      </VStack>
-      <AddEditProjectModal
-        isOpen={isModalOpen}
-        onClose={onModalClose}
-        onSave={handleSave}
-      />
-    </Container>
+    <div className="flex flex-col space-y-6">
+      {projects && (
+        <EntityTable
+          title={PROJECT_TABLE_TITLE}
+          entityName={PROJECT_ENTITY_NAME}
+          fields={projectFields}
+          columns={columns}
+          data={projects}
+          createEntity={(project) => createProject.mutateAsync(project)}
+          updateEntity={(project) => updateProject.mutateAsync(project)}
+          deleteEntity={(project) => deleteProject.mutate(project)}
+          newEntityDefaults={newEntity}
+          CardComponent={ProjectCard}
+          onRowClick={handleOnRowClick}
+        />
+      )}
+    </div>
   );
 };
+
+export default ProjectsPage;

@@ -18,22 +18,21 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { ChatPage } from 'pages/ChatPage';
-import { LoginPage } from 'pages/LoginPage';
-import { ProjectsPage } from 'pages/ProjectsPage';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import Page from '@layout/Page';
 import ProjectLayout from '@layout/ProjectLayout';
-
-import DatasetsPage from './pages/DatasetsPage';
-import DataSourcesPage from './pages/DataSourcesPage';
-import DocumentsPage from './pages/DocumentsPage';
-import ModelsPage from './pages/ModelsPage';
-import ProjectPage from './pages/ProjectPage';
-import PromptTemplatesPage from './pages/PromptTemplatesPage';
-import UsersPage from './pages/UsersPage';
-import WorkflowsPage from './pages/WorkflowsPage';
+import ChatPage from '@pages/ChatPage';
+import DatasetsPage from '@pages/DatasetsPage';
+import DataSourcesPage from '@pages/DataSourcesPage';
+import DocumentsPage from '@pages/DocumentsPage';
+import LoginPage from '@pages/LoginPage';
+import ModelsPage from '@pages/ModelsPage';
+import ProjectPage from '@pages/ProjectPage';
+import ProjectsPage from '@pages/ProjectsPage';
+import PromptTemplatesPage from '@pages/PromptTemplatesPage';
+import UsersPage from '@pages/UsersPage';
+import WorkflowsPage from '@pages/WorkflowsPage';
 
 export const router = createBrowserRouter([
   {

@@ -1,12 +1,38 @@
 # GenAI Mosaik with React + TypeScript + Vite
 
 
-## 1.Project Setup
+## 1. Project Local Setup
 
-1. `npm i` - to install dependencies
-2. `npm run dev` - to start project
-3. Project can be found at at http://localhost:3000
+### 1.1 Backend
+Start the backend by running the following **from the project root**:
+```bash
+make controller
+````
 
+### 1.2 Frontend
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Make sure you have the `.env` with the following variables:
+
+  ```
+
+  VITE_BASE_URL=http://localhost:8001
+  VITE_ENV=development
+
+  ````
+
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+4. Access the project at: [http://localhost:3000](http://localhost:3000)
 
 ## 2. Project Structure
 

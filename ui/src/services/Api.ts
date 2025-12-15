@@ -31,7 +31,7 @@ import { Session } from '@shared/types/session';
 import { Query, Workflow } from '@shared/types/workflow';
 
 class ApiClient {
-  private client;
+  private readonly client;
 
   constructor() {
     this.client = axios.create({
@@ -331,7 +331,7 @@ class ApiClient {
     }
   }
 
-  async updateProject(project: Project) {
+  async updateProject(project: Partial<Project>) {
     try {
       const response = await this.client.put(
         `/projects/${project.name}`,

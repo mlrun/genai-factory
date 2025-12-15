@@ -18,17 +18,19 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        'table-border': '#483f561f',
-        'table-text-muted': '#7f7989',
-        'table-text-default': '#4b4760',
-      },
-    },
-  },
-  plugins: [],
+export const formatDate = (date?: string | number | Date): string => {
+  if (!date) return '-';
+
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '-';
+
+  return d.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
 };
