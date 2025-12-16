@@ -14,8 +14,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@chakra-ui/checkbox": "^2.3.2",
     "@chakra-ui/icons": "^2.1.1",
+    "@chakra-ui/image": "^2.1.0",
+    "@chakra-ui/layout": "^2.3.1",
     "@chakra-ui/react": "^2.8.2",
+    "@chakra-ui/system": "^2.6.2",
+    "@chakra-ui/table": "^2.1.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@tanstack/query-core": "^5.40.0",
@@ -67,7 +72,7 @@
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
-    "vite": "^5.4.0",
+    "vite": "^6.2.0",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.3.2"
   }
