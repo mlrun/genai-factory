@@ -11,9 +11,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@components/shared/Tooltip';
-import SidebarToggle from '@icons/project/sidebar/sidebar-toggle.svg?react';
 import { Slot } from '@radix-ui/react-slot';
 
+import ToggleLock from '@assets/icons/sidebar/toggle-lock.svg?react';
+import ToggleUnlock from '@assets/icons/sidebar/toggle-unlock.svg?react';
 import { cn } from '@shared/cn/utils';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
@@ -249,11 +250,7 @@ const Sidebar = React.forwardRef<SidebarElement, SidebarProps>(
                 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 onClick={togglePin}
               >
-                {pinned ? (
-                  <SidebarToggle />
-                ) : (
-                  <SidebarToggle className="rotate-180" />
-                )}
+                {pinned ? <ToggleLock /> : <ToggleUnlock />}
               </Button>
             )}
           </div>

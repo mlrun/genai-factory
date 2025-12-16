@@ -18,14 +18,14 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import Artifacts from '@assets/icons/project/sidebar/artifacts.svg?react';
-import Dashboard from '@assets/icons/project/sidebar/dashboard.svg?react';
-import DataSets from '@assets/icons/project/sidebar/data-sets.svg?react';
-import DatabaseOutline from '@assets/icons/project/sidebar/database-outline.svg?react';
-import Group from '@assets/icons/project/sidebar/group.svg?react';
-import JobsWorkflows from '@assets/icons/project/sidebar/jobs-workflows.svg?react';
-import MLFunctions from '@assets/icons/project/sidebar/ML-functions.svg?react';
-import Model from '@assets/icons/project/sidebar/model.svg?react';
+import Artifacts from '@assets/icons/sidebar/artifacts.svg?react';
+import Dashboard from '@assets/icons/sidebar/dashboard.svg?react';
+import DataSets from '@assets/icons/sidebar/data-sets.svg?react';
+import DatabaseOutline from '@assets/icons/sidebar/database-outline.svg?react';
+import Group from '@assets/icons/sidebar/group.svg?react';
+import JobsWorkflows from '@assets/icons/sidebar/jobs-workflows.svg?react';
+import MLFunctions from '@assets/icons/sidebar/ML-functions.svg?react';
+import Model from '@assets/icons/sidebar/model.svg?react';
 
 export const getProjectLinks = (projectName: string) => {
   const pathname = `/projects/${projectName}`;
