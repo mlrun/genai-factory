@@ -30,7 +30,7 @@ const ProjectLayout = () => {
       <ProjectSidebar />
       <SidebarInset>
         <Navbar />
-        <div className="flex flex-1 overflow-auto">
+        <div className="flex flex-1 px-14 py-8 overflow-auto">
           <Outlet />
         </div>
       </SidebarInset>
