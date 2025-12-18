@@ -34,14 +34,14 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
 
-function useSidebar(): SidebarContext {
+const useSidebar = (): SidebarContext => {
   const context = React.useContext(SidebarContext);
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider.');
   }
 
   return context;
-}
+};
 
 export type SidebarProviderElement = HTMLDivElement;
 export type SidebarProviderProps = React.ComponentProps<'div'> & {
