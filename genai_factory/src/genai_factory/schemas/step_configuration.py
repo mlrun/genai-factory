@@ -11,19 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
-from typing import List, Optional
-
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithComparableData
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task","path"]
+class StepConfiguration(BaseWithComparableData):
+    _top_level_fields = ["project_id", "workflow_id","agent_id","mcp_server_id"]
 
-    task: str = ""
-    path: str
+    branch: str
+    step_name: str
+    kwargs: Optional[dict[str,str]] = {}
     project_id: str
-    data_sources: List[str] = []
-    producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+    workflow_id: Optional[str] = None
+    model_id: Optional[str] = None
+    agent_id: Optional[str] = None
+    mcp_server_id: Optional[str] = None

@@ -30,6 +30,8 @@ class DataSourceType(str, Enum):
 class DataSource(BaseWithVerMetadata):
     _top_level_fields = ["data_source_type"]
 
-    data_source_type: DataSourceType
     project_id: str
-    database_kwargs: dict[str, str] = {}
+    data_source_type: DataSourceType
+    kwargs: dict[str, str] = {}
+    profile: dict[str, str] = {}
+

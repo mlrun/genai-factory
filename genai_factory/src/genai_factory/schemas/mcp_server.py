@@ -12,18 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional
+from enum import Enum
 
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithWorkMetadata
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task","path"]
+class McpType(str, Enum):
+    GAITOR = "gaitor"
+    CUSTOM = "custom"
 
-    task: str = ""
-    path: str
-    project_id: str
-    data_sources: List[str] = []
-    producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+
+class McpServer(BaseWithWorkMetadata):
+    _top_level_fields = ["mcp_type","project_id","state"]
+    mcp_type: McpType

@@ -11,19 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import List, Optional
+from typing import Optional
 
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task","path"]
+class Schedule(BaseWithVerMetadata):
+    _top_level_fields = ["workflow_id"]
 
-    task: str = ""
-    path: str
-    project_id: str
-    data_sources: List[str] = []
-    producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+    workflow_id: Optional[str] = None
+    configuration: dict
+    status: dict

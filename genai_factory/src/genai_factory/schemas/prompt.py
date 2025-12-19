@@ -11,19 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from enum import Enum
+from typing import Optional
 
-from typing import List, Optional
-
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithComparableData
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task","path"]
+class PromptFormatType(str, Enum):
+    FSTRING = "fstring"
+    MUSTACHE = "mustache"
+    JINJA2 = "jinja2"
 
-    task: str = ""
-    path: str
+class Prompt(BaseWithComparableData):
+    _top_level_fields = ["format","project_id"]
+
+    messages: Optional[dict]
+    input_arguments: dict = {}
+    default_arguments: dict = {}
+    extra_data: dict = {}
+    format: PromptFormatType = ""
     project_id: str
-    data_sources: List[str] = []
-    producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+    models: dict[str,dict] = {}

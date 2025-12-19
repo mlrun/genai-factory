@@ -15,7 +15,7 @@
 from datetime import datetime
 from enum import Enum
 from http.client import HTTPException
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union, List
 
 import yaml
 from pydantic import BaseModel
@@ -79,6 +79,13 @@ class Base(BaseModel):
         return str(self.to_dict(to_datestr=True))
 
 
+class WorkflowState(str, Enum):
+    DRAFT = "draft"
+    TESTED = "tested"
+    EVALUATED = "evaluated"
+    READY = "ready"
+
+
 class BaseWithMetadata(Base):
     name: str
     uid: Optional[str] = None
@@ -94,6 +101,17 @@ class BaseWithOwner(BaseWithMetadata):
 
 class BaseWithVerMetadata(BaseWithOwner):
     version: str = ""
+
+class BaseWithWorkMetadata(BaseWithVerMetadata):
+    branch: str
+    project_id: str
+    type_kwargs: dict
+    structure: dict
+    configuration: dict
+    state: WorkflowState
+
+class BaseWithComparableData(BaseWithVerMetadata):
+    evaluations: List[str] = []
 
 
 class APIResponse(BaseModel):

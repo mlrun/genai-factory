@@ -11,19 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import List, Optional
+from enum import Enum
+from typing import Optional
 
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task","path"]
+class Status(str, Enum):
+    RUNNING = "Running"
+    FAILED = "Failed"
+    SUCCEED = "Succeed"
 
-    task: str = ""
-    path: str
-    project_id: str
-    data_sources: List[str] = []
-    producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+class Run(BaseWithVerMetadata):
+    _top_level_fields = ["schedule_id", "workflow_id"]
+
+    schedule_id: Optional[str] = None
+    workflow_id: str
+    configuration: dict
+    status: Status
+    outputs: dict
+
+
