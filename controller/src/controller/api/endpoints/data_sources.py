@@ -149,7 +149,7 @@ def delete_data_source(
     :param version:      The version of the data source to delete.
     :param db_session:   The database session.
 
-    :returThe response from the database.
+    :return The response from the database.
     """
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
@@ -275,7 +275,7 @@ def ingest(
 
     data = {
         "document": document.to_dict(),
-        "database_kwargs": data_source.database_kwargs,
+        "kwargs": data_source.kwargs,
     }
     if metadata is not None:
         params["metadata"] = json.dumps(metadata)
