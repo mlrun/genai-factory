@@ -14,16 +14,11 @@
 from enum import Enum
 from typing import Optional
 
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithVerMetadata, Status
 
-
-class Status(str, Enum):
-    RUNNING = "Running"
-    FAILED = "Failed"
-    SUCCEED = "Succeed"
 
 class Run(BaseWithVerMetadata):
-    _top_level_fields = ["schedule_id", "workflow_id"]
+    _top_level_fields = ["schedule_id", "workflow_id","status"]
 
     schedule_id: Optional[str] = None
     workflow_id: str

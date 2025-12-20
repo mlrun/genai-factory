@@ -1077,6 +1077,7 @@ class Client(ABC):
             owner_id: str = None,
             version: str = None,
             workflow_id: str = None,
+            status: Union[api_models.Status, str] = None,
             labels_match: Union[list, str] = None,
             output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
             **kwargs,
@@ -1088,6 +1089,7 @@ class Client(ABC):
         :param owner_id:     The owner to filter the schedules by.
         :param version:      The version to filter the schedules by.
         :param workflow_id:  The workflow to filter the schedules by.
+        :param status:       The status to filter the schedules by.
         :param labels_match: The labels to match, filter the schedules by labels.
         :param output_mode:  The output mode.
 
@@ -1154,6 +1156,7 @@ class Client(ABC):
             version: str = None,
             workflow_id: str = None,
             schedule_id: str = None,
+            status: Union[api_models.Status, str] = None,
             labels_match: Union[list, str] = None,
             output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
             **kwargs,
@@ -1165,7 +1168,8 @@ class Client(ABC):
         :param owner_id:     The owner to filter the runs by.
         :param version:      The version to filter the runs by.
         :param workflow_id:  The workflow to filter the runs by.
-        :param schedule_id:   The schedule to filter the runs by.
+        :param schedule_id:  The schedule to filter the runs by.
+        :param status:       The status to filter the runs by.
         :param labels_match: The labels to match, filter the runs by labels.
         :param output_mode:  The output mode.
 

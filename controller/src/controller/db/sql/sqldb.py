@@ -897,6 +897,8 @@ class Schedule(VersionedOwnerBaseSchema):
         index = True
     )
 
+    status: Mapped[str] = mapped_column()
+
     # Relationships:
 
     relationship_args = {"back_populates": "schedule", "cascade": "all, delete-orphan"}
@@ -906,8 +908,10 @@ class Schedule(VersionedOwnerBaseSchema):
     workflow: Mapped["Workflow"] = relationship(back_populates="schedules")
 
 
+
+
     def __init__(
-        self, uid, name, spec, version, workflow_id, description=None, owner_id=None, labels=None
+        self, uid, name, spec, version, workflow_id, status, description=None, owner_id=None, labels=None
     ):
         super().__init__(
             uid=uid,
@@ -919,6 +923,7 @@ class Schedule(VersionedOwnerBaseSchema):
             labels=labels,
         )
         self.workflow_id = workflow_id
+        self.status = status
 
 class Run(VersionedOwnerBaseSchema):
     """
@@ -941,6 +946,8 @@ class Run(VersionedOwnerBaseSchema):
         index = True
     )
 
+    status: Mapped[str] = mapped_column()
+
     # Relationships:
 
     # Many-to-one relationship with workflows:
@@ -948,8 +955,9 @@ class Run(VersionedOwnerBaseSchema):
     schedule: Mapped["Schedule"] = relationship(back_populates="runs")
 
 
+
     def __init__(
-        self, uid, name, spec, version, workflow_id, schedule_id, description=None, owner_id=None, labels=None
+        self, uid, name, spec, version, workflow_id, schedule_id, status, description=None, owner_id=None, labels=None
     ):
         super().__init__(
             uid=uid,
@@ -962,4 +970,5 @@ class Run(VersionedOwnerBaseSchema):
         )
         self.workflow_id = workflow_id
         self.schedule_id = schedule_id
+        self.status = status
 

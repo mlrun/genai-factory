@@ -157,7 +157,7 @@ def initdb():
             description="Default Schedule",
             owner_id=guest_id,
             configuration={},
-            status={}
+            status=Status.PENDING
         ),
         db_session=db_session,
     )
@@ -171,7 +171,7 @@ def initdb():
             owner_id=guest_id,
             workflow_id=project_id,
             configuration={},
-            status=Status.RUNNING,
+            status=Status.PENDING,
             outputs={},
         ),
         db_session=db_session,

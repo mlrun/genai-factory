@@ -13,12 +13,12 @@
 # limitations under the License.
 from typing import Optional
 
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithVerMetadata, Status
 
 
 class Schedule(BaseWithVerMetadata):
-    _top_level_fields = ["workflow_id"]
+    _top_level_fields = ["workflow_id","status"]
 
     workflow_id: Optional[str] = None
     configuration: dict
-    status: dict
+    status: Status

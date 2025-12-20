@@ -1943,6 +1943,7 @@ class SqlClient(Client):
             owner_id: str = None,
             version: str = None,
             workflow_id: str = None,
+            status: Union[api_models.Status, str] = None,
             labels_match: Union[list, str] = None,
             output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
             db_session: sqlalchemy.orm.Session = None,
@@ -1954,6 +1955,7 @@ class SqlClient(Client):
         :param owner_id:     The owner to filter the schedules by.
         :param version:      The version to filter the schedules by.
         :param workflow_id:  The workflow to filter the schedules by.
+        :param status:       The status to filter the schedules by.
         :param labels_match: The labels to match, filter the schedules by labels.
         :param output_mode:  The output mode.
         :param db_session:   The session to use.
@@ -1962,7 +1964,7 @@ class SqlClient(Client):
         """
         logger.debug(
             f"Getting schedules: owner_id={owner_id}, version={version}, workflow_id={workflow_id},"
-            f" labels_match={labels_match}, mode={output_mode}"
+            f" status={status}, labels_match={labels_match}, mode={output_mode}"
         )
         filters = []
         if name:
@@ -1973,6 +1975,8 @@ class SqlClient(Client):
             filters.append(db.Schedule.version == version)
         if workflow_id:
             filters.append(db.Schedule.workflow_id == workflow_id)
+        if status:
+            filters.append(db.Schedule.status == status)
         return self._list(
             session=db_session,
             db_class=db.Schedule,
@@ -2061,6 +2065,7 @@ class SqlClient(Client):
             version: str = None,
             workflow_id: str = None,
             schedule_id: str = None,
+            status: Union[api_models.Status, str] = None,
             labels_match: Union[list, str] = None,
             output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
             db_session: sqlalchemy.orm.Session = None,
@@ -2073,6 +2078,7 @@ class SqlClient(Client):
         :param version:      The version to filter the runs by.
         :param workflow_id:  The workflow to filter the runs by.
         :param schedule_id:     The model to filter the runs by.
+        :param status:       The status to filter the schedules by.
         :param labels_match: The labels to match, filter the runs by labels.
         :param output_mode:  The output mode.
         :param db_session:   The session to use.
@@ -2081,7 +2087,7 @@ class SqlClient(Client):
         """
         logger.debug(
             f"Getting runs: owner_id={owner_id}, version={version}, workflow_id={workflow_id},"
-            f" schedule_id={schedule_id}, labels_match={labels_match}, mode={output_mode}"
+            f" schedule_id={schedule_id}, status={status}, labels_match={labels_match}, mode={output_mode}"
         )
         filters = []
         if name:
@@ -2094,6 +2100,8 @@ class SqlClient(Client):
             filters.append(db.Run.workflow_id == workflow_id)
         if schedule_id:
             filters.append(db.Run.schedule_id == schedule_id)
+        if status:
+            filters.append(db.Schedule.status == status)
         return self._list(
             session=db_session,
             db_class=db.Run,

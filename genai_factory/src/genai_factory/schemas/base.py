@@ -85,6 +85,14 @@ class WorkflowState(str, Enum):
     EVALUATED = "evaluated"
     READY = "ready"
 
+class Status(str, Enum):
+    PENDING="pending"
+    QUEUED="queued"
+    RUNNING = "Running"
+    FAILED = "Failed"
+    SUCCEED = "Succeed"
+
+
 
 class BaseWithMetadata(Base):
     name: str
