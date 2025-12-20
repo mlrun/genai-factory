@@ -75,7 +75,7 @@ class DataLoader:
             chunk_size=config.chunk_size, chunk_overlap=config.chunk_overlap
         )
 
-    def load(self, loader, metadata: dict = None, version: int = None):
+    def load(self, loader, metadata: dict = None, version: str = None):
         """Loads documents into the vector store.
 
         Args:
@@ -128,12 +128,12 @@ class DataLoader:
 def get_data_loader(
     config: WorkflowServerConfig,
     data_source_name: str = None,
-    database_kwargs: dict = None,
+    kwargs: dict = None,
 ) -> DataLoader:
     """Get a data loader instance."""
     vector_db = get_vector_db(
         config,
         collection_name=data_source_name,
-        vector_store_args=database_kwargs,
+        vector_store_args=kwargs,
     )
     return DataLoader(config, vector_store=vector_db)
