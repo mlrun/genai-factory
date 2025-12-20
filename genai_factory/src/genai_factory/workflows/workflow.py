@@ -22,6 +22,7 @@ from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
 from genai_factory.schemas import APIDictResponse, WorkflowType
 from genai_factory.schemas import Workflow as WorkflowSchema
+from genai_factory.schemas.base import WorkflowState
 from genai_factory.sessions import SessionStore
 
 
@@ -36,8 +37,10 @@ class Workflow:
         config: WorkflowServerConfig,
         client: ControllerClient,
         description: str = "",
+        branch: str = "",
         labels: dict = None,
-        deployment: str = None,
+        state: WorkflowState = None,
+        type_kwargs: dict = {},
     ):
         # Validate the skeleton:
         if not skeleton:
@@ -52,11 +55,13 @@ class Workflow:
         self._config = config
         self._labels = labels
         self._description = description
-        self._deployment = deployment
         self._client = client
+        self._branch = branch
+        self._state = state
+        self._type_kwargs = type_kwargs
 
         # Prepare future instances:
-        self._graph = None
+        self._structure = None
         self._server = None
 
     def to_schema(self) -> WorkflowSchema:
@@ -67,16 +72,19 @@ class Workflow:
             version=self._version,
             workflow_type=self._workflow_type,
             configuration=self.get_config(),
-            graph=self._graph.to_dict(),
+            structure=self._structure.to_dict(),
             labels=self._labels,
             description=self._description,
-            deployment=self._deployment,
+            branch=self._branch,
+            state=self._state,
+            type_kwargs=self._type_kwargs,
         )
+    #ToDo: Understand what is deployment in new orm
 
-    def set_deployment(self):
-        self._deployment = os.path.join(
-            self._config.deployment_url, f"api/workflows/{self._name}/infer"
-        )
+    # def set_deployment(self):
+    #     self._deployment = os.path.join(
+    #         self._config.deployment_url, f"api/workflows/{self._name}/infer"
+    #     )
 
     def get_config(self):
         return self._config.workflows_kwargs.get(self._name, {})
@@ -88,8 +96,8 @@ class Workflow:
             "steps", {}
         )
         if isinstance(self._skeleton, list):
-            self._graph = mlrun_serving.states.RootFlowStep()
-            last_step = self._graph
+            self._structure = mlrun_serving.states.RootFlowStep()
+            last_step = self._structure
             for step in self._skeleton:
                 if isinstance(step, dict):
                     step_name = step.get("name", step["class_name"])
@@ -105,8 +113,8 @@ class Workflow:
             return
 
         # Skeleton is a graph dictionary:
-        self._graph = mlrun_serving.states.RootFlowStep.from_dict(self._skeleton)
-        for step in self._graph:
+        self._structure = mlrun_serving.states.RootFlowStep.from_dict(self._skeleton)
+        for step in self._structure:
             if step.name in getattr(steps_config, "steps", {}):
                 step.class_args = steps_config["steps"][step.name]
 
@@ -115,7 +123,7 @@ class Workflow:
         if self._server is None:
             namespace = get_caller_globals()
             server = mlrun_serving.create_graph_server(
-                graph=self._graph,
+                graph=self._structure,
                 parameters={},
                 verbose=self._config.verbose,
                 graph_initializer=self.graph_initializer,

@@ -54,15 +54,14 @@ class Client(ABC):
 
     @abstractmethod
     def get_user(
-        self, uid: str = None, name: str = None, email: str = None, **kwargs
+        self, uid: str = None, name: str = None, **kwargs
     ) -> Optional[api_models.User]:
         """
         Get a user from the database.
-        Either user_id or user_name or email must be provided.
+        Either user_id or user_name.
 
         :param uid:   The UID of the user to get.
         :param name:  The name of the user to get.
-        :param email: The email of the user to get.
 
         :return: The user.
         """
@@ -95,8 +94,6 @@ class Client(ABC):
     def list_users(
         self,
         name: str = None,
-        email: str = None,
-        full_name: str = None,
         labels_match: Union[list, str] = None,
         output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
         **kwargs,
@@ -105,8 +102,6 @@ class Client(ABC):
         List users from the database.
 
         :param name:         The name to filter the users by.
-        :param email:        The email to filter the users by.
-        :param full_name:    The full name to filter the users by.
         :param labels_match: The labels to match, filter the users by labels.
         :param output_mode:  The output mode.
 
@@ -409,50 +404,50 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def create_prompt_template(
-        self, prompt_template: Union[api_models.PromptTemplate, dict], **kwargs
-    ) -> api_models.PromptTemplate:
+    def create_prompt(
+            self, prompt: Union[api_models.Prompt, dict], **kwargs
+    ) -> api_models.Prompt:
         """
-        Create a new prompt template in the database.
+        Create a new prompt in the database.
 
-        :param prompt_template: The prompt template object to create.
+        :param prompt: The prompt object to create.
 
-        :return: The created prompt template.
-        """
-        pass
-
-    @abstractmethod
-    def get_prompt_template(
-        self, name: str, **kwargs
-    ) -> Optional[api_models.PromptTemplate]:
-        """
-        Get a prompt template from the database.
-
-        :param name: The name of the prompt template to get.
-
-        :return: The requested prompt template.
+        :return: The created prompt.
         """
         pass
 
     @abstractmethod
-    def update_prompt_template(
-        self,
-        name: str,
-        prompt_template: Union[api_models.PromptTemplate, dict],
-        **kwargs,
-    ) -> api_models.PromptTemplate:
+    def get_prompt(
+            self, name: str, **kwargs
+    ) -> Optional[api_models.Prompt]:
         """
-        Update an existing prompt template in the database.
+        Get a prompt from the database.
 
-        :param name:            The name of the prompt template to update.
-        :param prompt_template: The prompt template object with the new data.
+        :param name: The name of the prompt to get.
 
-        :return: The updated prompt template.
+        :return: The requested prompt.
         """
         pass
 
     @abstractmethod
-    def delete_prompt_template(self, name: str, **kwargs):
+    def update_prompt(
+            self,
+            name: str,
+            prompt: Union[api_models.Prompt, dict],
+            **kwargs,
+    ) -> api_models.Prompt:
+        """
+        Update an existing prompt in the database.
+
+        :param name:   The name of the prompt to update.
+        :param prompt: The prompt object with the new data.
+
+        :return: The updated prompt.
+        """
+        pass
+
+    @abstractmethod
+    def delete_prompt(self, name: str, **kwargs):
         """
         Delete a prompt template from the database.
 
@@ -461,27 +456,29 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def list_prompt_templates(
-        self,
-        name: str = None,
-        owner_id: str = None,
-        version: str = None,
-        project_id: str = None,
-        labels_match: Union[list, str] = None,
-        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-        **kwargs,
-    ) -> List[Optional[api_models.PromptTemplate]]:
+    def list_prompts(
+            self,
+            name: str = None,
+            owner_id: str = None,
+            version: str = None,
+            project_id: str = None,
+            prompt_format: Union[api_models.PromptFormatType, str] = None,
+            labels_match: Union[list, str] = None,
+            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+            **kwargs,
+    ) -> List[Optional[api_models.Prompt]]:
         """
-        List prompt templates from the database.
+        List prompts from the database.
 
-        :param name:         The name to filter the prompt templates by.
-        :param owner_id:     The owner to filter the prompt templates by.
-        :param version:      The version to filter the prompt templates by.
-        :param project_id:   The project to filter the prompt templates by.
-        :param labels_match: The labels to match, filter the prompt templates by labels.
+        :param name:         The name to filter the prompt by.
+        :param owner_id:     The owner to filter the prompt by.
+        :param version:      The version to filter the prompt by.
+        :param project_id:   The project to filter the prompt by.
+        :param prompt_format:The prompt to filter the prompt by.
+        :param labels_match: The labels to match, filter the prompt by labels.
         :param output_mode:  The output mode.
 
-        :return: The list of prompt templates.
+        :return: The list of prompts.
         """
         pass
 
@@ -613,6 +610,7 @@ class Client(ABC):
         project_id: str = None,
         workflow_type: Union[api_models.WorkflowType, str] = None,
         labels_match: Union[list, str] = None,
+        state: Union[api_models.WorkflowState, str] = None,
         output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
         **kwargs,
     ) -> List[Optional[api_models.Workflow]]:
@@ -625,11 +623,166 @@ class Client(ABC):
         :param project_id:    The project to filter the workflows by.
         :param workflow_type: The workflow type to filter the workflows by.
         :param labels_match:  The labels to match, filter the workflows by labels.
+        :param state:The state to match, filter the workflows by state.
         :param output_mode:   The output mode.
 
         :return: The list of workflows.
         """
         pass
+
+    @abstractmethod
+    def create_agent(
+        self, agent: Union[api_models.Agent, dict], **kwargs
+    ) -> api_models.Agent:
+        """
+        Create a new agent in the database.
+
+        :param agent: The agent object to create.
+
+        :return: The created agent.
+        """
+        pass
+
+    @abstractmethod
+    def get_agent(self, name: str, **kwargs) -> Type[api_models.Base]:
+        """
+        Get an agent from the database.
+
+        :param name: The name of the agent to get.
+
+        :return:       The requested agent.
+        """
+        pass
+
+    @abstractmethod
+    def update_agent(
+        self, name: str, agent: Union[api_models.Agent, dict], **kwargs
+    ) -> api_models.Agent:
+        """
+        Update an existing agent in the database.
+
+        :param name:  The name of the agent to update.
+        :param agent: The agent object with the new data.
+
+        :return: The updated agent.
+        """
+        pass
+
+    @abstractmethod
+    def delete_agent(self, name: str, **kwargs):
+        """
+        Delete an agent from the database.
+
+        :param name: The name of the agent to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_agents(
+        self,
+        name: str = None,
+        owner_id: str = None,
+        version: str = None,
+        project_id: str = None,
+        agent_type: Union[api_models.AgentType, str] = None,
+        labels_match: Union[list, str] = None,
+        state: Union[api_models.WorkflowState, str] = None,
+        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+        **kwargs,
+    ) -> List[Optional[api_models.Agent]]:
+        """
+        List agents from the database.
+
+        :param name:          The name to filter the agents by.
+        :param owner_id:      The owner to filter the agents by.
+        :param version:       The version to filter the agents by.
+        :param project_id:    The project to filter the agents by.
+        :param agent_type:    The agent type to filter the agents by.
+        :param labels_match:  The labels to match, filter the agents by labels.
+        :param state:         The state to match, filter the agents by state.
+        :param output_mode:   The output mode.
+
+        :return: The list of agents.
+        """
+        pass
+
+    @abstractmethod
+    def create_mcp_server(
+        self, mcp_server: Union[api_models.McpServer, dict], **kwargs
+    ) -> api_models.McpServer:
+        """
+        Create a new mcp_server in the database.
+
+        :param mcp_server: The mcp_server object to create.
+
+        :return: The created mcp_server.
+        """
+        pass
+
+    @abstractmethod
+    def get_mcp_server(self, name: str, **kwargs) -> Type[api_models.Base]:
+        """
+        Get a mcp_server from the database.
+
+        :param name: The name of the mcp_server to get.
+
+        :return:       The requested mcp_server.
+        """
+        pass
+
+    @abstractmethod
+    def update_mcp_server(
+        self, name: str, mcp_server: Union[api_models.McpServer, dict], **kwargs
+    ) -> api_models.McpServer:
+        """
+        Update an existing mcp_server in the database.
+
+        :param name:       The name of the mcp_server to update.
+        :param mcp_server: The mcp_server object with the new data.
+
+        :return: The updated mcp_server.
+        """
+        pass
+
+    @abstractmethod
+    def delete_mcp_server(self, name: str, **kwargs):
+        """
+        Delete a mcp_server from the database.
+
+        :param name: The name of the mcp_server to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_mcp_servers(
+        self,
+        name: str = None,
+        owner_id: str = None,
+        version: str = None,
+        project_id: str = None,
+        mcp_type: Union[api_models.McpType, str] = None,
+        labels_match: Union[list, str] = None,
+        state: Union[api_models.WorkflowState, str] = None,
+        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+        **kwargs,
+    ) -> List[Optional[api_models.McpServer]]:
+        """
+        List mcp_servers from the database.
+
+        :param name:          The name to filter the mcp_servers by.
+        :param owner_id:      The owner to filter the mcp_servers by.
+        :param version:       The version to filter the mcp_servers by.
+        :param project_id:    The project to filter the mcp_servers by.
+        :param mcp_type:      The mcp_server type to filter the mcp_servers by.
+        :param labels_match:  The labels to match, filter the mcp_servers by labels.
+        :param state:         The state to match, filter the mcp_servers by state.
+        :param output_mode:   The output mode.
+
+        :return: The list of mcp_servers.
+        """
+        pass
+
+
 
     @abstractmethod
     def create_session(
@@ -706,3 +859,317 @@ class Client(ABC):
         :return: The list of chat sessions.
         """
         pass
+
+    @abstractmethod
+    def create_step_configuration(
+            self, step_configuration: Union[api_models.StepConfiguration, dict], **kwargs
+    ) -> api_models.StepConfiguration:
+        """
+        Create a new step configuration in the database.
+
+        :param step_configuration: The step configuration object to create.
+
+        :return: The created step configuration.
+        """
+        pass
+
+    @abstractmethod
+    def get_step_configuration(
+            self, name: str = None, uid: str = None, **kwargs
+    ) -> Optional[api_models.StepConfiguration]:
+        """
+        Get a step configuration from the database.
+
+        :param name:    The name of the step configuration to get.
+        :param uid:     The ID of the step configuration to get.
+
+        :return: The requested step configuration.
+        """
+        pass
+
+    @abstractmethod
+    def update_step_configuration(
+            self, name: str, step_configuration: Union[api_models.StepConfiguration, dict], **kwargs
+    ) -> api_models.StepConfiguration:
+        """
+        Update a step configuration in the database.
+
+        :param name:    The name of the step configuration to update.
+        :param          step_configuration: The step configuration object with the new data.
+
+        :return: The updated chat step configuration.
+        """
+        pass
+
+    @abstractmethod
+    def delete_step_configuration(self, name: str, **kwargs):
+        """
+        Delete a step configuration from the database.
+
+        :param name: The name of the step configuration to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_step_configurations(
+            self,
+            name: str = None,
+            owner_id: str = None,
+            version: str = None,
+            project_id: str = None,
+            workflow_id: str = None,
+            labels_match: Union[list, str] = None,
+            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+            **kwargs,
+    )-> List[Optional[api_models.StepConfiguration]]:
+        """
+        List step configurations from the database.
+
+        :param name:         The name to filter the step configurations by.
+        :param owner_id:     The owner to filter the step configurations by.
+        :param version:      The version to filter the step configurations by.
+        :param project_id:   The project to filter the step configurations by.
+        :param workflow_id:  The workflow to filter the step configurations by.
+        :param labels_match: The labels to match, filter the step configurations by labels.
+        :param output_mode:  The output mode.
+
+        :return: The list of step configurations.
+        """
+        pass
+
+    @abstractmethod
+    def create_deployment(
+            self, deployment: Union[api_models.Deployment, dict], **kwargs
+    ) -> api_models.Deployment:
+        """
+        Create a new deployment in the database.
+
+        :param deployment: The deployment object to create.
+
+        :return: The created deployment.
+        """
+        pass
+
+    @abstractmethod
+    def get_deployment(
+            self, name: str = None, uid: str = None, **kwargs
+    ) -> Optional[api_models.Deployment]:
+        """
+        Get a deployment from the database.
+
+        :param name:    The name of the deployment to get.
+        :param uid:     The ID of the deployment to get.
+
+        :return: The requested deployment.
+        """
+        pass
+
+    @abstractmethod
+    def update_deployment(
+            self, name: str, deployment: Union[api_models.Deployment, dict], **kwargs
+    ) -> api_models.Deployment:
+        """
+        Update a deployment in the database.
+
+        :param name:        The name of the deployment to update.
+        :param deployment:  The deployment object with the new data.
+
+        :return: The updated chat deployment.
+        """
+        pass
+
+    @abstractmethod
+    def delete_deployment(self, name: str, **kwargs):
+        """
+        Delete a deployment from the database.
+
+        :param name: The name of the deployment to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_deployments(
+            self,
+            name: str = None,
+            owner_id: str = None,
+            version: str = None,
+            project_id: str = None,
+            workflow_id: str = None,
+            model_id: str = None,
+            agent_id: str = None,
+            mcp_server_id: str = None,
+            labels_match: Union[list, str] = None,
+            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+            **kwargs,
+    )-> List[Optional[api_models.Deployment]]:
+        """
+        List deployments from the database.
+
+        :param name:         The name to filter the deployments by.
+        :param owner_id:     The owner to filter the deployments by.
+        :param version:      The version to filter the deployments by.
+        :param project_id:   The project to filter the deployments by.
+        :param workflow_id:  The workflow to filter the deployments by.
+        :param model_id:     The model to filter the deployments by.
+        :param agent_id:     The agent to filter the deployments by.
+        :param mcp_server_id:The mcp server to filter the deployments by.
+        :param labels_match: The labels to match, filter the deployments by labels.
+        :param output_mode:  The output mode.
+
+        :return: The list of deployments.
+        """
+        pass
+
+    @abstractmethod
+    def create_schedule(
+            self, schedule: Union[api_models.Schedule, dict], **kwargs
+    ) -> api_models.Schedule:
+        """
+        Create a new schedule in the database.
+
+        :param schedule: The schedule object to create.
+
+        :return: The created schedule.
+        """
+        pass
+
+    @abstractmethod
+    def get_schedule(
+            self, name: str = None, uid: str = None, **kwargs
+    ) -> Optional[api_models.Schedule]:
+        """
+        Get a schedule from the database.
+
+        :param name:    The name of the schedule to get.
+        :param uid:     The ID of the schedule to get.
+
+        :return: The requested schedule.
+        """
+        pass
+
+    @abstractmethod
+    def update_schedule(
+            self, name: str, schedule: Union[api_models.Schedule, dict], **kwargs
+    ) -> api_models.Schedule:
+        """
+        Update a schedule in the database.
+
+        :param name:        The name of the schedule to update.
+        :param schedule:  The schedule object with the new data.
+
+        :return: The updated chat schedule.
+        """
+        pass
+
+    @abstractmethod
+    def delete_schedule(self, name: str, **kwargs):
+        """
+        Delete a schedule from the database.
+
+        :param name: The name of the schedule to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_schedules(
+            self,
+            name: str = None,
+            owner_id: str = None,
+            version: str = None,
+            workflow_id: str = None,
+            labels_match: Union[list, str] = None,
+            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+            **kwargs,
+    )-> List[Optional[api_models.Schedule]]:
+        """
+        List schedules from the database.
+
+        :param name:         The name to filter the schedules by.
+        :param owner_id:     The owner to filter the schedules by.
+        :param version:      The version to filter the schedules by.
+        :param workflow_id:  The workflow to filter the schedules by.
+        :param labels_match: The labels to match, filter the schedules by labels.
+        :param output_mode:  The output mode.
+
+        :return: The list of schedules.
+        """
+        pass
+
+
+    @abstractmethod
+    def create_run(
+            self, run: Union[api_models.Run, dict], **kwargs
+    ) -> api_models.Run:
+        """
+        Create a new run in the database.
+
+        :param run: The run object to create.
+
+        :return: The created run.
+        """
+        pass
+
+    @abstractmethod
+    def get_run(
+            self, name: str = None, uid: str = None, **kwargs
+    ) -> Optional[api_models.Run]:
+        """
+        Get a run from the database.
+
+        :param name:    The name of the run to get.
+        :param uid:     The ID of the run to get.
+
+        :return: The requested run.
+        """
+        pass
+
+    @abstractmethod
+    def update_run(
+            self, name: str, run: Union[api_models.Run, dict], **kwargs
+    ) -> api_models.Run:
+        """
+        Update a run in the database.
+
+        :param name:        The name of the run to update.
+        :param run:  The run object with the new data.
+
+        :return: The updated chat run.
+        """
+        pass
+
+    @abstractmethod
+    def delete_run(self, name: str, **kwargs):
+        """
+        Delete a run from the database.
+
+        :param name: The name of the run to delete.
+        """
+        pass
+
+    @abstractmethod
+    def list_runs(
+            self,
+            name: str = None,
+            owner_id: str = None,
+            version: str = None,
+            workflow_id: str = None,
+            schedule_id: str = None,
+            labels_match: Union[list, str] = None,
+            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
+            **kwargs,
+    )-> List[Optional[api_models.Run]]:
+        """
+        List runs from the database.
+
+        :param name:         The name to filter the runs by.
+        :param owner_id:     The owner to filter the runs by.
+        :param version:      The version to filter the runs by.
+        :param workflow_id:  The workflow to filter the runs by.
+        :param schedule_id:   The schedule to filter the runs by.
+        :param labels_match: The labels to match, filter the runs by labels.
+        :param output_mode:  The output mode.
+
+        :return: The list of runs.
+        """
+        pass
+
