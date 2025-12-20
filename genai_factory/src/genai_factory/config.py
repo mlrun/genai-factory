@@ -41,6 +41,33 @@ class WorkflowServerConfig(BaseModel):
     MLRun project name to use for the workflows. Default: default.
     """
 
+    mlrun_api_url: str = "http://localhost:30070"
+    """
+    URL to use for the mlrun API. Default: http://localhost:30070.
+    """
+
+    workflow_api_name: str = "default"
+    """
+    Workflow application name to use for the application runtime. Default: default.
+    """
+
+    workflow_source_url: str = ""
+    """
+    Workflow source code git repository. Default: "".
+    """
+
+    image_requirements: list[str] = [
+        "git+https://github.com/tomerbv/genai-factory.git@nuclio_deployment",
+    ]
+    """
+    MLRun default image requirements for creating images. Default: [].
+    """
+
+    deployment_url: str = "http://localhost:8000"
+    """
+    URL to use for the workflows server deployment API. Default: http://localhost:8000.
+    """
+
     verbose: bool = True
     """
     Whether to print verbose logs. Default: True.
@@ -49,11 +76,6 @@ class WorkflowServerConfig(BaseModel):
     log_level: str = "INFO"
     """
     The log level. Default: INFO.
-    """
-
-    deployment_url: str = "http://localhost:8000"
-    """
-    URL to use for the workflows server deployment API. Default: http://localhost:8000.
     """
 
     workflows_kwargs: dict[str, dict] = {}

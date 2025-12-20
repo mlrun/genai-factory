@@ -38,7 +38,7 @@ down: ## Stop GenAI factory controller and UI
 .PHONY: controller
 controller:
 	# Build controller's image:
-	docker build -f controller/Dockerfile -t $(CONTROLLER_NAME):latest .
+	docker build --platform=linux/amd64 -f controller/Dockerfile -t $(CONTROLLER_NAME):latest .
 
 	# Run controller locally in a container:
 	docker run -d -p 8001:8001 --name $(CONTROLLER_NAME) $(CONTROLLER_NAME):latest
