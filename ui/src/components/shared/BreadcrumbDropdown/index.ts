@@ -18,25 +18,4 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Outlet } from 'react-router-dom';
-
-import ProjectBreadcrumbs from '@components/feature/Project/ProjectBreadcrumbs';
-import { SidebarInset, SidebarProvider } from '@components/shared/Sidebar';
-import Navbar from '@layout/Navbar';
-import ProjectSidebar from '@layout/ProjectSidebar';
-
-const ProjectLayout = () => {
-  return (
-    <SidebarProvider defaultOpen={false}>
-      <ProjectSidebar />
-      <SidebarInset>
-        <Navbar breadcrumbs={<ProjectBreadcrumbs />} />
-        <div className="flex flex-1 px-14 py-8 overflow-auto">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  );
-};
-
-export default ProjectLayout;
+export { default } from './BreadcrumbDropdown';

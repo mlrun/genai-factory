@@ -55,9 +55,6 @@ body {
   --rightbar-input-border-color: #dcdfe8;
   --failed-color: #fc3426;
 
-  --project-label-border: #e0e9f5;
-  --project-label-text: #333;
-
   --text-size-number: 0.0625rem;
 
   --text-size-12: calc(var(--text-size-number) * 12);
@@ -85,7 +82,7 @@ body {
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.74 0.01 0);
+  --muted-foreground: oklch(0.551 0.032 256.544);
   --accent: oklch(0.96 0.019 263.009);
   --accent-foreground: oklch(0.553 0.226 260.044);
   --destructive: oklch(0.577 0.245 27.325);
@@ -154,11 +151,7 @@ b {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
-  --color-project-label-from: #0054c9;
-  --color-project-label-to: #0054c9;
-  --color-project-label-border: var(--project-label-border);
-  --color-project-label-text: var(--project-label-text);}
+}
 
 .dark {
   --background: oklch(0.145 0 0);
@@ -192,10 +185,6 @@ b {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-}
-
-@utility bg-project-label-gradient {
-  @apply bg-linear-0 from-project-label-from/3 to-project-label-to/3;
 }
 
 @layer base {
