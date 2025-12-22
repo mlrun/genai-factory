@@ -32,6 +32,7 @@ import ProjectPage from '@pages/ProjectPage';
 import ProjectsPage from '@pages/ProjectsPage';
 import PromptTemplatesPage from '@pages/PromptTemplatesPage';
 import UsersPage from '@pages/UsersPage';
+import WorkflowPage from '@pages/WorkflowPage';
 import WorkflowsPage from '@pages/WorkflowsPage';
 
 export const router = createBrowserRouter([
@@ -53,7 +54,6 @@ export const router = createBrowserRouter([
       { path: 'projects/:name', element: <ProjectPage /> },
       { path: 'chat', element: <ChatPage /> },
       { path: 'chat/:sessionName', element: <ChatPage /> },
-
       {
         path: 'projects/:name',
         element: <ProjectLayout />,
@@ -67,6 +67,10 @@ export const router = createBrowserRouter([
           { path: 'workflows', element: <WorkflowsPage /> },
           { path: 'users', element: <UsersPage /> },
         ],
+      },
+      {
+        path: '/projects/:name/workflows/:workflowName',
+        element: <WorkflowPage />,
       },
     ],
   },

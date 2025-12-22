@@ -19,6 +19,7 @@ such restriction.
 */
 
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import EntityTable from '@components/shared/EntityTable';
 import Loading from '@components/shared/Loading';
@@ -31,6 +32,7 @@ import { workflowFields } from '@constants';
 
 const WorkflowsPage = () => {
   const { data: publicUser } = useUser();
+  const navigate = useNavigate();
 
   const {
     create,
@@ -107,6 +109,7 @@ const WorkflowsPage = () => {
       updateEntity={(d) => update.mutate(d)}
       deleteEntity={(id) => remove.mutate(id)}
       newEntityDefaults={newEntity}
+      onRowClick={(workflow) => navigate(workflow.name)}
     />
   );
 };
