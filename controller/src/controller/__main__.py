@@ -31,17 +31,7 @@ from genai_factory.schemas import (
     Project,
     QueryItem,
     User,
-    DataSourceType,
-    Dataset,
-    Model,
-    StepConfiguration,
-    Deployment, DeploymentType,
-    Schedule,
-    Run,
-    Status,
-    Agent, AgentType,
-    WorkflowState,
-    McpServer, McpType, Workflow, WorkflowType
+    DataSourceType
 )
 
 
@@ -99,149 +89,6 @@ def initdb():
             owner_id=guest_id,
             project_id=project_id,
             data_source_type=DataSourceType.VECTOR,
-        ),
-        db_session=db_session,
-    )
-
-    # Create data set:
-    click.echo("Creating default data set")
-    client.create_dataset(
-        Dataset(
-            name="default",
-            description="Default Data Set",
-            owner_id=guest_id,
-            project_id=project_id,
-            path = "",
-            producer = {}
-        ),
-        db_session=db_session,
-    )
-
-    # Create model:
-    click.echo("Creating default model")
-    client.create_model(
-        Model(
-            name="default",
-            description="Default Data Set",
-            owner_id=guest_id,
-            project_id=project_id,
-            is_adapter = False,
-            producer= {},
-            source="default",
-        ),
-        db_session=db_session,
-    )
-
-    # create deployment
-    click.echo("Creating default deployment")
-    client.create_deployment(
-        Deployment(
-            name="default",
-            description="Default Step Configuration",
-            owner_id=guest_id,
-            project_id=project_id,
-            model_id=project_id,
-            is_remote=False,
-            type=DeploymentType.MODEL,
-            status={},
-            configuration={}
-        ),
-        db_session=db_session,
-    )
-
-    # create schedule
-    click.echo("Creating default deployment")
-    client.create_schedule(
-        Schedule(
-            name="default",
-            description="Default Schedule",
-            owner_id=guest_id,
-            configuration={},
-            status=Status.PENDING
-        ),
-        db_session=db_session,
-    )
-
-    # create run
-    click.echo("Creating default run")
-    client.create_run(
-        Run(
-            name="default",
-            description="Default Schedule",
-            owner_id=guest_id,
-            workflow_id=project_id,
-            configuration={},
-            status=Status.PENDING,
-            outputs={},
-        ),
-        db_session=db_session,
-    )
-
-    # create workflow
-    click.echo("Creating default workflow")
-    client.create_workflow(
-        Workflow(
-            name="default_workflow",
-            description="Default Workflow for init",
-            owner_id=guest_id,
-            project_id=project_id,
-            configuration={},
-            type_kwargs={},
-            structure={},
-            state=WorkflowState.DRAFT,
-            workflow_type=WorkflowType.APPLICATION,
-            branch="",
-        ),
-        db_session=db_session,
-    )
-
-    # create agent
-    click.echo("Creating default agent")
-    client.create_agent(
-        Agent(
-            name="default",
-            description="Default Agent",
-            owner_id=guest_id,
-            project_id=project_id,
-            configuration={},
-            type_kwargs={},
-            structure={},
-            state=WorkflowState.DRAFT,
-            agent_type=AgentType.SINGLE,
-            branch="",
-        ),
-        db_session=db_session,
-    )
-
-    # create Mcp
-    click.echo("Creating default Mcp Server")
-    client.create_mcp_server(
-        McpServer(
-            name="default",
-            description="Default Schedule",
-            owner_id=guest_id,
-            project_id=project_id,
-            configuration={},
-            type_kwargs={},
-            structure={},
-            mcp_type=McpType.GAITOR,
-            state=WorkflowState.DRAFT,
-            branch="",
-        ),
-        db_session=db_session,
-    )
-
-    # create step configuration
-    click.echo("Creating default step configuration")
-    client.create_step_configuration(
-        StepConfiguration(
-            name="default",
-            description="Default Step Configuration",
-            owner_id=guest_id,
-            project_id=project_id,
-            branch="default",
-            step_name="default",
-            workflow_id=project_id,
         ),
         db_session=db_session,
     )
@@ -422,46 +269,6 @@ def list_users(user):
     data = client.list_users(user, output_mode="short")
     table = format_table_results(data)
     click.echo(table)
-
-@click.command("projects")
-def list_projects():
-    """
-    List all the projects in the database
-
-    """
-    click.echo("Running List Users")
-
-    data = client.list_projects(output_mode="short")
-    table = format_table_results(data)
-    click.echo(table)
-
-@click.command("documents")
-def list_documents():
-    """
-    List all the documents in the database
-
-    """
-    click.echo("Running List Documents")
-
-    data = client.list_documents(output_mode="short")
-    table = format_table_results(data)
-    click.echo(table)
-
-@click.command("step-configurations")
-def list_step_configurations():
-    """
-    List all the step configurations in the database
-
-    """
-    click.echo("Running List Step Configurations")
-
-    data = client.list_step_configurations(output_mode="short")
-    table = format_table_results(data)
-    click.echo(table)
-
-
-
-
 
 @click.command("data-sources")
 @click.option("-o", "--owner", type=str, help="owner filter")
@@ -653,8 +460,6 @@ cli.add_command(list)
 list.add_command(list_users)
 list.add_command(list_data_sources)
 list.add_command(list_sessions)
-list.add_command(list_projects)
-list.add_command(list_documents)
 
 cli.add_command(update)
 update.add_command(update_data_source)
