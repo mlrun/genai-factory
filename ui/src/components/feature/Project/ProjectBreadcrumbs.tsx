@@ -33,7 +33,7 @@ import { DropdownMenuItem } from '@components/shared/DropdownMenu';
 import { getProjectLinks } from '@layout/ProjectSidebar/projectLinks.util';
 import { useProject, useProjects } from '@queries';
 
-import { PATHNAME_SCREEN_INDEX, PROJECTS_BASE_PATH } from '@constants';
+import { PROJECTS_BASE_PATH, SCREEN_PATH_INDEX } from '@constants';
 
 const ProjectBreadcrumbs = () => {
   const { pathname } = useLocation();
@@ -46,7 +46,7 @@ const ProjectBreadcrumbs = () => {
   );
 
   const currentScreen = useMemo(
-    () => pathname.split('/')[PATHNAME_SCREEN_INDEX],
+    () => pathname.split('/')[SCREEN_PATH_INDEX],
     [pathname],
   );
 
@@ -59,7 +59,7 @@ const ProjectBreadcrumbs = () => {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link to={PROJECTS_BASE_PATH}>Projects</Link>
+            <Link to={`/${PROJECTS_BASE_PATH}`}>Projects</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
@@ -67,8 +67,8 @@ const ProjectBreadcrumbs = () => {
           <BreadcrumbDropdown>
             {projects.map((project) => {
               const path = currentScreen
-                ? `${PROJECTS_BASE_PATH}/${project.name}/${currentScreen}`
-                : `${PROJECTS_BASE_PATH}/${project.name}`;
+                ? `/${PROJECTS_BASE_PATH}/${project.name}/${currentScreen}`
+                : `/${PROJECTS_BASE_PATH}/${project.name}`;
 
               return (
                 <DropdownMenuItem key={project.uid} asChild>
@@ -82,7 +82,7 @@ const ProjectBreadcrumbs = () => {
         {project && (
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to={`${PROJECTS_BASE_PATH}/${project.name}`}>
+              <Link to={`/${PROJECTS_BASE_PATH}/${project.name}`}>
                 {project.name}
               </Link>
             </BreadcrumbLink>

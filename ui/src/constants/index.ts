@@ -30,30 +30,41 @@ export * from './userFields';
 export * from './workflowFields';
 export * from './projectFields';
 
+// -----------------------------------------------------------------------------
+// UI text
+// -----------------------------------------------------------------------------
 export const NEW_BUTTON_TEXT_PREFIX = 'New';
 
 export const PROJECT_TABLE_TITLE = 'projects';
 export const PROJECT_ENTITY_NAME = 'project';
 
-export const PROJECTS_BASE_PATH = '/projects';
-export const PATHNAME_SCREEN_INDEX = 3;
+// -----------------------------------------------------------------------------
+// Routing
+// -----------------------------------------------------------------------------
+export const PROJECTS_BASE_PATH = 'projects';
+export const SCREEN_PATH_INDEX = 3;
+
+const MINUTE = 60 * 1000;
 
 export const QUERY_DEFAULTS = {
-  staleTime: 5 * 60 * 1000,
+  staleTime: 5 * MINUTE,
   retry: 1,
   refetchOnWindowFocus: false,
 } as const;
 
 export const TOGGLE_OPTIONS = [
-  { value: 'card' as const, Icon: CardIcon },
-  { value: 'list' as const, Icon: ListIcon },
-];
+  { value: 'card', Icon: CardIcon },
+  { value: 'list', Icon: ListIcon },
+] as const;
 
+// -----------------------------------------------------------------------------
+// Tables
+// -----------------------------------------------------------------------------
 export const TABLE_LABELS = {
   UPDATE: 'Update',
   DELETE: 'Delete',
   NO_ROWS: 'No rows available',
-};
+} as const;
 
 export const SORT_DIRECTION = {
   ASC: 'asc',
