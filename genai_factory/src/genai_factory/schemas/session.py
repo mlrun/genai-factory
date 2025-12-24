@@ -17,7 +17,7 @@ from typing import List, Optional, Tuple
 
 from pydantic import BaseModel
 
-from genai_factory.schemas.base import BaseWithOwner
+from genai_factory.schemas.base import BaseWithVerMetadata
 
 
 class QueryItem(BaseModel):
@@ -38,9 +38,9 @@ class ChatRole(str, Enum):
 class Message(BaseModel):
     role: ChatRole
     content: str
-    extra_data: Optional[dict] = None
     sources: Optional[List[dict]] = None
-    human_feedback: Optional[str] = None
+    human_feedback: Optional[List[dict]] = None
+    extra_data: Optional[List[dict]] = None
 
 
 class Conversation(BaseModel):
@@ -64,12 +64,13 @@ class Conversation(BaseModel):
         return cls.model_validate({"messages": data or []})
 
 
-class ChatSession(BaseWithOwner):
+class ChatSession(BaseWithVerMetadata):
     _extra_fields = ["history"]
     _top_level_fields = ["workflow_id"]
 
     workflow_id: str
     history: List[Message] = []
+    extra_data: Optional[dict] = None
 
     def to_conversation(self):
         return Conversation.from_list(self.history)

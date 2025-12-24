@@ -12,44 +12,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Depends
 
-from controller.api.utils import AuthInfo, get_auth_user, get_db, parse_version
+from controller.api.utils import (
+    AuthInfo,
+    get_auth_user,
+    get_db,
+    parse_version,
+)
 from controller.db import client
-from genai_factory.schemas import APIResponse, OutputMode, PromptTemplate
+from genai_factory.schemas import (
+    APIResponse,
+    OutputMode,
+    McpServer,
+    McpType,
+    WorkflowState
+)
 
 router = APIRouter(prefix="/projects/{project_name}")
 
 
-@router.post("/prompt_templates")
-def create_prompt(
+@router.post("/mcp_servers")
+def create_mcp_server(
     project_name: str,
-    prompt: PromptTemplate,
+    mcp_server: McpServer,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
-    Create a new prompt in the database.
+    Create a new mcp_server in the database.
 
-    :param project_name: The name of the project to create the prompt in.
-    :param prompt:       The prompt to create.
+    :param project_name: The name of the project to create the mcp_server in.
+    :param mcp_server:        The mcp_server to create.
     :param db_session:   The database session.
 
     :return: The response from the database.
     """
     try:
-        data = client.create_prompt_template(prompt_template=prompt, db_session=db_session)
+        data = client.create_mcp_server(mcp_server=mcp_server, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to create prompt {prompt.name} in project {project_name}: {e}",
+            error=f"Failed to create mcp_server {mcp_server.name} in project {project_name}: {e}",
         )
 
 
-@router.get("/prompt_templates/{name}")
-def get_prompt(
+@router.get("/mcp_servers/{name}")
+def get_mcp_server(
     project_name: str,
     name: str,
     uid: str = None,
@@ -57,69 +68,69 @@ def get_prompt(
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
-    Get a prompt from the database.
+    Get a mcp_server from the database.
 
-    :param project_name: The name of the project to get the prompt from.
-    :param name:         The name of the prompt to get.
-    :param uid:          The UID of the prompt to get.
-    :param version:      The version of the prompt to get.
+    :param project_name: The name of the project to get the mcp_server from.
+    :param name:         The name of the mcp_server to get.
+    :param uid:          The UID of the mcp_server to get.
+    :param version:      The version of the mcp_server to get.
     :param db_session:   The database session.
 
-    :return: The prompt from the database.
+    :return: The mcp_server from the database.
     """
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
-        data = client.get_prompt_template(
-            project_id=project_id,
+        data = client.get_mcp_server(
             name=name,
+            project_id=project_id,
             uid=uid,
             version=version,
             db_session=db_session,
         )
         if data is None:
             return APIResponse(
-                success=False, error=f"Prompt with name = {name} not found"
+                success=False, error=f"Agent with name = {name} not found"
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to get prompt {name} in project {project_name}: {e}",
+            error=f"Failed to get Agent {name} in project {project_name}: {e}",
         )
 
 
-@router.put("/prompt_templates/{name}")
-def update_prompt(
+@router.put("/mcp_servers/{name}")
+def update_mcp_server(
     project_name: str,
-    prompt: PromptTemplate,
+    mcp_server: McpServer,
     name: str,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
-    Update a prompt in the database.
+    Update a mcp_server in the database.
 
-    :param project_name: The name of the project to update the prompt in.
-    :param prompt:       The prompt to update.
-    :param name:         The name of the prompt to update.
+    :param project_name: The name of the project to update the mcp_server in.
+    :param mcp_server:   The mcp_server to update.
+    :param name:         The name of the mcp_server to update.
     :param db_session:   The database session.
 
     :return: The response from the database.
     """
     try:
-        data = client.update_prompt_template(
-            name=name, prompt_template=prompt, db_session=db_session
+        data = client.update_mcp_server(
+            name=name, mcp_server=mcp_server, db_session=db_session
         )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update prompt {name} in project {project_name}: {e}",
+            error=f"Failed to update mcp_server {name} in project {project_name}: {e}",
         )
 
 
-@router.delete("/prompt_templates/{name}")
-def delete_prompt(
+@router.delete("/mcp_servers/{name}")
+def delete_mcp_server(
     project_name: str,
     name: str,
     uid: str = None,
@@ -127,20 +138,20 @@ def delete_prompt(
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
-    Delete a prompt from the database.
+    Delete a mcp_server from the database.
 
-    :param project_name: The name of the project to delete the prompt from.
-    :param name:         The name of the prompt to delete.
-    :param uid:          The UID of the prompt to delete.
-    :param version:      The version of the prompt to delete.
+    :param project_name: The name of the project to delete the mcp_server from.
+    :param name:         The name of the mcp_server to delete.
+    :param uid:          The UID of the mcp_server to delete.
+    :param version:      The version of the mcp_server to delete.
     :param db_session:   The database session.
 
     :return: The response from the database.
     """
     project_id = client.get_project(name=project_name, db_session=db_session).uid
-    uid, version = parse_version(uid, version)
+    uid, version = parse_version(uid=uid, version=version)
     try:
-        client.delete_prompt_template(
+        client.delete_mcp_server(
             project_id=project_id,
             name=name,
             uid=uid,
@@ -151,30 +162,34 @@ def delete_prompt(
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to delete prompt {name} in project {project_name}: {e}",
+            error=f"Failed to delete mcp_server {name} in project {project_name}: {e}",
         )
 
 
-@router.get("/prompt_templates")
-def list_prompts(
+@router.get("/mcp_servers")
+def list_mcp_servers(
     project_name: str,
     name: str = None,
     version: str = None,
+    mcp_type: Union[McpType, str] = None,
+    state: Union[WorkflowState, str] = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.DETAILS,
     db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
-    List prompts in the database.
+    List mcp_servers in the database.
 
-    :param project_name: The name of the project to list the prompts from.
-    :param name:         The name to filter by.
-    :param version:      The version to filter by.
-    :param labels:       The labels to filter by.
-    :param mode:         The output mode.
-    :param db_session:   The database session.
-    :param auth:         The authentication information.
+    :param project_name:  The name of the project to list the mcp_servers from.
+    :param name:          The name to filter by.
+    :param version:       The version to filter by.
+    :param mcp_type:      The mcp_server type to filter by.
+    :param state:         The workflow state to filter by.
+    :param labels:        The labels to filter by.
+    :param mode:          The output mode.
+    :param db_session:    The database session.
+    :param auth:          The authentication information.
 
     :return: The response from the database.
     """
@@ -182,11 +197,13 @@ def list_prompts(
     owner_id = getattr(owner, "uid", None)
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     try:
-        data = client.list_prompt_templates(
-            project_id=project_id,
+        data = client.list_mcp_servers(
             name=name,
+            project_id=project_id,
             owner_id=owner_id,
             version=version,
+            mcp_type=mcp_type,
+            state=state,
             labels_match=labels,
             output_mode=mode,
             db_session=db_session,
@@ -195,5 +212,6 @@ def list_prompts(
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to list prompts in project {project_name}: {e}",
+            error=f"Failed to list mcp_servers in project {project_name}: {e}",
         )
+

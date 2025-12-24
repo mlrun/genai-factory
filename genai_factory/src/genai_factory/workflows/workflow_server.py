@@ -19,6 +19,7 @@ import uvicorn
 from genai_factory.config import WorkflowServerConfig
 from genai_factory.controller_client import ControllerClient
 from genai_factory.schemas import WorkflowType
+from genai_factory.schemas.base import WorkflowState
 from genai_factory.sessions import SessionStore
 from genai_factory.utils import logger
 from genai_factory.workflows import Workflow
@@ -62,10 +63,11 @@ class WorkflowServer:
         self,
         name: str,
         workflow_type: WorkflowType,
-        graph: list,
+        structure: list,
         version: str = "0.0.0",
         description: str = "",
         labels: dict = None,
+        state: WorkflowState = WorkflowState.DRAFT,
     ):
         # Check if workflow already exists:
         if name in self._workflows:
@@ -73,13 +75,14 @@ class WorkflowServer:
         self._workflows[name] = Workflow(
             name=name,
             workflow_type=workflow_type,
-            skeleton=graph,
+            skeleton=structure,
             session_store=self._session_store,
             config=self._config,
             client=self.controller_client,
             version=version,
             description=description,
             labels=labels,
+            state=state
         )
 
     async def run_workflow(self, name: str, event):
@@ -118,7 +121,7 @@ class WorkflowServer:
         Commit the workflows to the controller.
         """
         for workflow in self._workflows.values():
-            workflow.set_deployment()
+            # workflow.set_deployment()
             self._controller_client.update_workflow(workflow.to_schema())
 
     def api_startup(self):

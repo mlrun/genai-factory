@@ -11,19 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from enum import Enum
 
-from typing import List, Optional
-
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithWorkMetadata
 
 
-class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task","path"]
+class AgentType(str, Enum):
+    SINGLE = "single"
+    TEAM = "team"
 
-    task: str = ""
-    path: str
-    project_id: str
-    data_sources: List[str] = []
-    producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+
+class Agent(BaseWithWorkMetadata):
+    _top_level_fields = ["agent_type","project_id","state"]
+    agent_type: AgentType

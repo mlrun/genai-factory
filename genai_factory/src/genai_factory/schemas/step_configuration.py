@@ -11,16 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
-from typing import List, Optional
-
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithComparableData
 
 
-class PromptTemplate(BaseWithVerMetadata):
-    _extra_fields = ["arguments"]
-    _top_level_fields = ["text"]
+class StepConfiguration(BaseWithComparableData):
+    _top_level_fields = ["project_id", "workflow_id","agent_id","mcp_server_id"]
 
-    text: str
+    branch: str
+    step_name: str
+    kwargs: Optional[dict[str,str]] = {}
     project_id: str
-    arguments: Optional[List[str]] = None
+    workflow_id: Optional[str] = None
+    model_id: Optional[str] = None
+    agent_id: Optional[str] = None
+    mcp_server_id: Optional[str] = None

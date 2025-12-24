@@ -24,12 +24,14 @@ from tabulate import tabulate
 from controller.api.utils import _send_to_application
 from controller.config import config
 from controller.db import client
+
 from genai_factory.schemas import (
     DataSource,
     Document,
     Project,
     QueryItem,
     User,
+    DataSourceType
 )
 
 
@@ -50,22 +52,18 @@ def initdb():
 
     # Create admin user:
     click.echo("Creating guest user")
-    user_id = client.create_user(
+    guest_id = client.create_user(
         User(
             name="guest",
-            email="guest@example.com",
-            full_name="Guest User",
-            is_admin=True,
+            extra_data={},
         ),
         db_session=db_session,
     ).uid
     click.echo("Creating admin user")
-    user_id = client.create_user(
+    admin_id = client.create_user(
         User(
             name="admin",
-            email="admin@example.com",
-            full_name="Admin User",
-            is_admin=True,
+            extra_data={},
         ),
         db_session=db_session,
     ).uid
@@ -76,7 +74,8 @@ def initdb():
         Project(
             name="default",
             description="Default Project",
-            owner_id=user_id,
+            owner_id=guest_id,
+            source="default",
         ),
         db_session=db_session,
     ).uid
@@ -87,13 +86,14 @@ def initdb():
         DataSource(
             name="default",
             description="Default Data Source",
-            owner_id=user_id,
+            owner_id=guest_id,
             project_id=project_id,
-            data_source_type="vector",
+            data_source_type=DataSourceType.VECTOR,
         ),
         db_session=db_session,
     )
     db_session.close()
+
 
 
 @click.command("config")
@@ -142,6 +142,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
         path=path,
         owner_id=data_source.owner_id,
         project_id=project.uid,
+        ingestions=[data_source.owner_id]
     )
 
     # Add document to the database:
@@ -159,7 +160,7 @@ def ingest(path, project, name, loader, metadata, version, data_source, from_fil
 
     data = {
         "document": document,
-        "database_kwargs": data_source.database_kwargs,
+        "kwargs": data_source.kwargs,
     }
 
     if metadata:
@@ -257,20 +258,17 @@ def update():
 
 @click.command("users")
 @click.option("-u", "--user", type=str, help="user name filter")
-@click.option("-e", "--email", type=str, help="email filter")
-def list_users(user, email):
+def list_users(user):
     """
     List all the users in the database
 
     :param user:  Username filter
-    :param email: Email filter
     """
     click.echo("Running List Users")
 
-    data = client.list_users(email, user, output_mode="short")
+    data = client.list_users(user, output_mode="short")
     table = format_table_results(data)
     click.echo(table)
-
 
 @click.command("data-sources")
 @click.option("-o", "--owner", type=str, help="owner filter")
@@ -302,7 +300,7 @@ def list_data_sources(owner, project, version, source_type, metadata):
         version=version,
         data_source_type=source_type,
         labels_match=metadata,
-        output_mode="short",
+        output_mode="raw",
     )
     table = format_table_results(data)
     click.echo(table)
