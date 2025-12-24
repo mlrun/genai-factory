@@ -18,20 +18,13 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 
-const Navbar = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface NavbarProps {
+  breadcrumbs?: ReactNode;
+}
 
-  const isPathActive = (current: string, base: string) =>
-    current === base || current.startsWith(base + '/');
-
-  const navItems = [
-    { label: 'Projects', path: '/projects' },
-    { label: 'Chat', path: '/chat' },
-  ];
-
+const Navbar = ({ breadcrumbs }: NavbarProps) => {
   return (
     <div
       className="
@@ -42,28 +35,7 @@ const Navbar = () => {
       "
       data-testid="topbar"
     >
-      <div className="flex items-center pl-4 gap-2">
-        {navItems.map(({ label, path }) => {
-          const isActive = isPathActive(location.pathname, path);
-
-          return (
-            <button
-              key={path}
-              onClick={() => navigate(path)}
-              className={`
-                px-3 py-2 rounded-md text-sm
-                ${
-                  isActive
-                    ? 'font-bold bg-blue-500 text-white'
-                    : 'font-normal hover:bg-gray-100'
-                }
-              `}
-            >
-              {label}
-            </button>
-          );
-        })}
-      </div>
+      <div className="flex items-center pl-4 gap-2">{breadcrumbs}</div>
     </div>
   );
 };
