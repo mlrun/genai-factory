@@ -83,7 +83,7 @@ const ProjectsPage = () => {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-6 px-14 py-8">
       {projects && (
         <EntityTable
           title={PROJECT_TABLE_TITLE}

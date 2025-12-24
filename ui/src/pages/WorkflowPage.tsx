@@ -29,7 +29,7 @@ const WorkflowPage = () => {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col w-full h-full">
       <WorkflowHeader />
       <WorkflowTabs />
     </div>

@@ -66,12 +66,14 @@ export const router = createBrowserRouter([
       { path: 'datasets', element: <DatasetsPage /> },
       { path: 'documents', element: <DocumentsPage /> },
       { path: 'prompt-templates', element: <PromptTemplatesPage /> },
-      { path: 'workflows', element: <WorkflowsPage /> },
-      { path: 'users', element: <UsersPage /> },
       {
-        path: 'workflows/:workflowName',
-        element: <WorkflowPage />,
+        path: 'workflows',
+        children: [
+          { index: true, element: <WorkflowsPage /> },
+          { path: ':workflowName', element: <WorkflowPage /> },
+        ],
       },
+      { path: 'users', element: <UsersPage /> },
     ],
   },
 ]);
