@@ -53,21 +53,20 @@ export const router = createBrowserRouter([
       { path: 'projects/:name', element: <ProjectPage /> },
       { path: 'chat', element: <ChatPage /> },
       { path: 'chat/:sessionName', element: <ChatPage /> },
-
-      {
-        path: 'projects/:name',
-        element: <ProjectLayout />,
-        children: [
-          { index: true, element: <ProjectPage /> },
-          { path: 'models', element: <ModelsPage /> },
-          { path: 'data-sources', element: <DataSourcesPage /> },
-          { path: 'datasets', element: <DatasetsPage /> },
-          { path: 'documents', element: <DocumentsPage /> },
-          { path: 'prompt-templates', element: <PromptTemplatesPage /> },
-          { path: 'workflows', element: <WorkflowsPage /> },
-          { path: 'users', element: <UsersPage /> },
-        ],
-      },
+    ],
+  },
+  {
+    path: 'projects/:name',
+    element: <ProjectLayout />,
+    children: [
+      { index: true, element: <ProjectPage /> },
+      { path: 'models', element: <ModelsPage /> },
+      { path: 'data-sources', element: <DataSourcesPage /> },
+      { path: 'datasets', element: <DatasetsPage /> },
+      { path: 'documents', element: <DocumentsPage /> },
+      { path: 'prompt-templates', element: <PromptTemplatesPage /> },
+      { path: 'workflows', element: <WorkflowsPage /> },
+      { path: 'users', element: <UsersPage /> },
     ],
   },
 ]);

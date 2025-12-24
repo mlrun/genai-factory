@@ -24,7 +24,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Chatbar from '@components/feature/Chat/Chatbar';
 import Loading from '@components/shared/Loading';
 import Navbar from '@layout/Navbar';
-import Sidebar from '@layout/Sidebar';
 import { useUser } from '@queries';
 
 import { useAuthStore } from '@stores/authStore';
@@ -57,9 +56,7 @@ const Page = () => {
       <div className="flex flex-1 px-14 py-8">
         {showChatbar && publicUser && (
           <div className="hidden md:flex">
-            <Sidebar>
-              <Chatbar publicUser={publicUser} />
-            </Sidebar>
+            <Chatbar publicUser={publicUser} />
           </div>
         )}
         <div className="flex-1 overflow-y-auto">

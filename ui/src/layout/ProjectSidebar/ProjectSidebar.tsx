@@ -1,0 +1,71 @@
+/*
+Copyright 2024 Iguazio Systems Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
+
+import { useMemo } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@components/shared/Sidebar';
+
+import { getProjectLinks } from './projectLinks.util';
+
+const ProjectSidebar = () => {
+  const { pathname } = useLocation();
+  const { name: projectName } = useParams();
+
+  const links = useMemo(() => {
+    return projectName ? getProjectLinks(projectName) : [];
+  }, [projectName]);
+
+  return (
+    <Sidebar collapsible="icon" className="fixed z-20 flex h-full flex-col">
+      <SidebarContent className="gap-y-2 text-white pt-3">
+        <SidebarMenu>
+          {links.map((item) => {
+            const isActive = pathname === item.link.toLowerCase();
+            return (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  className="capitalize p-3"
+                >
+                  <Link to={item.link} className="flex items-center gap-2">
+                    <item.icon />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      {item.label}
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
+  );
+};
+
+export default ProjectSidebar;

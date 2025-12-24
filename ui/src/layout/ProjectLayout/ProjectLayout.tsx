@@ -20,8 +20,22 @@ such restriction.
 
 import { Outlet } from 'react-router-dom';
 
+import { SidebarInset, SidebarProvider } from '@components/shared/Sidebar';
+import Navbar from '@layout/Navbar';
+import ProjectSidebar from '@layout/ProjectSidebar';
+
 const ProjectLayout = () => {
-  return <Outlet />;
+  return (
+    <SidebarProvider defaultOpen={false}>
+      <ProjectSidebar />
+      <SidebarInset>
+        <Navbar />
+        <div className="flex flex-1 px-14 py-8 overflow-auto">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
 };
 
 export default ProjectLayout;
