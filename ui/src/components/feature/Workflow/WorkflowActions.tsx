@@ -19,11 +19,12 @@ such restriction.
 */
 
 import { Button } from '@components/shared/Button';
+import { Separator } from '@components/shared/Separator';
 
 import { WORKFLOW_MAIN_ACTIONS, WORKFLOW_SECONDARY_ACTIONS } from '@constants';
 
 const WorkflowActions = () => (
-  <div className="flex gap-x-3">
+  <div className="flex h-full gap-x-3">
     <div className="flex gap-x-3">
       {WORKFLOW_MAIN_ACTIONS.map((action, index) => (
         <Button
@@ -36,7 +37,9 @@ const WorkflowActions = () => (
         </Button>
       ))}
     </div>
-
+    <div className="py-2 px-1.5">
+      <Separator orientation="vertical" />
+    </div>
     <div className="flex gap-x-3">
       {WORKFLOW_SECONDARY_ACTIONS.map((action, index) => (
         <Button
