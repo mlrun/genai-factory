@@ -27,8 +27,10 @@ import JobsWorkflows from '@assets/icons/sidebar/jobs-workflows.svg?react';
 import MLFunctions from '@assets/icons/sidebar/ML-functions.svg?react';
 import Model from '@assets/icons/sidebar/model.svg?react';
 
+import { PROJECTS_BASE_PATH } from '@constants';
+
 export const getProjectLinks = (projectName: string) => {
-  const pathname = `/projects/${projectName}`;
+  const pathname = `/${PROJECTS_BASE_PATH}/${projectName}`;
 
   return [
     {
