@@ -25,12 +25,14 @@ import {
   TabsTrigger,
 } from '@components/shared/Tabs';
 
+import { WORKFLOW_TABS } from '@constants';
+
 const WorkflowTabs = () => {
   return (
     <Tabs defaultValue="overview" className="flex flex-col grow justify-start">
       <TabsList className="px-10 gap-4 bg-white justify-normal py-0">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="graph">Graph view</TabsTrigger>
+        <TabsTrigger value="overview">{WORKFLOW_TABS.OVERVIEW}</TabsTrigger>
+        <TabsTrigger value="graph">{WORKFLOW_TABS.GRAPH_VIEW}</TabsTrigger>
       </TabsList>
 
       <TabsContent

@@ -45,6 +45,11 @@ export const NEW_BUTTON_TEXT_PREFIX = 'New';
 export const PROJECT_TABLE_TITLE = 'projects';
 export const PROJECT_ENTITY_NAME = 'project';
 
+export const WORKFLOW_TABS = {
+  OVERVIEW: 'Overview',
+  GRAPH_VIEW: 'Graph view',
+};
+
 // -----------------------------------------------------------------------------
 // Routing
 // -----------------------------------------------------------------------------
