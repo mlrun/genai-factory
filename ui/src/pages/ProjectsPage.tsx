@@ -77,7 +77,7 @@ const ProjectsPage = () => {
   );
 
   const handleOnRowClick = (project: Project) => {
-    navigate(`/projects/${project.name}`);
+    navigate(`/projects/${project.name}/monitor`);
   };
 
   if (isLoading) return <Loading />;

@@ -37,7 +37,7 @@ export const getProjectLinks = (projectName: string) => {
       icon: Dashboard,
       id: 'Dashboard',
       label: 'Project overview',
-      link: `${pathname}`,
+      link: `${pathname}/monitor`,
     },
     {
       icon: JobsWorkflows,
