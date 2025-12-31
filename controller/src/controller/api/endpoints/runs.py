@@ -21,7 +21,7 @@ from controller.db import client
 from genai_factory.schemas import APIResponse, Run, OutputMode
 
 
-router = APIRouter(prefix="/schedules/{schedule_name}")
+router = APIRouter()
 
 @router.post("/runs")
 def create_run(

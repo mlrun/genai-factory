@@ -14,6 +14,8 @@
 
 from typing import Optional, List
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
@@ -22,7 +24,7 @@ class Document(BaseWithVerMetadata):
     path: str
     project_id: str
     summary: str = ""
-    ingestions: List[str] = []
-    keywords: List[str] = []
-    metadata: dict[str, str] = {}
-    extra_data: dict[str, str] = {}
+    ingestions: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
+    metadata: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str,str] = Field(default_factory=dict)

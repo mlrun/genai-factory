@@ -21,7 +21,7 @@ class Run(BaseWithVerMetadata):
     _top_level_fields = ["schedule_id", "workflow_id","status"]
 
     schedule_id: Optional[str] = None
-    workflow_id: str
+    workflow_id: Optional[str] = None
     configuration: dict
     status: Status
     outputs: dict

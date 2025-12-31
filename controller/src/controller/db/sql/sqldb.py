@@ -739,21 +739,21 @@ class StepConfiguration(VersionedOwnerBaseSchema):
     )
     workflow_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("workflow.uid"),
-        nullable = False,
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
+        nullable = True,
         index = True
     )
 
     agent_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("agent.uid"),
+        ForeignKey("agent.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )
 
     mcp_server_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("mcp_server.uid"),
+        ForeignKey("mcp_server.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )
@@ -811,28 +811,28 @@ class Deployment(VersionedOwnerBaseSchema):
 
     workflow_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("workflow.uid"),
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )
 
     model_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("model.uid"),
+        ForeignKey("model.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )
 
     agent_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("agent.uid"),
+        ForeignKey("agent.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )
 
     mcp_server_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("mcp_server.uid"),
+        ForeignKey("mcp_server.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )
@@ -936,12 +936,12 @@ class Run(VersionedOwnerBaseSchema):
     # Columns:
     workflow_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("workflow.uid"),
-        nullable=False,
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
+        nullable=True,
         index=True
     )
     schedule_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("schedule.uid"),
+        String(ID_LENGTH), ForeignKey("schedule.uid", ondelete="SET NULL"),
         nullable = True,
         index = True
     )

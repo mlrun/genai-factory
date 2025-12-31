@@ -14,6 +14,8 @@
 
 from enum import Enum
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
@@ -32,6 +34,6 @@ class DataSource(BaseWithVerMetadata):
 
     project_id: str
     data_source_type: DataSourceType
-    kwargs: dict[str, str] = {}
-    profile: dict[str, str] = {}
+    kwargs: dict[str, str] = Field(default_factory=dict)
+    profile: dict[str, str] = Field(default_factory=dict)
 

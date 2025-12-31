@@ -22,4 +22,4 @@ class Project(BaseWithVerMetadata):
     _top_level_fields = ["source"]
 
     source: str = ""
-    steps: dict = {}
+    steps: dict = Field(default_factory=dict)

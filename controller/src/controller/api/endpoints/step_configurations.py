@@ -11,22 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# Copyright 2023 Iguazio
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-import json
-import os
-from typing import List, Optional, Tuple, Union
+
+from typing import List, Optional, Tuple
 
 from fastapi import APIRouter, Depends
 
@@ -43,7 +29,7 @@ from genai_factory.schemas import (
     OutputMode,
 )
 
-router = APIRouter(prefix="/projects/{project_name}/workflows/{workflow_name}")
+router = APIRouter(prefix="/projects/{project_name}")
 
 
 @router.post("/step_configurations")
@@ -72,7 +58,7 @@ def create_step_configuration(
 
 
 @router.get("/step_configurations/{name}")
-def get_data_source(
+def get_step_configuration(
     project_name: str,
     name: str,
     uid: str = None,
@@ -113,7 +99,7 @@ def get_data_source(
         )
 
 
-@router.put("/step_configuration/{name}")
+@router.put("/step_configurations/{name}")
 def update_step_configuration(
     project_name: str,
     step_configuration: StepConfiguration,
@@ -121,9 +107,9 @@ def update_step_configuration(
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
-    Update a data source in the database.
+    Update a step configuration in the database.
 
-    :param project_name:        The name of the project to update the data source in.
+    :param project_name:        The name of the project to update the step configuration in.
     :param step_configuration:  The step configuration to update.
     :param name:                The name of the step configuration to update.
     :param db_session:          The database session.
@@ -138,12 +124,12 @@ def update_step_configuration(
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to update data source {name} in project {project_name}: {e} and workflow {workflow_name}: {e}",
+            error=f"Failed to update Step Configuration {name} in project {project_name}: {e}",
         )
 
 
-@router.delete("/step_configuration/{name}")
-def delete_data_source(
+@router.delete("/step_configurations/{name}")
+def delete_step_configuration(
     project_name: str,
     name: str,
     uid: str = None,
@@ -151,7 +137,7 @@ def delete_data_source(
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
-    Delete a data source from the database.
+    Delete a step configuration from the database.
 
     :param project_name: The name of the project to delete the step configuration from.
     :param name:         The name of the step configuration to delete.
@@ -180,7 +166,7 @@ def delete_data_source(
 
 
 @router.get("/step_configurations")
-def list_data_sources(
+def list_step_configurations(
     project_name: str,
     name: str = None,
     version: str = None,
@@ -190,7 +176,7 @@ def list_data_sources(
     auth: AuthInfo = Depends(get_auth_user),
 ) -> APIResponse:
     """
-    List data sources in the database.
+    List step configurations in the database.
 
     :param project_name:     The name of the project to list the step configurations from.
     :param name:             The name to filter by.

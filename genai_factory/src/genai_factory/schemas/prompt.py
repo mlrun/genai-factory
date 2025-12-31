@@ -14,6 +14,8 @@
 from enum import Enum
 from typing import Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithComparableData
 
 
@@ -26,9 +28,9 @@ class Prompt(BaseWithComparableData):
     _top_level_fields = ["format","project_id"]
 
     messages: Optional[dict]
-    input_arguments: dict = {}
-    default_arguments: dict = {}
-    extra_data: dict = {}
-    format: PromptFormatType = ""
+    input_arguments: dict[str,str] = Field(default_factory=dict)
+    default_arguments: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str,str] = Field(default_factory=dict)
+    format: PromptFormatType = PromptFormatType.FSTRING
     project_id: str
-    models: dict[str,dict] = {}
+    models: dict[str,str] = Field(default_factory=dict)

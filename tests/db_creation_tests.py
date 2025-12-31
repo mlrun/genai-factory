@@ -133,6 +133,9 @@ def fetch_schedules():
 def fetch_users():
     return get("/users")
 
+def fetch_runs():
+    return get("/runs")
+
 
 
 def fetch_project_resource(resource: str):
@@ -163,10 +166,8 @@ def print_db_tables(output_file=None):
             try:
                 if resource == "projects":
                     raw_rows = fetch_projects()
-                elif resource == "step_configurations":
-                    raw_rows = fetch_workflow_resource(resource)
                 elif resource == "runs":
-                    raw_rows = fetch_schedules_resource(resource)
+                    raw_rows = fetch_runs()
                 elif resource == "schedules":
                     raw_rows = fetch_schedules()
                 elif resource == "users":

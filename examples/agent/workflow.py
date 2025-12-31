@@ -24,8 +24,18 @@ workflow_graph = [
     HistorySaver(),
 ]
 
+workflow_graph = [
+    SessionLoader(),
+    Gaurdrail(),
+    A2a(),
+    Gaurdrail(),
+    HistorySaver(),
+]
+
+
 workflow_server.add_workflow(
     name="default",
     structure=workflow_graph,
     workflow_type="application",
+    type_kwargs={}
 )

@@ -15,6 +15,8 @@
 from enum import Enum
 from typing import Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
@@ -26,6 +28,6 @@ class Model(BaseWithVerMetadata):
     project_id: str
     source: str
     task: str = ""
-    producer: Optional[dict[str,str]]
-    profile: Optional[dict[str,str]] = {}
-    extra_data: Optional[dict[str,str]] = {}
+    producer: dict[str,str] = Field(default_factory=dict)
+    profile: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str,str] = Field(default_factory=dict)

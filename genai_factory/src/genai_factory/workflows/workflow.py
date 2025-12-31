@@ -36,11 +36,11 @@ class Workflow:
         session_store: SessionStore,
         config: WorkflowServerConfig,
         client: ControllerClient,
+        type_kwargs: dict,
         description: str = "",
         branch: str = "",
         labels: dict = None,
         state: WorkflowState = None,
-        type_kwargs: dict = {},
     ):
         # Validate the skeleton:
         if not skeleton:

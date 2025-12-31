@@ -31,7 +31,17 @@ from genai_factory.schemas import (
     Project,
     QueryItem,
     User,
-    DataSourceType
+    DataSourceType,
+    Dataset,
+    Model,
+    StepConfiguration,
+    Deployment, DeploymentType,
+    Schedule,
+    Run,
+    Status,
+    Agent, AgentType,
+    WorkflowState,
+    McpServer, McpType, Workflow, WorkflowType
 )
 
 
@@ -89,6 +99,149 @@ def initdb():
             owner_id=guest_id,
             project_id=project_id,
             data_source_type=DataSourceType.VECTOR,
+        ),
+        db_session=db_session,
+    )
+
+    # Create data set:
+    click.echo("Creating default data set")
+    client.create_dataset(
+        Dataset(
+            name="default",
+            description="Default Data Set",
+            owner_id=guest_id,
+            project_id=project_id,
+            path="",
+            producer={}
+        ),
+        db_session=db_session,
+    )
+
+    # Create model:
+    click.echo("Creating default model")
+    model_id = client.create_model(
+        Model(
+            name="default",
+            description="Default Data Set",
+            owner_id=guest_id,
+            project_id=project_id,
+            is_adapter=False,
+            producer={},
+            source="default",
+        ),
+        db_session=db_session,
+    ).uid
+
+    # create workflow
+    click.echo("Creating default workflow")
+    workflow_id = client.create_workflow(
+        Workflow(
+            name="default_workflow",
+            description="Default Workflow for init",
+            owner_id=guest_id,
+            project_id=project_id,
+            configuration={},
+            type_kwargs={},
+            structure={},
+            state=WorkflowState.DRAFT,
+            workflow_type=WorkflowType.APPLICATION,
+            branch="",
+        ),
+        db_session=db_session,
+    ).uid
+
+    # create schedule
+    click.echo("Creating default Schedule")
+    client.create_schedule(
+        Schedule(
+            name="default",
+            description="Default Schedule",
+            owner_id=guest_id,
+            configuration={},
+            status=Status.PENDING,
+            workflow_id= workflow_id,
+        ),
+        db_session=db_session,
+    )
+
+    # create run
+    click.echo("Creating default run")
+    client.create_run(
+        Run(
+            name="default",
+            description="Default Run",
+            owner_id=guest_id,
+            workflow_id=workflow_id,
+            configuration={},
+            status=Status.PENDING,
+            outputs={},
+        ),
+        db_session=db_session,
+    )
+
+    # create agent
+    click.echo("Creating default agent")
+    client.create_agent(
+        Agent(
+            name="default",
+            description="Default Agent",
+            owner_id=guest_id,
+            project_id=project_id,
+            configuration={},
+            type_kwargs={},
+            structure={},
+            state=WorkflowState.DRAFT,
+            agent_type=AgentType.SINGLE,
+            branch="",
+        ),
+        db_session=db_session,
+    )
+
+    # create Mcp
+    click.echo("Creating default Mcp Server")
+    client.create_mcp_server(
+        McpServer(
+            name="default",
+            description="Default Schedule",
+            owner_id=guest_id,
+            project_id=project_id,
+            configuration={},
+            type_kwargs={},
+            structure={},
+            mcp_type=McpType.GAITOR,
+            state=WorkflowState.DRAFT,
+            branch="",
+        ),
+        db_session=db_session,
+    )
+
+    # create step configuration
+    click.echo("Creating default step configuration")
+    client.create_step_configuration(
+        StepConfiguration(
+            name="default",
+            description="Default Step Configuration",
+            owner_id=guest_id,
+            project_id=project_id,
+            branch="default",
+            step_name="default",
+            workflow_id=workflow_id,
+        ),
+        db_session=db_session,
+    )
+    # create deployment
+    click.echo("Creating default deployment")
+    client.create_deployment(
+        Deployment(
+            name="default",
+            description="Default Step Configuration",
+            owner_id=guest_id,
+            project_id=project_id,
+            model_id=model_id,
+            is_remote=False,
+            type=DeploymentType.MODEL,
+            status={},
+            configuration={}
         ),
         db_session=db_session,
     )

@@ -14,6 +14,8 @@
 
 from typing import List, Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
@@ -23,7 +25,7 @@ class Dataset(BaseWithVerMetadata):
     task: str = ""
     path: str
     project_id: str
-    data_sources: List[str] = []
+    data_sources: List[str] = Field(default_factory=list)
     producer: dict[str,str]
-    profile: dict[str,str] = {}
-    extra_data: dict[str, str] = {}
+    profile: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str, str] = Field(default_factory=dict)

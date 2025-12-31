@@ -64,10 +64,12 @@ class WorkflowServer:
         name: str,
         workflow_type: WorkflowType,
         structure: list,
+        type_kwargs: dict,
         version: str = "0.0.0",
         description: str = "",
         labels: dict = None,
-        state: WorkflowState = WorkflowState.DRAFT,
+        state: WorkflowState = WorkflowState.DRAFT
+
     ):
         # Check if workflow already exists:
         if name in self._workflows:
@@ -82,7 +84,8 @@ class WorkflowServer:
             version=version,
             description=description,
             labels=labels,
-            state=state
+            state=state,
+            type_kwargs=type_kwargs
         )
 
     async def run_workflow(self, name: str, event):

@@ -14,12 +14,14 @@
 from enum import Enum
 from typing import Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithComparableData
 
 
 class DeploymentType(str, Enum):
-    MODEL = "Model"
-    WORKFLOW = "Workflow"
+    MODEL = "model"
+    WORKFLOW = "workflow"
     KNOWLEDGE_BASE = "knowledge-base"
     AGENT = "agent"
     MCP_SERVER = "mcp_server"
@@ -38,8 +40,8 @@ class Deployment(BaseWithComparableData):
     agent_id: Optional[str] = None
     mcp_server_id: Optional[str] = None
 
-    type_kwargs: dict[str, str] = {}
+    type_kwargs: dict[str, str] = Field(default_factory=dict)
     configuration: dict
     status: dict
-    profile: dict = {}
+    profile: dict = Field(default_factory=dict)
 

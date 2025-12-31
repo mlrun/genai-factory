@@ -38,6 +38,8 @@ class ChatRole(str, Enum):
 class Message(BaseModel):
     role: ChatRole
     content: str
+
+    # Optional (nullable in DB)
     sources: Optional[List[dict]] = None
     human_feedback: Optional[List[dict]] = None
     extra_data: Optional[List[dict]] = None
