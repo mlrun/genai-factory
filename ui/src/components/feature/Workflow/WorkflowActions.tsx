@@ -26,14 +26,14 @@ import { WORKFLOW_MAIN_ACTIONS, WORKFLOW_SECONDARY_ACTIONS } from '@constants';
 const WorkflowActions = () => (
   <div className="flex h-full gap-x-3">
     <div className="flex gap-x-3">
-      {WORKFLOW_MAIN_ACTIONS.map((action, index) => (
+      {WORKFLOW_MAIN_ACTIONS.map(({ icon: Icon, label, variant }, index) => (
         <Button
-          key={`${action.label}-${index}`}
-          variant={action.variant}
+          key={`${label}-${index}`}
+          variant={variant}
           className="flex items-center text-sm py-2 px-4 gap-x-1.5 rounded-[6px]"
         >
-          {action.icon && <action.icon className="mt-0.5" />}
-          {action.label}
+          <Icon className="mt-0.5" />
+          {label}
         </Button>
       ))}
     </div>
