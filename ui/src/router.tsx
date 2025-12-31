@@ -22,6 +22,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import Page from '@layout/Page';
 import ProjectLayout from '@layout/ProjectLayout';
+import TableLayout from '@layout/Table';
 import ChatPage from '@pages/ChatPage';
 import DatasetsPage from '@pages/DatasetsPage';
 import DataSourcesPage from '@pages/DataSourcesPage';
@@ -32,6 +33,7 @@ import ProjectPage from '@pages/ProjectPage';
 import ProjectsPage from '@pages/ProjectsPage';
 import PromptTemplatesPage from '@pages/PromptTemplatesPage';
 import UsersPage from '@pages/UsersPage';
+import WorkflowPage from '@pages/WorkflowPage';
 import WorkflowsPage from '@pages/WorkflowsPage';
 
 export const router = createBrowserRouter([
@@ -50,7 +52,10 @@ export const router = createBrowserRouter([
     element: <Page />,
     children: [
       { path: 'projects', element: <ProjectsPage /> },
-      { path: 'projects/:name', element: <ProjectPage /> },
+      {
+        path: 'projects/:name',
+        element: <Navigate replace={true} to="monitor" />,
+      },
       { path: 'chat', element: <ChatPage /> },
       { path: 'chat/:sessionName', element: <ChatPage /> },
     ],
@@ -59,14 +64,23 @@ export const router = createBrowserRouter([
     path: 'projects/:name',
     element: <ProjectLayout />,
     children: [
-      { index: true, element: <ProjectPage /> },
-      { path: 'models', element: <ModelsPage /> },
-      { path: 'data-sources', element: <DataSourcesPage /> },
-      { path: 'datasets', element: <DatasetsPage /> },
-      { path: 'documents', element: <DocumentsPage /> },
-      { path: 'prompt-templates', element: <PromptTemplatesPage /> },
-      { path: 'workflows', element: <WorkflowsPage /> },
-      { path: 'users', element: <UsersPage /> },
+      {
+        element: <TableLayout />,
+        children: [
+          { path: 'monitor', element: <ProjectPage /> },
+          { path: 'models', element: <ModelsPage /> },
+          { path: 'data-sources', element: <DataSourcesPage /> },
+          { path: 'datasets', element: <DatasetsPage /> },
+          { path: 'documents', element: <DocumentsPage /> },
+          { path: 'prompt-templates', element: <PromptTemplatesPage /> },
+          { path: 'users', element: <UsersPage /> },
+          { path: 'workflows', index: true, element: <WorkflowsPage /> },
+        ],
+      },
+      {
+        path: 'workflows',
+        children: [{ path: ':workflowName', element: <WorkflowPage /> }],
+      },
     ],
   },
 ]);

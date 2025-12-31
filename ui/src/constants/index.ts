@@ -18,7 +18,14 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { FunctionComponent, SVGProps } from 'react';
+
+import { ButtonProps } from '@components/shared/Button';
+
 import CardIcon from '@assets/icons/cards-icon.svg?react';
+import Chat from '@assets/icons/chat.svg?react';
+import Eye from '@assets/icons/eye.svg?react';
+import Flow from '@assets/icons/flow.svg?react';
 import ListIcon from '@assets/icons/list-icon.svg?react';
 
 export * from './datasetFields';
@@ -37,6 +44,11 @@ export const NEW_BUTTON_TEXT_PREFIX = 'New';
 
 export const PROJECT_TABLE_TITLE = 'projects';
 export const PROJECT_ENTITY_NAME = 'project';
+
+export const WORKFLOW_TABS = {
+  OVERVIEW: 'Overview',
+  GRAPH_VIEW: 'Graph view',
+};
 
 // -----------------------------------------------------------------------------
 // Routing
@@ -70,3 +82,25 @@ export const SORT_DIRECTION = {
   ASC: 'asc',
   DESC: 'desc',
 } as const;
+
+export const WORKFLOW_MAIN_ACTIONS: {
+  icon: FunctionComponent<
+    SVGProps<SVGSVGElement> & {
+      title?: string;
+      titleId?: string;
+      desc?: string;
+      descId?: string;
+    }
+  >;
+  label: string;
+  variant: ButtonProps['variant'];
+}[] = [
+  { icon: Chat, label: 'Test', variant: 'secondary' },
+  { icon: Eye, label: 'Trace', variant: 'secondary' },
+  { icon: Flow, label: 'Compare', variant: 'secondary' },
+];
+
+export const WORKFLOW_SECONDARY_ACTIONS: {
+  label: string;
+  variant?: ButtonProps['variant'];
+}[] = [{ label: 'Save', variant: 'secondary' }, { label: 'Export' }];

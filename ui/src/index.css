@@ -55,6 +55,11 @@ body {
   --rightbar-input-border-color: #dcdfe8;
   --failed-color: #fc3426;
 
+  --project-label-border: #e0e9f5;
+  --project-label-text: #333;
+  --workflow-content-bg: #FCFCFD;
+  --workflow-content-border: #483f561f;
+
   --text-size-number: 0.0625rem;
 
   --text-size-12: calc(var(--text-size-number) * 12);
@@ -79,7 +84,7 @@ body {
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.553 0.226 260.044);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(1 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.551 0.032 256.544);
@@ -151,6 +156,13 @@ b {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-project-label-from: #0054c9;
+  --color-project-label-to: #0054c9;
+  --color-project-label-border: var(--project-label-border);
+  --color-project-label-text: var(--project-label-text);
+  --color-workflow-content-bg: var(--workflow-content-bg);
+  --color-workflow-content-border: var(--workflow-content-border);
 }
 
 .dark {

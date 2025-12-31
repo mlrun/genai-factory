@@ -22,3 +22,5 @@ export * from './projects/useProject';
 export * from './projects/useProjects';
 export * from './projects/useProjectActions';
 export * from './projects/useProjectEntity';
+
+export * from './workflow/useWorkflow';

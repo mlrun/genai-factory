@@ -44,7 +44,7 @@ const ProjectSidebar = () => {
       <SidebarContent className="gap-y-2 text-white pt-3">
         <SidebarMenu>
           {links.map((item) => {
-            const isActive = pathname === item.link.toLowerCase();
+            const isActive = pathname.includes(item.link);
             return (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton

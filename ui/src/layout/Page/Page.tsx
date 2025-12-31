@@ -53,13 +53,13 @@ const Page = () => {
   return (
     <div className="flex flex-col h-full">
       <Navbar />
-      <div className="flex flex-1 px-14 py-8">
+      <div className="flex flex-1">
         {showChatbar && publicUser && (
           <div className="hidden md:flex">
             <Chatbar publicUser={publicUser} />
           </div>
         )}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col flex-1 overflow-y-auto">
           <Outlet />
         </div>
       </div>

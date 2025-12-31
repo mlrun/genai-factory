@@ -18,25 +18,31 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Outlet } from 'react-router-dom';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@components/shared/Tabs';
 
-import ProjectBreadcrumbs from '@components/feature/Project/ProjectBreadcrumbs';
-import { SidebarInset, SidebarProvider } from '@components/shared/Sidebar';
-import Navbar from '@layout/Navbar';
-import ProjectSidebar from '@layout/ProjectSidebar';
+import { WORKFLOW_TABS } from '@constants';
 
-const ProjectLayout = () => {
+const WorkflowTabs = () => {
   return (
-    <SidebarProvider defaultOpen={false}>
-      <ProjectSidebar />
-      <SidebarInset>
-        <Navbar breadcrumbs={<ProjectBreadcrumbs />} />
-        <div className="flex flex-1 overflow-auto">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <Tabs defaultValue="overview" className="flex flex-col grow justify-start">
+      <TabsList className="px-10 gap-4 bg-white justify-normal py-0">
+        <TabsTrigger value="overview">{WORKFLOW_TABS.OVERVIEW}</TabsTrigger>
+        <TabsTrigger value="graph">{WORKFLOW_TABS.GRAPH_VIEW}</TabsTrigger>
+      </TabsList>
+
+      <TabsContent
+        value="overview"
+        className="flex flex-col items-start p-8 px-14 gap-5 flex-1 self-stretch border border-workflow-content-border bg-workflow-content-bg"
+      ></TabsContent>
+
+      <TabsContent value="graph" className="flex flex-1 flex-col"></TabsContent>
+    </Tabs>
   );
 };
 
-export default ProjectLayout;
+export default WorkflowTabs;

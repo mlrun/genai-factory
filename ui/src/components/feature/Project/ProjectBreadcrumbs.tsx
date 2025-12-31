@@ -51,7 +51,7 @@ const ProjectBreadcrumbs = () => {
   );
 
   const currentScreenLabel = useMemo(() => {
-    return links.find(({ link }) => link.startsWith(pathname))?.label;
+    return links.find(({ link }) => pathname.startsWith(link))?.label;
   }, [pathname, links]);
 
   return (

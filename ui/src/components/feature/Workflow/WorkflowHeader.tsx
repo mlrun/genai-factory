@@ -18,25 +18,29 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Outlet } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
-import ProjectBreadcrumbs from '@components/feature/Project/ProjectBreadcrumbs';
-import { SidebarInset, SidebarProvider } from '@components/shared/Sidebar';
-import Navbar from '@layout/Navbar';
-import ProjectSidebar from '@layout/ProjectSidebar';
+import WorkflowActions from '@components/feature/Workflow/WorkflowActions';
+import { useWorkflow } from '@queries';
 
-const ProjectLayout = () => {
+import Back from '@assets/icons/back.svg?react';
+
+const WorkflowHeader = () => {
+  const { data: workflow } = useWorkflow();
+  const { name: projectName } = useParams();
+
   return (
-    <SidebarProvider defaultOpen={false}>
-      <ProjectSidebar />
-      <SidebarInset>
-        <Navbar breadcrumbs={<ProjectBreadcrumbs />} />
-        <div className="flex flex-1 overflow-auto">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <header className="flex justify-between items-center bg-white gap-6 pt-6 pr-8 pb-4 pl-8 self-stretch">
+      <Link
+        to={`/projects/${projectName}/workflows`}
+        className="flex items-center gap-2 font-medium text-sidebar-foreground hover:underline"
+      >
+        <Back />
+        {workflow?.name}
+      </Link>
+      <WorkflowActions />
+    </header>
   );
 };
 
-export default ProjectLayout;
+export default WorkflowHeader;

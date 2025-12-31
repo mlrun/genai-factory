@@ -18,25 +18,22 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Outlet } from 'react-router-dom';
+import WorkflowHeader from '@components/feature/Workflow/WorkflowHeader';
+import WorkflowTabs from '@components/feature/Workflow/WorkflowTabs';
+import Loading from '@components/shared/Loading';
+import { useWorkflow } from '@queries';
 
-import ProjectBreadcrumbs from '@components/feature/Project/ProjectBreadcrumbs';
-import { SidebarInset, SidebarProvider } from '@components/shared/Sidebar';
-import Navbar from '@layout/Navbar';
-import ProjectSidebar from '@layout/ProjectSidebar';
+const WorkflowPage = () => {
+  const { isLoading } = useWorkflow();
 
-const ProjectLayout = () => {
+  if (isLoading) return <Loading />;
+
   return (
-    <SidebarProvider defaultOpen={false}>
-      <ProjectSidebar />
-      <SidebarInset>
-        <Navbar breadcrumbs={<ProjectBreadcrumbs />} />
-        <div className="flex flex-1 overflow-auto">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="flex flex-col w-full h-full">
+      <WorkflowHeader />
+      <WorkflowTabs />
+    </div>
   );
 };
 
-export default ProjectLayout;
+export default WorkflowPage;
