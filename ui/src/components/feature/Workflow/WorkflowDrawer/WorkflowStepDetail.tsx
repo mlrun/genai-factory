@@ -25,10 +25,10 @@ interface WorkflowStepDetailProps {
 
 const WorkflowStepDetail = ({ label, value }: WorkflowStepDetailProps) => (
   <div className="flex flex-col">
-    <span className="capitalize text-[#667385] font-inter text-[14px] font-semibold leading-normal">
+    <span className="capitalize text-workflow-drawer-label font-inter text-sm font-semibold leading-normal">
       {label}
     </span>
-    <span className="text-[#404D60] font-inter text-[14px] font-normal leading-normal">
+    <span className="text-workflow-drawer-value font-inter text-sm font-normal leading-normal">
       {JSON.stringify(value).replace(/^"|"$/g, '')}
     </span>
   </div>

@@ -34,7 +34,7 @@ export type WorkflowStep = {
   after?: string[];
   kind: string;
   class_name: string;
-  class_args?: Record<string, any>;
+  class_args?: Record<string, unknown>;
   responder?: boolean;
 };
 

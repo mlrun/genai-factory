@@ -57,7 +57,7 @@ body {
 
   --project-label-border: #e0e9f5;
   --project-label-text: #333;
-  --workflow-content-bg: #FCFCFD;
+  --workflow-content-bg: #fcfcfd;
   --workflow-content-border: #483f561f;
 
   --text-size-number: 0.0625rem;
@@ -163,6 +163,8 @@ b {
   --color-project-label-text: var(--project-label-text);
   --color-workflow-content-bg: var(--workflow-content-bg);
   --color-workflow-content-border: var(--workflow-content-border);
+  --color-workflow-drawer-label: #667385;
+  --color-workflow-drawer-value: #404d60;
 }
 
 .dark {

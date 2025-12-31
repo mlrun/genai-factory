@@ -64,6 +64,7 @@ function WorkflowGraph() {
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
       >
+        {/* TODO: Replace default ReactFlow Controls with custom UI once Figma design is finalized */}
         <Controls
           className="shadow rounded-md p-1 flex gap-1 bg-white
         [&_button]:!border-0 [&_button]:rounded-sm [&_button]:hover:!bg-blue-50"
