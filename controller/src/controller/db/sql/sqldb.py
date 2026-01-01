@@ -365,9 +365,12 @@ class Model(VersionedOwnerBaseSchema):
     # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="models")
 
-    relationship_args = {"back_populates": "model", "cascade": "all, delete-orphan"}
-    # one-to-many relationship with deployments:
-    deployments: Mapped[List["Deployment"]] = relationship(**relationship_args)
+    # one-to-many relationship with deployments
+    # 2. DEPLOYMENTS: Keep when Agent is deleted
+    deployments: Mapped[List["Deployment"]] = relationship(
+        "Deployment",
+        back_populates="model"
+    )
 
     def __init__(
         self,
@@ -522,15 +525,30 @@ class Workflow(VersionedOwnerBaseSchema):
 
     # Relationships:
 
-    relationship_args = {"back_populates": "workflow", "cascade": "all, delete-orphan"}
-    # one-to-many relationship with step configuration:
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(**relationship_args)
-    # one-to-many relationship with deployments:
-    deployments: Mapped[List["Deployment"]] = relationship(**relationship_args)
-    # one-to-many relationship with schedules:
-    schedules: Mapped[List["Schedule"]] = relationship(**relationship_args)
-    # one-to-many relationship with runs:
-    runs: Mapped[List["Run"]] = relationship(**relationship_args)
+    # 1. SCHEDULES: Deleted when Workflow is deleted
+    schedules: Mapped[List["Schedule"]] = relationship(
+        "Schedule",
+        back_populates="workflow",
+        cascade="all, delete-orphan"  # This handles the deletion
+    )
+
+    # 2. RUNS: Keep when Workflow is deleted
+    runs: Mapped[List["Run"]] = relationship(
+        "Run",
+        back_populates="workflow"
+    )
+
+    # 3. STEP CONFIGURATIONS: Keep when Workflow is deleted
+    step_configurations: Mapped[List["StepConfiguration"]] = relationship(
+        "StepConfiguration",
+        back_populates="workflow"
+    )
+
+    # 4. DEPLOYMENTS: Keep when Workflow is deleted
+    deployments: Mapped[List["Deployment"]] = relationship(
+        "Deployment",
+        back_populates="workflow"
+    )
 
 
 
@@ -590,11 +608,17 @@ class Agent(VersionedOwnerBaseSchema):
 
     # Relationships:
 
-    relationship_args = {"back_populates": "agent", "cascade": "all, delete-orphan"}
-    # one-to-many relationship with step configuration:
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(**relationship_args)
-    # one-to-many relationship with deployments:
-    deployments: Mapped[List["Deployment"]] = relationship(**relationship_args)
+    # 1. STEP CONFIGURATIONS: Keep when Agent is deleted
+    step_configurations: Mapped[List["StepConfiguration"]] = relationship(
+        "StepConfiguration",
+        back_populates="agent"
+    )
+
+    # 2. DEPLOYMENTS: Keep when Agent is deleted
+    deployments: Mapped[List["Deployment"]] = relationship(
+        "Deployment",
+        back_populates="agent"
+    )
 
 
 
@@ -652,11 +676,17 @@ class McpServer(VersionedOwnerBaseSchema):
 
     # Relationships:
 
-    relationship_args = {"back_populates": "mcp_server", "cascade": "all, delete-orphan"}
-    # one-to-many relationship with step configuration:
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(**relationship_args)
-    # one-to-many relationship with deployments:
-    deployments: Mapped[List["Deployment"]] = relationship(**relationship_args)
+    # 1. STEP CONFIGURATIONS: Keep when Workflow is deleted
+    step_configurations: Mapped[List["StepConfiguration"]] = relationship(
+        "StepConfiguration",
+        back_populates="mcp_server"
+    )
+
+    # 2. DEPLOYMENTS: Keep when Workflow is deleted
+    deployments: Mapped[List["Deployment"]] = relationship(
+        "Deployment",
+        back_populates="mcp_server"
+    )
 
     # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="mcp_server")
@@ -892,8 +922,8 @@ class Schedule(VersionedOwnerBaseSchema):
     # Columns:
     workflow_id: Mapped[str] = mapped_column(
         String(ID_LENGTH),
-        ForeignKey("workflow.uid"),
-        nullable = True,
+        ForeignKey("workflow.uid", ondelete="CASCADE"),
+        nullable = False,
         index = True
     )
 
@@ -901,9 +931,8 @@ class Schedule(VersionedOwnerBaseSchema):
 
     # Relationships:
 
-    relationship_args = {"back_populates": "schedule", "cascade": "all, delete-orphan"}
     # one-to-many relationship with step configuration:
-    runs: Mapped[List["Run"]] = relationship(**relationship_args)
+    runs: Mapped[List["Run"]] = relationship(back_populates="schedule")
     # many-to-one relationship with workflows:
     workflow: Mapped["Workflow"] = relationship(back_populates="schedules")
 
