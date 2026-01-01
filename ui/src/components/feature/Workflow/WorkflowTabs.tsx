@@ -18,6 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import WorkflowGraph from '@components/feature/Workflow/WorkflowGraph';
 import {
   Tabs,
   TabsContent,
@@ -40,7 +41,12 @@ const WorkflowTabs = () => {
         className="flex flex-col items-start p-8 px-14 gap-5 flex-1 self-stretch border border-workflow-content-border bg-workflow-content-bg"
       ></TabsContent>
 
-      <TabsContent value="graph" className="flex flex-1 flex-col"></TabsContent>
+      <TabsContent
+        value="graph"
+        className="flex flex-col items-start gap-5 flex-1 self-stretch border border-workflow-content-border bg-workflow-content-bg"
+      >
+        <WorkflowGraph />
+      </TabsContent>
     </Tabs>
   );
 };

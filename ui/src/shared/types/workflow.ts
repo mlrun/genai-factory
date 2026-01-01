@@ -24,8 +24,18 @@ export type Workflow = {
   deployment: string;
   workflow_function?: string;
   configuration?: { [key: string]: string };
-  graph?: { [key: string]: string };
+  graph?: {
+    steps: Record<string, WorkflowStep>;
+  };
   created?: string;
+};
+
+export type WorkflowStep = {
+  after?: string[];
+  kind: string;
+  class_name: string;
+  class_args?: Record<string, unknown>;
+  responder?: boolean;
 };
 
 export enum WorkflowType {
