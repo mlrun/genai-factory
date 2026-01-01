@@ -11,15 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
-from pydantic import Field
-
-from genai_factory.schemas.base import BaseWithVerMetadata
+from tests.base_api_test import BaseAPITest
 
 
-class Project(BaseWithVerMetadata):
-    _top_level_fields = ["source"]
+class TestDocuments(BaseAPITest):
 
-    source: str = ""
-    steps: dict = Field(default_factory=dict)
+    @property
+    def resource(self):
+        return "documents"
+
+    def create_payload(self, project, owner):
+        return {
+            "name": "doc-1",
+            "owner_id": owner["uid"],
+            "description": "document",
+            "project_id": project["uid"],
+            "path": "/tmp/doc.txt",
+        }
+
+    def update_payload(self, project, owner):
+        return {
+            **self.create_payload(project, owner),
+            "description": "updated document",
+        }

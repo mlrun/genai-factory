@@ -15,22 +15,19 @@
 from enum import Enum
 from typing import Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
-class ModelType(str, Enum):
-    MODEL = "model"
-    ADAPTER = "adapter"
-
-
 class Model(BaseWithVerMetadata):
-    _extra_fields = ["path", "producer", "deployment"]
-    _top_level_fields = ["model_type", "task"]
+    _top_level_fields = ["is_adapter", "task"]
 
-    model_type: ModelType
-    base_model: str
+    is_adapter: bool
+    base_model: str = ""
     project_id: str
-    task: Optional[str] = None
-    path: Optional[str] = None
-    producer: Optional[str] = None
-    deployment: Optional[str] = None
+    source: str
+    task: str = ""
+    producer: dict[str,str] = Field(default_factory=dict)
+    profile: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str,str] = Field(default_factory=dict)

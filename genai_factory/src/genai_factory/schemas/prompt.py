@@ -11,20 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Optional, List
+from enum import Enum
+from typing import Optional
 
 from pydantic import Field
 
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithComparableData
 
 
-class Document(BaseWithVerMetadata):
-    _top_level_fields = ["path","keywords"]
-    path: str
-    project_id: str
-    summary: str = ""
-    ingestions: List[str] = Field(default_factory=list)
-    keywords: List[str] = Field(default_factory=list)
-    metadata: dict[str,str] = Field(default_factory=dict)
+class PromptFormatType(str, Enum):
+    FSTRING = "fstring"
+    MUSTACHE = "mustache"
+    JINJA2 = "jinja2"
+
+class Prompt(BaseWithComparableData):
+    _top_level_fields = ["format","project_id"]
+
+    messages: Optional[dict]
+    input_arguments: dict[str,str] = Field(default_factory=dict)
+    default_arguments: dict[str,str] = Field(default_factory=dict)
     extra_data: dict[str,str] = Field(default_factory=dict)
+    format: PromptFormatType = PromptFormatType.FSTRING
+    project_id: str
+    models: dict[str,str] = Field(default_factory=dict)

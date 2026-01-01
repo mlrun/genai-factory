@@ -13,10 +13,9 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import Optional
 
 from genai_factory.schemas import Conversation
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithWorkMetadata
 
 
 class WorkflowType(str, Enum):
@@ -25,18 +24,14 @@ class WorkflowType(str, Enum):
     DATA_PROCESSING = "data-processing"
     TRAINING = "training"
     EVALUATION = "evaluation"
+    KNOWLEDGE_BASE="knowledge-base"
+    AGENT="agent"
+    MCP_SERVER="mcp_server"
 
 
-class Workflow(BaseWithVerMetadata):
-    _top_level_fields = ["workflow_type"]
-
+class Workflow(BaseWithWorkMetadata):
+    _top_level_fields = ["workflow_type","project_id","state"]
     workflow_type: WorkflowType
-    project_id: str
-    deployment: Optional[str] = None
-    workflow_function: Optional[str] = None
-    configuration: Optional[dict] = None
-    graph: Optional[dict] = None
-
 
 class WorkflowEvent:
     """

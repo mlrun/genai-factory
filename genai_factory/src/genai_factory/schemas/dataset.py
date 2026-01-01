@@ -14,14 +14,18 @@
 
 from typing import List, Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
 class Dataset(BaseWithVerMetadata):
-    _top_level_fields = ["task"]
+    _top_level_fields = ["task","path"]
 
-    task: str
+    task: str = ""
     path: str
     project_id: str
-    sources: Optional[List[str]] = None
-    producer: Optional[str] = None
+    data_sources: List[str] = Field(default_factory=list)
+    producer: dict[str,str]
+    profile: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str, str] = Field(default_factory=dict)
