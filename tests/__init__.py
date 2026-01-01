@@ -11,19 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from genai_factory import workflow_server
-from genai_factory.chains.base import HistorySaver, SessionLoader
-from genai_factory.chains.refine import RefineQuery
-from genai_factory.chains.retrieval import MultiRetriever
-
-workflow_graph = [
-    SessionLoader(),
-    RefineQuery(),
-    MultiRetriever(),
-    HistorySaver(),
-]
-
-workflow_server.add_workflow(
-    name="default", structure=workflow_graph, workflow_type="application", type_kwargs={}
-)

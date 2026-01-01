@@ -12,18 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from genai_factory import workflow_server
-from genai_factory.chains.base import HistorySaver, SessionLoader
-from genai_factory.chains.refine import RefineQuery
-from genai_factory.chains.retrieval import MultiRetriever
+from tests.base_api_test import BaseAPITest
 
-workflow_graph = [
-    SessionLoader(),
-    RefineQuery(),
-    MultiRetriever(),
-    HistorySaver(),
-]
 
-workflow_server.add_workflow(
-    name="default", structure=workflow_graph, workflow_type="application", type_kwargs={}
-)
+class TestPrompts(BaseAPITest):
+
+    @property
+    def resource(self):
+        return "prompts"
+
+    def create_payload(self, project, owner):
+        return {
+            "name": "prompt-1",
+            "description": "prompt",
+            "owner_id": owner["uid"],
+            "project_id": project["uid"],
+            "messages": {}
+        }
+
+    def update_payload(self, project, owner):
+        return {
+            **self.create_payload(project, owner),
+            "description": "updated prompt",
+        }

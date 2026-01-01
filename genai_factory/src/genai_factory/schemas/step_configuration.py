@@ -11,19 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
-from genai_factory import workflow_server
-from genai_factory.chains.base import HistorySaver, SessionLoader
-from genai_factory.chains.refine import RefineQuery
-from genai_factory.chains.retrieval import MultiRetriever
+from pydantic import Field
 
-workflow_graph = [
-    SessionLoader(),
-    RefineQuery(),
-    MultiRetriever(),
-    HistorySaver(),
-]
+from genai_factory.schemas.base import BaseWithComparableData
 
-workflow_server.add_workflow(
-    name="default", structure=workflow_graph, workflow_type="application", type_kwargs={}
-)
+
+class StepConfiguration(BaseWithComparableData):
+    _top_level_fields = ["project_id", "workflow_id","agent_id","mcp_server_id"]
+
+    branch: str
+    step_name: str
+    kwargs: Optional[dict[str,str]] = Field(default_factory=dict)
+    project_id: str
+
+    # Optional (nullable in DB)
+    workflow_id: Optional[str] = None
+    agent_id: Optional[str] = None
+    mcp_server_id: Optional[str] = None
