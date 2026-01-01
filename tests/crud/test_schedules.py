@@ -211,3 +211,41 @@ def test_deleting_workflow_deletes_schedules(client, owner, workflow, project):
     resp = client.get("/api/schedules")
     assert resp.json()["data"] == []
 
+def test_deleting_schedule_preserves_runs(client, owner, workflow):
+    # 1. Create a Schedule
+    sched_resp = client.post(
+        "/api/schedules",
+        json={
+            "name": "temp-schedule",
+            "owner_id": owner["uid"],
+            "workflow_id": workflow["uid"],
+            "configuration": {},
+            "status": "pending",
+        },
+    )
+    schedule_uid = sched_resp.json()["data"]["uid"]
+
+    # 2. Create a Run attached to that Schedule
+    client.post(
+        "/api/runs",
+        json={
+            "name": "historical-run",
+            "owner_id": owner["uid"],
+            "workflow_id": workflow["uid"],
+            "schedule_id": schedule_uid,
+            "configuration": {},
+            "outputs": {},
+            "status": "pending",
+        },
+    )
+
+    # 3. Delete the Schedule
+    delete_response = client.delete(f"/api/schedules/temp-schedule")
+    assert delete_response.status_code == 200
+
+
+    # 4. Verify the Run still exists but schedule_id is NULL
+    run_resp = client.get("/api/runs/historical-run")
+    assert run_resp.status_code == 200
+    assert run_resp.json()["data"]["schedule_id"] is None  # This proves SET NULL worked!
+
