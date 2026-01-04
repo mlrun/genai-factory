@@ -21,7 +21,6 @@ such restriction.
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import Page from '@layout/Page';
-import ProjectLayout from '@layout/ProjectLayout';
 import TableLayout from '@layout/Table';
 import ChatPage from '@pages/ChatPage';
 import DatasetsPage from '@pages/DatasetsPage';
@@ -51,35 +50,50 @@ export const router = createBrowserRouter([
     path: '/',
     element: <Page />,
     children: [
-      { path: 'projects', element: <ProjectsPage /> },
       {
-        path: 'projects/:name',
-        element: <Navigate replace={true} to="monitor" />,
-      },
-      { path: 'chat', element: <ChatPage /> },
-      { path: 'chat/:sessionName', element: <ChatPage /> },
-    ],
-  },
-  {
-    path: 'projects/:name',
-    element: <ProjectLayout />,
-    children: [
-      {
-        element: <TableLayout />,
+        path: 'projects',
         children: [
-          { path: 'monitor', element: <ProjectPage /> },
-          { path: 'models', element: <ModelsPage /> },
-          { path: 'data-sources', element: <DataSourcesPage /> },
-          { path: 'datasets', element: <DatasetsPage /> },
-          { path: 'documents', element: <DocumentsPage /> },
-          { path: 'prompt-templates', element: <PromptTemplatesPage /> },
-          { path: 'users', element: <UsersPage /> },
-          { path: 'workflows', index: true, element: <WorkflowsPage /> },
+          { index: true, element: <ProjectsPage /> },
+          {
+            path: ':projectName',
+            children: [
+              { index: true, element: <Navigate replace to="monitor" /> },
+              {
+                element: <TableLayout />,
+                children: [
+                  { path: 'monitor', element: <ProjectPage /> },
+                  { path: 'models', element: <ModelsPage /> },
+                  { path: 'data-sources', element: <DataSourcesPage /> },
+                  { path: 'datasets', element: <DatasetsPage /> },
+                  { path: 'documents', element: <DocumentsPage /> },
+                  {
+                    path: 'prompt-templates',
+                    element: <PromptTemplatesPage />,
+                  },
+                  { path: 'users', element: <UsersPage /> },
+                  {
+                    path: 'workflows',
+                    index: true,
+                    element: <WorkflowsPage />,
+                  },
+                ],
+              },
+              {
+                path: 'workflows',
+                children: [
+                  { path: ':workflowName', element: <WorkflowPage /> },
+                ],
+              },
+            ],
+          },
         ],
       },
       {
-        path: 'workflows',
-        children: [{ path: ':workflowName', element: <WorkflowPage /> }],
+        path: 'chat',
+        children: [
+          { index: true, element: <ChatPage /> },
+          { path: ':sessionName', element: <ChatPage /> },
+        ],
       },
     ],
   },

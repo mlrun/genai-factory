@@ -33,7 +33,7 @@ import { getProjectLinks } from './projectLinks.util';
 
 const ProjectSidebar = () => {
   const { pathname } = useLocation();
-  const { name: projectName } = useParams();
+  const { projectName } = useParams();
 
   const links = useMemo(() => {
     return projectName ? getProjectLinks(projectName) : [];

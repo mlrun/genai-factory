@@ -23,18 +23,18 @@ import { validateApiResponse } from '@utils/validateApiResponse';
 import { QUERY_DEFAULTS } from '@constants';
 
 export function useProject() {
-  const { name } = useParams();
+  const { projectName } = useParams();
 
   return useQuery<Project>({
-    queryKey: ['project', name],
+    queryKey: ['project', projectName],
     queryFn: async () => {
-      if (!name) throw new Error('No project name provided');
+      if (!projectName) throw new Error('No project name provided');
       return validateApiResponse(
-        Client.getProject(name),
-        `fetch project: ${name}`,
+        Client.getProject(projectName),
+        `fetch project: ${projectName}`,
       );
     },
-    enabled: !!name,
+    enabled: !!projectName,
     ...QUERY_DEFAULTS,
   });
 }

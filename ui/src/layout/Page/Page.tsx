@@ -19,18 +19,19 @@ such restriction.
 */
 
 import React, { useEffect, useMemo } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
-import Chatbar from '@components/feature/Chat/Chatbar';
 import Loading from '@components/shared/Loading';
+import { SidebarInset, SidebarProvider } from '@components/shared/Sidebar';
 import Navbar from '@layout/Navbar';
+import ProjectSidebar from '@layout/ProjectSidebar';
 import { useUser } from '@queries';
 
 import { useAuthStore } from '@stores/authStore';
 
 const Page = () => {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { projectName } = useParams();
 
   const logout = useAuthStore((s) => s.logout);
 
@@ -46,24 +47,24 @@ const Page = () => {
     }
   }, [isError, error, logout, navigate, username]);
 
-  const showChatbar = pathname.includes('chat');
-
   if (isLoading) return <Loading />;
 
-  return (
-    <div className="flex flex-col h-full">
+  const content = (
+    <>
       <Navbar />
-      <div className="flex flex-1">
-        {showChatbar && publicUser && (
-          <div className="hidden md:flex">
-            <Chatbar publicUser={publicUser} />
-          </div>
-        )}
-        <div className="flex flex-col flex-1 overflow-y-auto">
-          <Outlet />
-        </div>
+      <div className="flex flex-1 overflow-y-auto">
+        <Outlet />
       </div>
-    </div>
+    </>
+  );
+
+  return projectName ? (
+    <SidebarProvider defaultOpen={false} className="flex flex-col h-full">
+      <ProjectSidebar />
+      <SidebarInset>{content}</SidebarInset>
+    </SidebarProvider>
+  ) : (
+    <div className="flex flex-col h-full">{content}</div>
   );
 };
 
