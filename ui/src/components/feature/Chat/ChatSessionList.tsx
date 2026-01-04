@@ -127,6 +127,7 @@ const ChatSessionList = () => {
         {sessions.map((session, index) => (
           <Flex
             gap={4}
+            padding={2}
             justifyContent={'space-between'}
             alignItems={'space-between'}
             key={index}

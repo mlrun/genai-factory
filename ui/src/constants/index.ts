@@ -104,3 +104,9 @@ export const WORKFLOW_SECONDARY_ACTIONS: {
   label: string;
   variant?: ButtonProps['variant'];
 }[] = [{ label: 'Save', variant: 'secondary' }, { label: 'Export' }];
+
+// -----------------------------------------------------------------------------
+// Workflow
+// -----------------------------------------------------------------------------
+
+export const DEFAULT_WORKFLOW_UID = '1dfd7fc7c4024501850e3541abc3ed9f';

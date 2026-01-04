@@ -18,10 +18,15 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { ChakraProvider } from '@chakra-ui/react';
 import Chat from '@components/feature/Chat';
 
 const ChatPage = () => {
-  return <Chat />;
+  return (
+    <ChakraProvider>
+      <Chat />
+    </ChakraProvider>
+  );
 };
 
 export default ChatPage;

@@ -18,24 +18,28 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { ReactNode } from 'react';
+import { useParams } from 'react-router-dom';
 
-interface NavbarProps {
-  breadcrumbs?: ReactNode;
-}
+import ProjectBreadcrumbs from '@components/feature/Project/ProjectBreadcrumbs';
 
-const Navbar = ({ breadcrumbs }: NavbarProps) => {
+// TODO: Remove the important from the border after you remove chakra
+const Navbar = () => {
+  const { projectName } = useParams();
   return (
     <div
       className="
         sticky top-0
         flex items-center justify-between
         h-[64px] bg-white z-10
-        border-b border-[rgba(72,63,86,0.12)]
+        !border-b border-[rgba(72,63,86,0.12)]
       "
       data-testid="topbar"
     >
-      <div className="flex items-center pl-4 gap-2">{breadcrumbs}</div>
+      {projectName && (
+        <div className="flex items-center pl-4 gap-2">
+          <ProjectBreadcrumbs />
+        </div>
+      )}
     </div>
   );
 };

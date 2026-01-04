@@ -17,21 +17,19 @@ import { useNavigate } from 'react-router-dom';
 
 import { AddIcon } from '@chakra-ui/icons';
 import { Button, Flex, useColorMode } from '@chakra-ui/react';
-import { useSessionActions } from '@queries';
+import { useSessionActions, useUser } from '@queries';
 import { colors } from '@shared/theme';
-import { User } from '@shared/types';
 
 import ChatSessionList from './ChatSessionList';
 
 import { generateSessionId } from '@shared/utils';
 
-interface ChatbarProps {
-  publicUser: User;
-}
+import { DEFAULT_WORKFLOW_UID } from '@constants';
 
-const Chatbar = ({ publicUser }: ChatbarProps) => {
+const Chatbar = () => {
   const navigate = useNavigate();
   const { colorMode } = useColorMode();
+  const { data: publicUser } = useUser();
 
   const { createSession } = useSessionActions();
 
@@ -42,8 +40,8 @@ const Chatbar = ({ publicUser }: ChatbarProps) => {
         name: sessionName,
         description: '* New Chat',
         labels: {},
-        workflow_id: '1dfd7fc7c4024501850e3541abc3ed9f',
-        owner_id: publicUser.uid,
+        workflow_id: DEFAULT_WORKFLOW_UID,
+        owner_id: publicUser?.uid,
       };
       const newSession = await createSession.mutateAsync(payload);
       navigate(`/chat/${newSession.name}`);

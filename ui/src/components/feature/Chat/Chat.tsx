@@ -15,6 +15,7 @@
 import { useEffect, useRef } from 'react';
 
 import { Box, Flex } from '@chakra-ui/react';
+import Chatbar from '@components/feature/Chat/Chatbar';
 import Bubble from '@components/shared/Bubble';
 import Loading from '@components/shared/Loading';
 import Message from '@components/shared/Message';
@@ -37,36 +38,39 @@ const Chat = () => {
   if (error) return <div>Failed to load chat.</div>;
 
   return (
-    <Flex
-      paddingX={{ xl: '25%', md: '10%' }}
-      paddingBottom={4}
-      flexDir="column"
-      justifyContent="space-between"
-      flexGrow={1}
-      height="calc(100vh - 92px)"
-    >
+    <Flex height="100%" width="100%">
+      <Chatbar />
       <Flex
-        sx={{ '::-webkit-scrollbar': { display: 'none' } }}
-        justifyContent="flex-start"
+        paddingX={{ xl: '25%', md: '10%' }}
+        paddingBottom={4}
+        flexDir="column"
+        justifyContent="space-between"
         flexGrow={1}
-        flexDirection="column"
-        paddingBottom="92px"
-        overflowY="scroll"
+        height="100%"
       >
-        {session?.history?.map((message, index) => (
-          <Bubble
-            key={index}
-            content={message.content}
-            bot={message.role}
-            sources={message.sources}
-            html={message.html as string}
-          />
-        ))}
-        <Box height="2px" ref={lastMessageRef} />
+        <Flex
+          sx={{ '::-webkit-scrollbar': { display: 'none' } }}
+          justifyContent="flex-start"
+          flexGrow={1}
+          flexDirection="column"
+          paddingBottom="92px"
+          overflowY="scroll"
+        >
+          {session?.history?.map((message, index) => (
+            <Bubble
+              key={index}
+              content={message.content}
+              bot={message.role}
+              sources={message.sources}
+              html={message.html as string}
+            />
+          ))}
+          <Box height="2px" ref={lastMessageRef} />
+        </Flex>
+        <Box>
+          <Message />
+        </Box>
       </Flex>
-      <Box>
-        <Message />
-      </Box>
     </Flex>
   );
 };
