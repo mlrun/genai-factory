@@ -24,6 +24,8 @@ import ChatSessionList from './ChatSessionList';
 
 import { generateSessionId } from '@shared/utils';
 
+import { DEFAULT_WORKFLOW_UID } from '@constants';
+
 const Chatbar = () => {
   const navigate = useNavigate();
   const { colorMode } = useColorMode();
@@ -38,8 +40,8 @@ const Chatbar = () => {
         name: sessionName,
         description: '* New Chat',
         labels: {},
-        workflow_id: '1dfd7fc7c4024501850e3541abc3ed9f',
-        owner_id: publicUser?.uid ?? 'f482f5a66a1b48628d699acb6df02be4',
+        workflow_id: DEFAULT_WORKFLOW_UID,
+        owner_id: publicUser?.uid,
       };
       const newSession = await createSession.mutateAsync(payload);
       navigate(`/chat/${newSession.name}`);
