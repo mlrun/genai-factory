@@ -40,7 +40,7 @@ const Message = () => {
       },
       {
         onSuccess: async () => {
-          setCanSend(false);
+          setCanSend(true);
           await refetch();
         },
         onError: (error) => {
@@ -52,7 +52,7 @@ const Message = () => {
             duration: 5000,
             isClosable: true,
           });
-          setCanSend(true);
+          setCanSend(false);
         },
       },
     );
