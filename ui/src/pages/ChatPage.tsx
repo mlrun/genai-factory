@@ -17,16 +17,30 @@ illegal under applicable law, and the grant of the foregoing license
 under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
+import Chatbar from '@components/feature/Chat/Chatbar';
+import { ChatInput } from '@components/feature/Chat/ChatInput';
+import { ChatMessagesPanel } from '@components/feature/Chat/ChatMessagesPanel';
+import Loading from '@components/shared/Loading';
+import { useSession } from '@queries';
 
-import { ChakraProvider } from '@chakra-ui/react';
-import Chat from '@components/feature/Chat';
+export default function ChatPage() {
+  const { data: session, error, isLoading } = useSession();
 
-const ChatPage = () => {
+  if (isLoading) return <Loading />;
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-full text-red-500">
+        Failed to load chat.
+      </div>
+    );
+
   return (
-    <ChakraProvider>
-      <Chat />
-    </ChakraProvider>
+    <div className="flex h-full w-full">
+      <Chatbar />
+      <div className="flex flex-1 flex-col justify-between h-full">
+        <ChatMessagesPanel messages={session?.history ?? []} />
+        <ChatInput />
+      </div>
+    </div>
   );
-};
-
-export default ChatPage;
+}

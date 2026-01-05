@@ -12,204 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import * as React from 'react';
 
-import { ChevronDownIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import {
-  Button,
-  Flex,
-  IconButton,
-  Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  useColorMode,
-  useToast,
-} from '@chakra-ui/react';
-import { useSession, useSessionActions, useSessions } from '@queries';
-import { colors } from '@shared/theme';
-import { Session } from '@shared/types/session';
+import ChatSessionListItem from '@components/feature/Chat/ChatSessionListItem';
+import type { Session } from '@shared/types/session';
 
-import { useChatStore } from '@stores/chatStore';
+interface Props {
+  sessions: Session[];
+  activeSessionName?: string;
+  editingSessionId?: string | null;
+  description: string;
+  onSelect: (session: Session) => void;
+  onStartRename: (session: Session) => void;
+  onChangeDescription: (value: string) => void;
+  onConfirmRename: () => void;
+  onDelete: (sessionName: string) => void;
+}
 
-const ChatSessionList = () => {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const { colorMode } = useColorMode();
-  const toast = useToast();
-
-  const { setCanSend, setIsTyping } = useChatStore();
-
-  const { data: sessions = [] } = useSessions();
-  const { data: selectedSession } = useSession();
-
-  const { deleteSession, updateSession } = useSessionActions();
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [description, setDescription] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleSelectChat = (session: Session) => {
-    setIsTyping(false);
-    setCanSend(true);
-    navigate(`/chat/${session.name}`);
-  };
-
-  const handleUpdateSession = () => {
-    if (!selectedSession) return;
-
-    updateSession.mutate(
-      { ...selectedSession, description },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Session updated',
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-          });
-          setIsEditing(false);
-        },
-        onError: (error) => {
-          toast({
-            title: 'Error updating session',
-            description: error.message,
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-          });
-        },
-      },
+export function SessionsList({
+  activeSessionName,
+  description,
+  editingSessionId,
+  onChangeDescription,
+  onConfirmRename,
+  onDelete,
+  onSelect,
+  onStartRename,
+  sessions,
+}: Readonly<Props>) {
+  if (sessions.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center px-4 text-center">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-muted-foreground">
+            No sessions yet
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Start a new chat to see it here
+          </p>
+        </div>
+      </div>
     );
-  };
-
-  const handleDeleteSession = (name: string) => {
-    deleteSession.mutate(name, {
-      onSuccess: () => {
-        toast({
-          title: 'Session deleted',
-          description: 'The selected session has been deleted successfully.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error while deleting session',
-          description: error.message,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      },
-    });
-  };
+  }
 
   return (
-    <Flex
-      width={72}
-      maxHeight="680px"
-      overflow="scroll"
-      flexFlow="column"
-      display="table"
-      gap={4}
-      alignItems="flex-start"
-    >
-      <Flex
-        width="100%"
-        justifyContent="space-between"
-        direction="column"
-        gap={2}
-      >
-        {sessions.map((session, index) => (
-          <Flex
-            gap={4}
-            padding={2}
-            justifyContent={'space-between'}
-            alignItems={'space-between'}
-            key={index}
-          >
-            <Button
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setIsEditing(true);
-                }
-              }}
-              width={'100%'}
-              bg={
-                colorMode === 'dark'
-                  ? pathname.includes(session.name as string)
-                    ? colors.gray700
-                    : colors.gray800
-                  : pathname.includes(session.name as string)
-                    ? colors.gray400
-                    : colors.gray200
-              }
-              _hover={{
-                bg: colorMode === 'dark' ? colors.gray700 : colors.gray400,
-              }}
-              _active={{ bg: colors.gray600 }}
-              onClick={() => handleSelectChat(session)}
-            >
-              <>
-                {isEditing && session.uid === selectedSession?.uid ? (
-                  <Input
-                    ref={inputRef}
-                    onFocus={(e) => e.target.click()}
-                    textAlign={'center'}
-                    focusBorderColor="transparent"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === 'Enter' && handleUpdateSession()
-                    }
-                  />
-                ) : (
-                  session.name
-                )}
-              </>
-            </Button>
+    <div className="h-full overflow-y-auto">
+      <div className="space-y-1 p-2">
+        {sessions.map((session) => {
+          const isActive = session.name === activeSessionName;
+          const isEditing = editingSessionId === session.uid;
 
-            <Menu>
-              <MenuButton
-                onClick={() => {
-                  setIsEditing(false);
-                  setDescription(session.description);
-                }}
-                as={IconButton}
-                aria-label="Options"
-                icon={<ChevronDownIcon />}
-                variant="outline"
-              />
-              <MenuList>
-                <MenuItem
-                  onClick={() => setIsEditing(true)}
-                  icon={<EditIcon />}
-                >
-                  Rename
-                </MenuItem>
-                {/* <MenuItem icon={<ExternalLinkIcon />}>Export to PDF</MenuItem>
-                <MenuItem icon={<RepeatIcon />}>Archive</MenuItem> */}
-                <MenuItem
-                  onClick={() => handleDeleteSession(session.name)}
-                  icon={<DeleteIcon />}
-                >
-                  Delete
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </Flex>
-        ))}
-      </Flex>
-    </Flex>
+          return (
+            <ChatSessionListItem
+              key={session.uid}
+              isActive={isActive}
+              isEditing={isEditing}
+              session={session}
+              description={description}
+              onChangeDescription={onChangeDescription}
+              onConfirmRename={onConfirmRename}
+              onDelete={onDelete}
+              onStartRename={onStartRename}
+              onSelect={onSelect}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
-};
-
-export default ChatSessionList;
+}

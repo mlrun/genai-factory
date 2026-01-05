@@ -1,109 +1,69 @@
-// Copyright 2024 Iguazio
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+import { useState } from 'react';
+import { Copy, LucideClipboardCheck, MessageSquare } from 'lucide-react';
 import Markdown from 'react-markdown';
 
-import { ChatIcon, CheckCircleIcon, CopyIcon } from '@chakra-ui/icons';
-import {
-  Flex,
-  IconButton,
-  Spinner,
-  useColorMode,
-  useToast,
-} from '@chakra-ui/react';
 import ChatMessage from '@components/feature/Chat/ChatMessage';
-import { colors } from '@shared/theme';
-import { Source } from '@shared/types';
+import { Button } from '@components/shared/Button';
+import { Card, CardContent } from '@components/shared/Card';
 
 import { useChatStore } from '@stores/chatStore';
 
 interface BubbleProps {
   bot: string;
   content: string;
-  html?: string;
-  sources?: Source[];
 }
 
 const Bubble = ({ bot, content }: BubbleProps) => {
   const isMessageError = useChatStore((state) => state.isMessageError);
-  const { colorMode } = useColorMode();
-  const toast = useToast();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content).then(() => {});
+    setIsCopied(true);
+    // TODO: show toast notification for "Message copied"
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   return (
-    <Flex gap={10} flexDirection="column">
+    <div className="flex flex-col gap-2">
       {bot === 'AI' ? (
-        <Flex maxW="800px" role="group" alignItems="flex-start" gap={4}>
-          <ChatIcon marginTop={2} />
-          <Flex>{!content && !isMessageError && <Spinner size="sm" />}</Flex>
+        <div className="flex max-w-[800px] items-start gap-1">
+          <div className="flex items-center">
+            {!content && !isMessageError && (
+              <div className="animate-spin border rounded-full w-4 h-4 border-gray-500" />
+            )}
+          </div>
           {!!content && (
-            <>
-              <Flex
-                direction="column"
-                padding={4}
-                borderRadius={6}
-                bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}
-                textAlign="left"
-                marginY={2}
-                maxW="66%"
+            <div className="flex group">
+              <Card className="border-0 my-2 py-1 px-4 bg-gray-200 dark:bg-gray-800 rounded-sm text-left">
+                <CardContent className="p-0">
+                  <ChatMessage message={content} />
+                </CardContent>
+              </Card>
+              <Button
+                variant="ghost"
+                className="mt-2 ml-1 h-fit opacity-0 group-hover:opacity-100 p-1 rounded-md"
+                onClick={handleCopy}
               >
-                <ChatMessage message={content} />
-              </Flex>
-              <IconButton
-                marginTop={2}
-                _hover={{
-                  bg: colorMode === 'dark' ? colors.gray700 : colors.gray200,
-                }}
-                bg={colorMode === 'dark' ? colors.gray800 : colors.gray300}
-                display="none"
-                _groupHover={{ display: 'block' }}
-                icon={<CopyIcon />}
-                onClick={() => {
-                  navigator.clipboard.writeText(content);
-                  toast({
-                    title: 'Message copied',
-                    status: 'success',
-                    duration: 3000,
-                    position: 'bottom',
-                    icon: (
-                      <Flex align="center">
-                        <CheckCircleIcon />
-                      </Flex>
-                    ),
-                  });
-                }}
-                aria-label="copy"
-              />
-            </>
+                {isCopied ? (
+                  <LucideClipboardCheck className="w-2 h-2" />
+                ) : (
+                  <Copy className="w-2 h-2" />
+                )}
+              </Button>
+            </div>
           )}
-        </Flex>
+        </div>
       ) : (
-        <Flex justifyContent="flex-end">
-          <Flex
-            maxW="66%"
-            textAlign="left"
-            marginY={2}
-            borderRadius={6}
-            paddingX={4}
-            paddingY={2}
-            bg={colorMode === 'dark' ? colors.gray700 : colors.gray200}
-            flexWrap="wrap"
-          >
-            <Markdown>{content}</Markdown>
-          </Flex>
-        </Flex>
+        <div className="flex justify-end">
+          <Card className="max-w-[80%] border-none my-2 p-2 bg-blue-200 dark:bg-blue-900 rounded-sm text-left flex-wrap">
+            <CardContent className="p-0">
+              <Markdown>{content}</Markdown>
+            </CardContent>
+          </Card>
+        </div>
       )}
-    </Flex>
+    </div>
   );
 };
 
