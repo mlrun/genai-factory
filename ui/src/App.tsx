@@ -18,8 +18,10 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { Suspense } from 'react';
 import { RouterProvider } from 'react-router-dom';
 
+import Loading from '@components/shared/Loading';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { router } from './router';
@@ -29,7 +31,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <Suspense fallback={<Loading />}>
+        <RouterProvider router={router} />
+      </Suspense>
     </QueryClientProvider>
   );
 }

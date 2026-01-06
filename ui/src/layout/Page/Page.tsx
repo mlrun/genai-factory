@@ -18,7 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { Suspense, useEffect, useMemo } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
 import Loading from '@components/shared/Loading';
@@ -50,12 +50,12 @@ const Page = () => {
   if (isLoading) return <Loading />;
 
   const content = (
-    <>
+    <Suspense fallback={<Loading />}>
       <Navbar />
       <div className="flex flex-1 overflow-y-auto">
         <Outlet />
       </div>
-    </>
+    </Suspense>
   );
 
   return projectName ? (
