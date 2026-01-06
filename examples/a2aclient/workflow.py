@@ -45,16 +45,16 @@ classify_task = root.to(session_loader).to(refine_query).to(intent_classifier)
 # Connect first part to choice step
 choice_task = classify_task.to(intent_choice)
 
-
+# Choice step
 a2a_client_task = choice_task.to(a2a_client)
 communicator_task = choice_task.to(communicator)
 
 
-
+# Merge back choice steps
 language_guardrail_task = root.add_step(language_guardrail, after=["a2a","communicator"])
-language_guardrail_task.to(hallucination_guardrail).to(history_saver).respond()
-# communicator_task.to(language_guardrail)
 
+# Conncet Last steps
+language_guardrail_task.to(hallucination_guardrail).to(history_saver).respond()
 
 root.plot("graph.png")
 
