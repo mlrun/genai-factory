@@ -48,6 +48,7 @@
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.23.1",
     "reactflow": "^11.11.4",
+    "recharts": "^2.15.4",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "rollup": "^4.52.4",
