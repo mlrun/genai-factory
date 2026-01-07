@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from examples.a2aclient.a2a_client import A2AClient
-from examples.a2aclient.communicator import Communicator
-from examples.a2aclient.intent_choice import IntentChoice
-from examples.a2aclient.intent_classifier import IntentClassifier
+from a2a_client import A2AClient
+from communicator import Communicator
+from intent_choice import IntentChoice
+from intent_classifier import IntentClassifier
 from genai_factory import workflow_server
 from genai_factory.chains.base import HistorySaver, SessionLoader
 from genai_factory.chains.hallucination_guardrail import HallucinationGuardrail
