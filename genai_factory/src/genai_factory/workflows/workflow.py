@@ -16,6 +16,7 @@ import os
 from typing import List, Union
 
 import mlrun.serving as mlrun_serving
+from mlrun.serving.states import RootFlowStep
 from mlrun.utils import get_caller_globals
 
 from genai_factory.config import WorkflowServerConfig
@@ -87,6 +88,9 @@ class Workflow:
         steps_config = self._config.workflows_kwargs.get(self._name, {}).get(
             "steps", {}
         )
+        if isinstance(self._skeleton, RootFlowStep):
+            self._graph = self._skeleton
+            return
         if isinstance(self._skeleton, list):
             self._graph = mlrun_serving.states.RootFlowStep()
             last_step = self._graph
@@ -154,7 +158,7 @@ class Workflow:
             success=True,
             data={
                 "answer": resp.results["answer"],
-                "sources": resp.results["sources"],
+                "sources": resp.results.get("sources", []),
                 "returned_state": {},
             },
         )
