@@ -23,6 +23,19 @@ from genai_factory.chains.language_guardrail import LanguageGuardrail
 from genai_factory.chains.refine import RefineQuery, CONVERSATION_CONTEXT_REFINER_PROMPT
 import mlrun.serving as mlrun_serving
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# 1. Get the directory where THIS script is located
+current_dir = Path(__file__).parent.resolve()
+
+# 2. Define the path to the specific .env file in this directory
+env_path = current_dir / ".env"
+
+# 3. Load only this specific file (override=True ensures it takes priority)
+load_dotenv(dotenv_path=env_path, override=True)
+
 # Class instances
 session_loader = SessionLoader()
 refine_query = RefineQuery(
@@ -30,7 +43,7 @@ refine_query = RefineQuery(
 )
 intent_classifier = IntentClassifier()
 intent_choice = IntentChoice()
-a2a_client = A2AClient(base_url="http://localhost:10000", name= "a2a")
+a2a_client = A2AClient(base_url=os.getenv("A2A_BASE_URL", "http://localhost:10000"), name= "a2a")
 communicator = Communicator(name="communicator")
 language_guardrail = LanguageGuardrail()
 hallucination_guardrail= HallucinationGuardrail()
