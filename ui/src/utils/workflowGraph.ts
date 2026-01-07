@@ -22,6 +22,18 @@ import { Edge, Node, Position } from 'reactflow';
 
 import { Workflow } from '@shared/types/workflow';
 
+import {
+  WORKFLOW_GRAPH_HORIZONTAL_OFFSET,
+  WORKFLOW_GRAPH_LEVEL_SPACING,
+  WORKFLOW_GRAPH_SIBLING_SPACING,
+  WORKFLOW_GRAPH_VERTICAL_BASE_POSITION,
+} from '@constants';
+
+type NodePosition = {
+  horizontalPosition: number;
+  verticalPosition: number;
+};
+
 export function buildGraph(workflow?: Workflow | null) {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
@@ -30,22 +42,24 @@ export function buildGraph(workflow?: Workflow | null) {
 
   const steps = workflow.graph.steps;
   const stepKeys = Object.keys(steps);
-  const positions: Record<string, { x: number; y: number }> = {};
+  const positions: Record<string, NodePosition> = {};
 
   function setPosition(
     stepKey: string,
     level: number,
     siblingIndex: number,
     siblingCount: number,
-  ) {
+  ): NodePosition {
     if (positions[stepKey]) return positions[stepKey];
 
-    const x = level * 250 + 100;
-    const spacing = 150;
-    const yOffset = (siblingIndex - (siblingCount - 1) / 2) * spacing;
-    const y = 200 + yOffset;
+    const horizontalPosition =
+      level * WORKFLOW_GRAPH_LEVEL_SPACING + WORKFLOW_GRAPH_HORIZONTAL_OFFSET;
+    const verticalOffset =
+      (siblingIndex - (siblingCount - 1) / 2) * WORKFLOW_GRAPH_SIBLING_SPACING;
+    const verticalPosition =
+      WORKFLOW_GRAPH_VERTICAL_BASE_POSITION + verticalOffset;
 
-    positions[stepKey] = { x, y };
+    positions[stepKey] = { horizontalPosition, verticalPosition };
     return positions[stepKey];
   }
 
@@ -89,7 +103,10 @@ export function buildGraph(workflow?: Workflow | null) {
     nodes.push({
       id: key,
       data: { label: key },
-      position: pos,
+      position: {
+        x: pos.horizontalPosition,
+        y: pos.verticalPosition,
+      },
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
     });
