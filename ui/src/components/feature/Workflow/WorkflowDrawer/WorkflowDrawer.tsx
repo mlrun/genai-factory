@@ -33,7 +33,6 @@ const WorkflowDrawer = () => {
       <DrawerContent
         aria-describedby={undefined}
         className="flex flex-col w-2/5 py-6 pl-8 pr-10 gap-y-4 border-0"
-        title={`${selectedWorkflowStep?.id}-content`}
       >
         <WorkflowDrawerHeader />
         {selectedWorkflowStep &&
