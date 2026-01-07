@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
