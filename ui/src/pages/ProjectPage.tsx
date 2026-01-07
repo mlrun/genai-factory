@@ -36,16 +36,14 @@ const ProjectPage = () => {
   }
 
   return (
-    <Box p={10} width="100%" mx="auto">
-      <ProjectDetails
-        name={project.name}
-        description={project.description}
-        uid={project.uid}
-        created={project.created}
-        updated={project.updated}
-        labels={project.labels}
-      />
-    </Box>
+    <ProjectDetails
+      name={project.name}
+      description={project.description}
+      uid={project.uid}
+      created={project.created}
+      updated={project.updated}
+      labels={project.labels}
+    />
   );
 };
 
