@@ -22,19 +22,63 @@ import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Bubble from '@components/shared/Bubble';
+import { Card, CardContent } from '@components/shared/Card';
 import { ChatHistory } from '@shared/types';
 
 interface Props {
   messages: ChatHistory[];
+  isLoading?: boolean;
+  newMessageIndices?: Set<number>;
+  sessionMessagesCount?: number;
 }
 
-export function ChatMessagesPanel({ messages }: Readonly<Props>) {
+export function ChatMessagesPanel({
+  isLoading,
+  messages,
+  newMessageIndices = new Set(),
+  sessionMessagesCount = 0,
+}: Readonly<Props>) {
   const { sessionName } = useParams();
   const lastMessageRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rafIdRef = useRef<number | null>(null);
+
+  const scrollToBottom = (instant = false) => {
+    if (containerRef.current && lastMessageRef.current) {
+      if (instant) {
+        // Direct scroll for instant updates during typing
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      } else {
+        // Smooth scroll for initial loads
+        lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   useEffect(() => {
-    lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
+    scrollToBottom();
+  }, [messages.length, isLoading]);
+
+  const handleTextUpdate = () => {
+    // Cancel any pending animation frame
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+    }
+
+    // Schedule scroll for next frame - this ensures smooth scrolling during typing
+    rafIdRef.current = requestAnimationFrame(() => {
+      scrollToBottom(true); // Use instant scroll during typing to keep message visible
+      rafIdRef.current = null;
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   if (!messages || messages.length === 0) {
     return (
@@ -51,15 +95,59 @@ export function ChatMessagesPanel({ messages }: Readonly<Props>) {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto px-14">
+    <div
+      ref={containerRef}
+      className="flex-1 flex flex-col overflow-y-auto px-14"
+    >
       <div className="space-y-3">
-        {messages.map((message, index) => (
-          <Bubble
-            key={`session-${sessionName}-${index}`}
-            content={message.content}
-            bot={message.role}
-          />
-        ))}
+        {messages.map((message, index) => {
+          // Only check newMessageIndices for session messages (not optimistic ones)
+          // Optimistic messages are appended after session messages
+          const isSessionMessage = index < sessionMessagesCount;
+          const isNewMessage =
+            isSessionMessage &&
+            newMessageIndices.has(index) &&
+            message.role === 'AI';
+          return (
+            <Bubble
+              key={`session-${sessionName}-${index}`}
+              content={message.content}
+              bot={message.role}
+              isNewMessage={isNewMessage}
+              onTextUpdate={handleTextUpdate}
+            />
+          );
+        })}
+        {isLoading && (
+          <div className="flex max-w-[800px] items-start gap-1">
+            <Card className="border-0 my-2 py-1 px-4 bg-gray-200 dark:bg-gray-800 rounded-sm text-left">
+              <CardContent className="p-0">
+                <div className="flex items-center gap-1">
+                  <span className="flex gap-0.5">
+                    <span
+                      className="animate-bounce"
+                      style={{ animationDelay: '0ms' }}
+                    >
+                      .
+                    </span>
+                    <span
+                      className="animate-bounce"
+                      style={{ animationDelay: '150ms' }}
+                    >
+                      .
+                    </span>
+                    <span
+                      className="animate-bounce"
+                      style={{ animationDelay: '300ms' }}
+                    >
+                      .
+                    </span>
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       <div ref={lastMessageRef} className="h-2" />
