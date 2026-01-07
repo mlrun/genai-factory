@@ -18,22 +18,26 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import Page from '@layout/Page';
-import TableLayout from '@layout/Table';
-import ChatPage from '@pages/ChatPage';
-import DatasetsPage from '@pages/DatasetsPage';
-import DataSourcesPage from '@pages/DataSourcesPage';
-import DocumentsPage from '@pages/DocumentsPage';
-import LoginPage from '@pages/LoginPage';
-import ModelsPage from '@pages/ModelsPage';
-import ProjectPage from '@pages/ProjectPage';
+
+const TableLayout = lazy(() => import('@layout/Table'));
+
 import ProjectsPage from '@pages/ProjectsPage';
-import PromptTemplatesPage from '@pages/PromptTemplatesPage';
-import UsersPage from '@pages/UsersPage';
-import WorkflowPage from '@pages/WorkflowPage';
-import WorkflowsPage from '@pages/WorkflowsPage';
+
+const LoginPage = lazy(() => import('@pages/LoginPage'));
+const ChatPage = lazy(() => import('@pages/ChatPage'));
+const ProjectPage = lazy(() => import('@pages/ProjectPage'));
+const ModelsPage = lazy(() => import('@pages/ModelsPage'));
+const DataSourcesPage = lazy(() => import('@pages/DataSourcesPage'));
+const DatasetsPage = lazy(() => import('@pages/DatasetsPage'));
+const DocumentsPage = lazy(() => import('@pages/DocumentsPage'));
+const PromptTemplatesPage = lazy(() => import('@pages/PromptTemplatesPage'));
+const UsersPage = lazy(() => import('@pages/UsersPage'));
+const WorkflowsPage = lazy(() => import('@pages/WorkflowsPage'));
+const WorkflowPage = lazy(() => import('@pages/WorkflowPage'));
 
 export const router = createBrowserRouter([
   {
