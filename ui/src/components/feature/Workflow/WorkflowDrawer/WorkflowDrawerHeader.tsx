@@ -18,7 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { DrawerHeader } from '@components/shared/Drawer';
+import { DrawerHeader, DrawerTitle } from '@components/shared/Drawer';
 import { Separator } from '@components/shared/Separator';
 
 import Book from '@assets/icons/book.svg?react';
@@ -32,10 +32,10 @@ const WorkflowDrawerHeader = () => {
 
   return (
     <DrawerHeader className="flex items-center justify-between p-0">
-      <div className="flex items-center gap-x-2 font-bold">
+      <DrawerTitle className="flex items-center gap-x-2 font-bold">
         <Shield />
         {selectedWorkflowStep?.id}
-      </div>
+      </DrawerTitle>
       <div className="flex items-center gap-x-1">
         <button className="p-[3px]">
           <Book />

@@ -28,26 +28,83 @@ export function buildGraph(workflow?: Workflow | null) {
 
   if (!workflow?.graph?.steps) return { nodes, edges };
 
-  const stepKeys = Object.keys(workflow.graph.steps);
+  const steps = workflow.graph.steps;
+  const stepKeys = Object.keys(steps);
+  const positions: Record<string, { x: number; y: number }> = {};
 
-  stepKeys.forEach((key, index) => {
+  function setPosition(
+    stepKey: string,
+    level: number,
+    siblingIndex: number,
+    siblingCount: number,
+  ) {
+    if (positions[stepKey]) return positions[stepKey];
+
+    const x = level * 250 + 100;
+    const spacing = 150;
+    const yOffset = (siblingIndex - (siblingCount - 1) / 2) * spacing;
+    const y = 200 + yOffset;
+
+    positions[stepKey] = { x, y };
+    return positions[stepKey];
+  }
+
+  const levels: Record<string, number> = {};
+  function getLevel(stepKey: string): number {
+    if (levels[stepKey] !== undefined) return levels[stepKey];
+    const step = steps[stepKey];
+    if (step?.after?.length) {
+      levels[stepKey] = Math.max(...step.after.map(getLevel)) + 1;
+    } else {
+      levels[stepKey] = 0;
+    }
+    return levels[stepKey];
+  }
+
+  stepKeys.forEach(getLevel);
+
+  const siblingCounts: Record<string, number> = {};
+  Object.values(steps).forEach((step) => {
+    step.after?.forEach((parent) => {
+      siblingCounts[parent] = (siblingCounts[parent] || 0) + 1;
+    });
+  });
+
+  const parentIndexCounter: Record<string, number> = {};
+  stepKeys.forEach((key) => {
+    const step = steps[key];
+    const level = levels[key];
+    let siblingIndex = 0;
+    let siblingCount = 1;
+
+    if (step.after?.length) {
+      const parent = step.after[0];
+      siblingIndex = parentIndexCounter[parent] || 0;
+      siblingCount = siblingCounts[parent] || 1;
+      parentIndexCounter[parent] = siblingIndex + 1;
+    }
+
+    const pos = setPosition(key, level, siblingIndex, siblingCount);
+
     nodes.push({
       id: key,
       data: { label: key },
-      position: { x: index * 250 + 100, y: 100 },
+      position: pos,
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
     });
 
-    const step = workflow?.graph?.steps[key];
-    step?.after?.forEach((prev) => {
-      edges.push({
-        id: `${prev}-${key}`,
-        source: prev,
-        target: key,
-        type: 'smoothstep',
-        animated: true,
-      });
+    step.after?.forEach((prev) => {
+      const edgeId = `${prev}-${key}`;
+      if (!edges.some((e) => e.id === edgeId)) {
+        edges.push({
+          id: edgeId,
+          source: prev,
+          target: key,
+          type: 'smoothstep',
+          animated: true,
+        });
+      }
     });
   });
 
