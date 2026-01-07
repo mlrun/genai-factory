@@ -18,7 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Edge, Node, Position } from 'reactflow';
+import { Edge, MarkerType, Node, Position } from 'reactflow';
 
 import { Workflow } from '@shared/types/workflow';
 
@@ -120,6 +120,14 @@ export function buildGraph(workflow?: Workflow | null) {
           target: key,
           type: 'smoothstep',
           animated: true,
+          markerEnd: {
+            type: MarkerType.Arrow,
+            width: 15,
+            height: 15,
+          },
+          style: {
+            strokeWidth: 2,
+          },
         });
       }
     });
