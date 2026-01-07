@@ -69,7 +69,6 @@ language_guardrail_task = root.add_step(language_guardrail, after=["a2a","commun
 # Conncet Last steps
 language_guardrail_task.to(hallucination_guardrail).to(history_saver).respond()
 
-root.plot("graph.png")
 
 
 workflow_server.add_workflow(
