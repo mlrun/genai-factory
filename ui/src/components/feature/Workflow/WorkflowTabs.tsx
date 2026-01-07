@@ -17,38 +17,48 @@ illegal under applicable law, and the grant of the foregoing license
 under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
-
 import WorkflowGraph from '@components/feature/Workflow/WorkflowGraph';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@components/shared/Tabs';
+import { WorkflowDetails } from '@components/feature/Workflow/WorkflowOverview';
+import { useWorkflow } from '@queries';
 
-import { WORKFLOW_TABS } from '@constants';
+const WorkflowView = () => {
+  const { data: workflow } = useWorkflow();
 
-const WorkflowTabs = () => {
   return (
-    <Tabs defaultValue="overview" className="flex flex-col grow justify-start">
-      <TabsList className="px-10 gap-4 bg-white justify-normal py-0">
-        <TabsTrigger value="overview">{WORKFLOW_TABS.OVERVIEW}</TabsTrigger>
-        <TabsTrigger value="graph">{WORKFLOW_TABS.GRAPH_VIEW}</TabsTrigger>
-      </TabsList>
+    <div className="flex flex-col h-full">
+      {/* 1. Technical Specification (Overview) */}
+      <div className="w-full px-14">
+        <WorkflowDetails />
+      </div>
 
-      <TabsContent
-        value="overview"
-        className="flex flex-col items-start p-8 px-14 gap-5 flex-1 self-stretch border border-workflow-content-border bg-workflow-content-bg"
-      ></TabsContent>
+      {/* 2. Visual Logic (Graph) */}
+      <div className="w-full px-14 pb-20 mt-auto">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-4 pt-4">
+            <h2 className="text-xl font-bold text-[#2a2d30]">Workflow Graph</h2>
+            <div className="h-px grow bg-gray-100" />
+            <span className="text-xs font-mono text-gray-400 uppercase tracking-widest">
+              {Object.keys(workflow?.graph?.steps || {}).length} Steps
+            </span>
+          </div>
 
-      <TabsContent
-        value="graph"
-        className="flex flex-col items-start gap-5 flex-1 self-stretch border border-workflow-content-border bg-workflow-content-bg"
-      >
-        <WorkflowGraph />
-      </TabsContent>
-    </Tabs>
+          {/* Graph Container */}
+          <div className="relative w-full h-[350px] overflow-hidden shadow-inner">
+            {/* Minimalist Grid Pattern for the graph background */}
+            <div
+              className="absolute inset-0 opacity-[0.03] pointer-events-none"
+              style={{
+                backgroundImage: 'radial-gradient(#2a2d30 1px, transparent 0)',
+                backgroundSize: '24px 24px',
+              }}
+            />
+
+            <WorkflowGraph />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default WorkflowTabs;
+export default WorkflowView;

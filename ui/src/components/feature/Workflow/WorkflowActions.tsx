@@ -24,7 +24,7 @@ import { Separator } from '@components/shared/Separator';
 import { WORKFLOW_MAIN_ACTIONS, WORKFLOW_SECONDARY_ACTIONS } from '@constants';
 
 const WorkflowActions = () => (
-  <div className="flex h-full gap-x-3">
+  <div className="flex gap-x-3">
     <div className="flex gap-x-3">
       {WORKFLOW_MAIN_ACTIONS.map(({ icon: Icon, label, variant }, index) => (
         <Button

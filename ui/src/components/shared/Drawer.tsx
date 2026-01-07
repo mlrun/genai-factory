@@ -35,7 +35,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn('absolute inset-0 z-50 bg-black/20', className)}
+    className={cn('fixed inset-0 z-50 bg-black/20', className)}
     {...props}
   />
 ));
@@ -46,10 +46,10 @@ const drawerContentVariants = cva(
   {
     variants: {
       direction: {
-        right: 'absolute right-0 inset-y-0 w-[380px]',
-        left: 'absolute left-0 inset-y-0 w-[380px]',
-        top: 'absolute top-0 inset-x-0 rounded-b-[10px]',
-        bottom: 'absolute bottom-0 inset-x-0 rounded-t-[10px] mt-24',
+        right: 'fixed right-0 inset-y-0 w-[380px]',
+        left: 'fixed left-0 inset-y-0 w-[380px]',
+        top: 'fixed top-0 inset-x-0 rounded-b-[10px]',
+        bottom: 'fixed bottom-0 inset-x-0 rounded-t-[10px] mt-24',
       },
     },
     defaultVariants: { direction: 'right' },
