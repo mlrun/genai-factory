@@ -64,7 +64,7 @@ export default function Chatbar() {
   const handleNewChat = useCallback(async () => {
     const payload = {
       name: generateSessionId(),
-      description: '* New Chat',
+      description: 'New Chat',
       labels: {},
       workflow_id: DEFAULT_WORKFLOW_UID,
       owner_id: publicUser?.uid,

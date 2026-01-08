@@ -32,7 +32,7 @@ const WorkflowView = () => {
       </div>
 
       {/* 2. Visual Logic (Graph) */}
-      <div className="w-full px-14 pb-20 mt-auto">
+      <div className="w-full px-14 pb-20 mt-10">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-4 pt-4">
             <h2 className="text-xl font-bold text-[#2a2d30]">Workflow Graph</h2>

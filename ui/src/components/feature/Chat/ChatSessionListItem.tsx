@@ -78,12 +78,12 @@ const ChatSessionListItem = ({
         ) : (
           <div className="flex flex-col gap-0.5 min-w-0">
             <div className="flex items-center gap-1 min-w-0">
-              <div className="truncate text-sm font-medium">{session.name}</div>
-              {session.description && (
-                <div className="truncate text-[10px] text-muted-foreground">
-                  {session.description}
-                </div>
-              )}
+              <div className="truncate text-sm font-medium">
+                {session.description}
+              </div>
+              <div className="truncate text-[8px] text-muted-foreground">
+                {session.name}
+              </div>
             </div>
             {session.created && (
               <div className="text-xs text-muted-foreground flex items-center gap-1">

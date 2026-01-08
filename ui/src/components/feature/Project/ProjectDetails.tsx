@@ -131,7 +131,7 @@ const ProjectDetails = ({
 
       <Tabs
         defaultValue="liveMonitoring"
-        className="flex flex-col justify-start mt-auto"
+        className="flex flex-col justify-start"
       >
         <TabsList className="gap-4 bg-transparent justify-normal py-0">
           <TabsTrigger value="liveMonitoring">Live Monitoring</TabsTrigger>
