@@ -29,6 +29,7 @@ const Navbar = () => {
   const { pathname } = useLocation();
 
   const isChatPage = pathname.includes('chat');
+  const isProjectsPage = pathname === '/projects';
   return (
     <div
       className="
@@ -44,13 +45,15 @@ const Navbar = () => {
           <ProjectBreadcrumbs />
         </div>
       )}
-      <div className="pr-14 ml-auto">
-        <Link to={isChatPage ? '/projects' : '/chat'}>
-          <Button variant="secondary">
-            {isChatPage ? 'Projects' : 'Chat'}
-          </Button>
-        </Link>
-      </div>
+      {(isChatPage || isProjectsPage) && (
+        <div className="pr-14 ml-auto">
+          <Link to={isChatPage ? '/projects' : '/chat'}>
+            <Button variant="secondary">
+              {isChatPage ? 'Projects' : 'Chat'}
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
