@@ -18,6 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { ClassNameStepDetail } from '@components/feature/Workflow/WorkflowDrawer/ClassNameStepDetail';
 import WorkflowDrawerHeader from '@components/feature/Workflow/WorkflowDrawer/WorkflowDrawerHeader';
 import WorkflowStepDetail from '@components/feature/Workflow/WorkflowDrawer/WorkflowStepDetail';
 import { Drawer, DrawerContent } from '@components/shared/Drawer';
@@ -36,9 +37,17 @@ const WorkflowDrawer = () => {
       >
         <WorkflowDrawerHeader />
         {selectedWorkflowStep &&
-          Object.entries(selectedWorkflowStep).map(([key, value]) => (
-            <WorkflowStepDetail key={key} label={key} value={value} />
-          ))}
+          Object.entries(selectedWorkflowStep).map(([key, value]) => {
+            if (key === 'class_args')
+              return (
+                <ClassNameStepDetail
+                  label={key}
+                  key={key}
+                  value={value as Record<string, unknown>}
+                />
+              );
+            return <WorkflowStepDetail key={key} label={key} value={value} />;
+          })}
       </DrawerContent>
     </Drawer>
   );

@@ -22,8 +22,8 @@ import { useParams } from 'react-router-dom';
 
 import { useProject } from '@queries';
 import Client from '@services/Api';
-import { Workflow } from '@shared/types/workflow';
-import { useQuery } from '@tanstack/react-query';
+import { Workflow, WorkflowStep } from '@shared/types/workflow';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { validateApiResponse } from '@utils/validateApiResponse';
 
@@ -47,3 +47,42 @@ export function useWorkflow(enabled = true) {
     ...QUERY_DEFAULTS,
   });
 }
+
+export const useWorkflowActions = () => {
+  const queryClient = useQueryClient();
+  const { projectName } = useParams();
+  const { data: currentWorkflow } = useWorkflow();
+
+  const invalidateProjects = () =>
+    queryClient.invalidateQueries({ queryKey: ['workflow'] });
+
+  const updateClassArgs = useMutation({
+    mutationFn: (workflowStep: WorkflowStep & { id: string }) => {
+      if (!projectName) throw new Error('No project name provided');
+
+      if (!currentWorkflow) throw new Error('No current workflow');
+
+      console.log(workflowStep);
+      // this shit runnied everything
+      const updatedWorkflow: Workflow = {
+        ...currentWorkflow,
+        graph: {
+          steps: {
+            ...currentWorkflow.graph?.steps,
+            [workflowStep.id]: workflowStep,
+          },
+        },
+      };
+
+      console.log(updatedWorkflow);
+
+      return validateApiResponse<Workflow>(
+        Client.updateWorkflow(projectName, updatedWorkflow),
+        `update (${workflowStep.kind})`,
+      );
+    },
+    onSuccess: invalidateProjects,
+  });
+
+  return { updateClassArgs };
+};

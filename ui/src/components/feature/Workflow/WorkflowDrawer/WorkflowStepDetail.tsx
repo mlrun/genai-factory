@@ -18,20 +18,60 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import React from 'react';
+
 interface WorkflowStepDetailProps {
   label: string;
   value: string | boolean | string[] | Record<string, unknown>;
 }
 
-const WorkflowStepDetail = ({ label, value }: WorkflowStepDetailProps) => (
-  <div className="flex flex-col">
-    <span className="capitalize text-workflow-drawer-label font-inter text-sm font-semibold leading-normal">
-      {label}
-    </span>
-    <span className="text-workflow-drawer-value font-inter text-sm font-normal leading-normal">
-      {JSON.stringify(value).replace(/^"|"$/g, '')}
-    </span>
-  </div>
-);
+const WorkflowStepDetail = ({ label, value }: WorkflowStepDetailProps) => {
+  // Cleaner value formatting
+  const formatValue = (val: any) => {
+    if (typeof val === 'boolean') {
+      return (
+        <span
+          className={`text-[11px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+            val ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          {String(val)}
+        </span>
+      );
+    }
+
+    if (Array.isArray(val)) {
+      return val.join(', ');
+    }
+
+    if (typeof val === 'object' && val !== null) {
+      return (
+        <pre className="text-[11px] font-mono text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 w-full overflow-x-auto">
+          {JSON.stringify(val, null, 2)}
+        </pre>
+      );
+    }
+
+    return (
+      <span className="truncate block" title={String(val)}>
+        {String(val)}
+      </span>
+    );
+  };
+
+  return (
+    <div className="flex items-start py-1 border-b border-gray-100 overflow-hidden last:border-none">
+      {/* Label - Fixed width matching the rest of your UI */}
+      <span className="w-1/3 min-w-[120px] text-gray-500 text-[13px] font-medium tracking-tight capitalize">
+        {label.replace(/_/g, ' ')}
+      </span>
+
+      {/* Value - Static text, no edit actions */}
+      <div className="w-2/3 text-[#2a2d30] text-sm font-medium">
+        {formatValue(value)}
+      </div>
+    </div>
+  );
+};
 
 export default WorkflowStepDetail;

@@ -18,6 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
+import { GitBranch } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
 import WorkflowActions from '@components/feature/Workflow/WorkflowActions';
@@ -31,12 +32,29 @@ const WorkflowHeader = () => {
 
   return (
     <header className="flex justify-between items-center bg-white gap-6 pt-6 pr-8 pb-4 pl-8 self-stretch">
+      {/* Header Section */}
       <Link
         to={`/projects/${projectName}/workflows`}
         className="flex items-center gap-2 font-medium text-sidebar-foreground hover:underline"
       >
         <Back />
-        {workflow?.name}
+        <div className="flex items-center gap-5">
+          <div className="w-16 h-16 rounded-xl bg-[#2a2d30] flex items-center justify-center shadow-lg shadow-gray-200">
+            <GitBranch size={32} className="text-white" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight text-[#2a2d30]">
+                {workflow?.name}
+              </h1>
+              {workflow?.version && (
+                <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-500 mt-1">
+                  v{workflow?.version}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       </Link>
       <WorkflowActions />
     </header>

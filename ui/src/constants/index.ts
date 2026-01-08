@@ -104,7 +104,7 @@ export const WORKFLOW_MAIN_ACTIONS: {
 export const WORKFLOW_SECONDARY_ACTIONS: {
   label: string;
   variant?: ButtonProps['variant'];
-}[] = [{ label: 'Save', variant: 'secondary' }, { label: 'Export' }];
+}[] = [{ label: 'Save', variant: 'secondary' }, { label: 'Deploy' }];
 
 // -----------------------------------------------------------------------------
 // Workflow
