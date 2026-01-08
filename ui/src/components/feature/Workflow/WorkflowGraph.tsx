@@ -51,7 +51,7 @@ function WorkflowGraph() {
     handleNodeClick(node.id, workflow);
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative overflow-x-hidden">
       <ReactFlow
         elementsSelectable={false}
         multiSelectionKeyCode={null}

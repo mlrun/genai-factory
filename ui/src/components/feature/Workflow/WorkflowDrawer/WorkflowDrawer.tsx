@@ -30,7 +30,10 @@ const WorkflowDrawer = () => {
 
   return (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction="right">
-      <DrawerContent className="flex flex-col w-2/5 py-6 pl-8 pr-10 gap-y-4 border-0">
+      <DrawerContent
+        aria-describedby={undefined}
+        className="flex flex-col w-2/5 py-6 pl-8 pr-10 gap-y-4 border-0"
+      >
         <WorkflowDrawerHeader />
         {selectedWorkflowStep &&
           Object.entries(selectedWorkflowStep).map(([key, value]) => (

@@ -18,9 +18,21 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { Edge, Node, Position } from 'reactflow';
+import { Edge, MarkerType, Node, Position } from 'reactflow';
 
 import { Workflow } from '@shared/types/workflow';
+
+import {
+  WORKFLOW_GRAPH_HORIZONTAL_OFFSET,
+  WORKFLOW_GRAPH_LEVEL_SPACING,
+  WORKFLOW_GRAPH_SIBLING_SPACING,
+  WORKFLOW_GRAPH_VERTICAL_BASE_POSITION,
+} from '@constants';
+
+type NodePosition = {
+  horizontalPosition: number;
+  verticalPosition: number;
+};
 
 export function buildGraph(workflow?: Workflow | null) {
   const nodes: Node[] = [];
@@ -28,26 +40,96 @@ export function buildGraph(workflow?: Workflow | null) {
 
   if (!workflow?.graph?.steps) return { nodes, edges };
 
-  const stepKeys = Object.keys(workflow.graph.steps);
+  const steps = workflow.graph.steps;
+  const stepKeys = Object.keys(steps);
+  const positions: Record<string, NodePosition> = {};
 
-  stepKeys.forEach((key, index) => {
+  function setPosition(
+    stepKey: string,
+    level: number,
+    siblingIndex: number,
+    siblingCount: number,
+  ): NodePosition {
+    if (positions[stepKey]) return positions[stepKey];
+
+    const horizontalPosition =
+      level * WORKFLOW_GRAPH_LEVEL_SPACING + WORKFLOW_GRAPH_HORIZONTAL_OFFSET;
+    const verticalOffset =
+      (siblingIndex - (siblingCount - 1) / 2) * WORKFLOW_GRAPH_SIBLING_SPACING;
+    const verticalPosition =
+      WORKFLOW_GRAPH_VERTICAL_BASE_POSITION + verticalOffset;
+
+    positions[stepKey] = { horizontalPosition, verticalPosition };
+    return positions[stepKey];
+  }
+
+  const levels: Record<string, number> = {};
+  function getLevel(stepKey: string): number {
+    if (levels[stepKey] !== undefined) return levels[stepKey];
+    const step = steps[stepKey];
+    if (step?.after?.length) {
+      levels[stepKey] = Math.max(...step.after.map(getLevel)) + 1;
+    } else {
+      levels[stepKey] = 0;
+    }
+    return levels[stepKey];
+  }
+
+  stepKeys.forEach(getLevel);
+
+  const siblingCounts: Record<string, number> = {};
+  Object.values(steps).forEach((step) => {
+    step.after?.forEach((parent) => {
+      siblingCounts[parent] = (siblingCounts[parent] || 0) + 1;
+    });
+  });
+
+  const parentIndexCounter: Record<string, number> = {};
+  stepKeys.forEach((key) => {
+    const step = steps[key];
+    const level = levels[key];
+    let siblingIndex = 0;
+    let siblingCount = 1;
+
+    if (step.after?.length) {
+      const parent = step.after[0];
+      siblingIndex = parentIndexCounter[parent] || 0;
+      siblingCount = siblingCounts[parent] || 1;
+      parentIndexCounter[parent] = siblingIndex + 1;
+    }
+
+    const pos = setPosition(key, level, siblingIndex, siblingCount);
+
     nodes.push({
       id: key,
       data: { label: key },
-      position: { x: index * 250 + 100, y: 100 },
+      position: {
+        x: pos.horizontalPosition,
+        y: pos.verticalPosition,
+      },
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
     });
 
-    const step = workflow?.graph?.steps[key];
-    step?.after?.forEach((prev) => {
-      edges.push({
-        id: `${prev}-${key}`,
-        source: prev,
-        target: key,
-        type: 'smoothstep',
-        animated: true,
-      });
+    step.after?.forEach((prev) => {
+      const edgeId = `${prev}-${key}`;
+      if (!edges.some((e) => e.id === edgeId)) {
+        edges.push({
+          id: edgeId,
+          source: prev,
+          target: key,
+          type: 'smoothstep',
+          animated: true,
+          markerEnd: {
+            type: MarkerType.Arrow,
+            width: 15,
+            height: 15,
+          },
+          style: {
+            strokeWidth: 2,
+          },
+        });
+      }
     });
   });
 

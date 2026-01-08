@@ -41,7 +41,6 @@ export const useWorkflowDrawerStore = create<WorkflowDrawerStore>((set) => ({
     set({ selectedWorkflowStep }),
 
   handleNodeClick: (nodeId, workflow) => {
-    console.log(workflow?.graph?.steps);
     if (workflow?.graph?.steps?.[nodeId]) {
       set({
         selectedWorkflowStep: { id: nodeId, ...workflow.graph.steps[nodeId] },

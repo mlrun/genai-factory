@@ -36,6 +36,7 @@ export * from './promptTemplateFields';
 export * from './userFields';
 export * from './workflowFields';
 export * from './projectFields';
+export * from './workflowGraphConstants';
 
 // -----------------------------------------------------------------------------
 // UI text
