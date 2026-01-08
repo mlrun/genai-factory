@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 
 interface TypingTextProps {
@@ -23,6 +23,8 @@ interface TypingTextProps {
 
 const TypingText = ({ onTextUpdate, speed = 12, text }: TypingTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const indexRef = useRef<number>(0);
 
   useEffect(() => {
     // Reset displayed text and ensure text is valid
@@ -40,25 +42,35 @@ const TypingText = ({ onTextUpdate, speed = 12, text }: TypingTextProps) => {
       .trim();
 
     setDisplayedText('');
-    let index = 0;
+    indexRef.current = 0;
 
-    const interval = setInterval(() => {
-      if (index < sanitizedText.length) {
-        setDisplayedText((prev) => {
-          const nextChar = sanitizedText[index];
-          // Double-check that we're not adding undefined
-          if (nextChar === undefined || nextChar === null) {
-            return prev;
-          }
-          return prev + nextChar;
-        });
-        index++;
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      if (indexRef.current < sanitizedText.length) {
+        const nextChar = sanitizedText[indexRef.current];
+        // Double-check that we're not adding undefined
+        if (nextChar !== undefined && nextChar !== null) {
+          setDisplayedText((prev) => prev + nextChar);
+        }
+        indexRef.current++;
       } else {
-        clearInterval(interval);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
       }
     }, speed);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [text, speed]);
 
   // Trigger scroll when displayedText updates

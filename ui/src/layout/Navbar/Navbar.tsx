@@ -45,11 +45,11 @@ const Navbar = () => {
         </div>
       )}
       <div className="pr-14 ml-auto">
-        <Button variant="secondary">
-          <Link to={isChatPage ? '/projects' : '/chat'}>
+        <Link to={isChatPage ? '/projects' : '/chat'}>
+          <Button variant="secondary">
             {isChatPage ? 'Projects' : 'Chat'}
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
     </div>
   );

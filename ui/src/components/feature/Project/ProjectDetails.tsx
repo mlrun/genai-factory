@@ -58,7 +58,7 @@ const ProjectDetails = ({
   };
 
   return (
-    <div className="flex flex-col w-full h-full px-6 text-[#2a2d30] antialiased">
+    <div className="flex flex-col w-full h-fulltext-[#2a2d30] antialiased">
       {/* Header Section */}
       <div className="flex items-center gap-5 mb-6">
         <div className="w-16 h-16 rounded-xl bg-[#2a2d30] flex items-center justify-center shadow-lg shadow-gray-200">

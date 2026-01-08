@@ -18,7 +18,7 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Chatbar from '@components/feature/Chat/Chatbar';
 import { ChatInput } from '@components/feature/Chat/ChatInput';
@@ -29,9 +29,13 @@ import { ChatHistory } from '@shared/types';
 
 export default function ChatPage() {
   const { data: session, error, isLoading } = useSession();
-  const [optimisticMessages, setOptimisticMessages] = useState<ChatHistory[]>([]);
+  const [optimisticMessages, setOptimisticMessages] = useState<ChatHistory[]>(
+    [],
+  );
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
-  const [newMessageIndices, setNewMessageIndices] = useState<Set<number>>(new Set());
+  const [newMessageIndices, setNewMessageIndices] = useState<Set<number>>(
+    new Set(),
+  );
   const lastHistoryLengthRef = useRef(0);
   const isInitialLoadRef = useRef(true);
   const wasWaitingForResponseRef = useRef(false);
@@ -64,7 +68,7 @@ export default function ChatPage() {
   // Track new messages when session history updates (after refetch)
   useEffect(() => {
     const currentHistoryLength = session?.history?.length ?? 0;
-    
+
     // Skip on initial load - never mark initial messages as new
     if (isInitialLoadRef.current) {
       return;
@@ -74,35 +78,57 @@ export default function ChatPage() {
     // This ensures the user's message from session history replaces the optimistic one
     if (currentHistoryLength > lastHistoryLengthRef.current) {
       setOptimisticMessages([]);
-      
+
       // Mark AI messages as new for typing animation when response is received
       // Only do this if we were waiting for a response (to avoid marking on refresh)
       if (wasWaitingForResponseRef.current) {
         // New messages arrived while waiting for response - mark AI messages as new for typing animation
         const newIndices = new Set<number>();
         const sessionHistory = session?.history ?? [];
-        
-        for (let i = lastHistoryLengthRef.current; i < currentHistoryLength; i++) {
+
+        for (
+          let i = lastHistoryLengthRef.current;
+          i < currentHistoryLength;
+          i++
+        ) {
           // Only mark AI messages for typing animation
           if (sessionHistory[i]?.role === 'AI') {
             newIndices.add(i);
           }
         }
-        
+
         if (newIndices.size > 0) {
           setNewMessageIndices(newIndices);
-          
-          // Clear new message indices after typing animation completes (give it time)
+
+          // Calculate timeout based on the longest message length
+          // Typing speed is 12ms per character (default in TypingText)
+          const typingSpeed = 12;
+          let maxMessageLength = 0;
+
+          newIndices.forEach((index) => {
+            const messageContent = sessionHistory[index]?.content || '';
+            const messageLength =
+              typeof messageContent === 'string'
+                ? messageContent.length
+                : String(messageContent || '').length;
+            maxMessageLength = Math.max(maxMessageLength, messageLength);
+          });
+
+          // Calculate timeout: message length * speed + buffer (2 seconds)
+          // This ensures animation completes before clearing
+          const timeoutDuration = maxMessageLength * typingSpeed + 2000;
+
+          // Clear new message indices after typing animation completes
           setTimeout(() => {
             setNewMessageIndices(new Set());
-          }, 10000); // Clear after 10 seconds (enough time for typing animation)
+          }, timeoutDuration);
         }
-        
+
         // Reset the flag AFTER processing new messages
         wasWaitingForResponseRef.current = false;
       }
     }
-    
+
     lastHistoryLengthRef.current = currentHistoryLength;
   }, [session?.history]);
 
@@ -124,14 +150,14 @@ export default function ChatPage() {
     <div className="flex h-full w-full">
       <Chatbar />
       <div className="flex flex-1 flex-col justify-between h-full">
-        <ChatMessagesPanel 
-          messages={allMessages} 
+        <ChatMessagesPanel
+          messages={allMessages}
           isLoading={isLoadingResponse}
           newMessageIndices={newMessageIndices}
           sessionMessagesCount={session?.history?.length ?? 0}
         />
-        <ChatInput 
-          onMessageSent={handleMessageSent} 
+        <ChatInput
+          onMessageSent={handleMessageSent}
           onLoadingChange={handleLoadingChange}
           isLoadingResponse={isLoadingResponse}
         />
