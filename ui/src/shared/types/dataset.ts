@@ -13,16 +13,16 @@
 // limitations under the License.
 
 export type Dataset = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: { [key: string]: string }
-  owner_id: string
-  version?: string
-  project_id: string
-  task: string
-  sources?: string[]
-  path: string
-  producer?: string
-  created?: string
-}
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: { [key: string]: string };
+  owner_id: string;
+  version?: string;
+  project_id: string;
+  task: string;
+  sources?: string[];
+  path: string;
+  producer?: string;
+  created?: string;
+};

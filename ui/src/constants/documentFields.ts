@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModalField } from '@shared/types/modalFieldConfigs'
+import { ModalField } from '@shared/types/modalFieldConfigs';
 
 export const documentFields: ModalField[] = [
   { name: 'name', label: 'Name', required: true },
@@ -20,4 +20,4 @@ export const documentFields: ModalField[] = [
   { name: 'version', label: 'Version' },
   { name: 'path', label: 'Path', required: true },
   { name: 'origin', label: 'Origin' },
-]
+];

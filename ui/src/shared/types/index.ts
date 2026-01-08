@@ -1,73 +1,83 @@
-// Copyright 2024 Iguazio
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright 2024 Iguazio Systems Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
 
 export type ChatHistory = {
-  name?: string
-  content: string
-  description?: string
-  role: string
-  sources: Source[]
+  name?: string;
+  content: string;
+  description?: string;
+  role: string;
+  sources: Source[];
   html?: string | undefined;
-}
+};
 
 export type UserSession = {
-  name: string
-  username: string
-  agent_name?: string | null
-  history: ChatHistory[]
-}
+  name: string;
+  username: string;
+  agent_name?: string | null;
+  history: ChatHistory[];
+};
 
 export type Source = {
-  source: string
-  title: string
-}
+  source: string;
+  title: string;
+};
 
 export type TableData = {
   //eslint-disable-next-line
-  name: any
-  created: string
-  updated: string
-  tags: string
-  resolved: boolean
-}
+  name: any;
+  created: string;
+  updated: string;
+  tags: string;
+  resolved: boolean;
+};
 
 export type BreadcrumbData = {
-  page: string
-  url: string
-}
+  page: string;
+  url: string;
+};
 
 export interface DataRow<T> {
-  id: number
-  data: T
+  id: number;
+  data: T;
 }
 
 export type User = {
-  uid?: string
-  name?: string
-  email?: string
-  role?: string
-  registered?: string
-  username?: string
-  admin?: boolean
-  token?: string
+  uid?: string;
+  name: string;
+  email?: string;
+  role?: string;
+  registered?: string;
+  username?: string;
+  admin?: boolean;
+  token?: string;
   full_name?: string;
-}
+};
 
+export type APIResponse<T> = {
+  data: T;
+  success: boolean;
+  error: string;
+};
 
-export type APIResponse = {
-  //eslint-disable-next-line
-  data: any[]
-  success: boolean
-  error: string
-}
+export type SortOption<T> = {
+  label: string;
+  accessorKey: Extract<keyof T, string>;
+  isDefault?: boolean;
+};

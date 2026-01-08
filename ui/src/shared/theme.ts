@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { extendTheme, type ThemeConfig } from '@chakra-ui/react'
+import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
 
 const config: ThemeConfig = {
   initialColorMode: 'light',
   useSystemColorMode: false,
-}
+};
 
 const breakpoints = {
   base: '0px',
@@ -26,7 +26,7 @@ const breakpoints = {
   lg: '960px',
   xl: '1200px',
   '2xl': '1536px',
-}
+};
 export const colors = {
   topbarDark: '#1A202C',
   topbarLight: '#E2E8F0',
@@ -55,10 +55,9 @@ export const colors = {
 
   mint: '#4CD5B1',
   mintLight: '#45cca9',
-  mintDark: '#369e83'
-}
+  mintDark: '#369e83',
+};
 
+const theme = extendTheme({ config, breakpoints, colors });
 
-const theme = extendTheme({ config, breakpoints, colors })
-
-export default theme
+export default theme;

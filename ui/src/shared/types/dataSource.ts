@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 export type DataSource = {
-  name: string
-  uid?: string
-  description?: string
-  labels?: { [key: string]: string }
-  owner_id: string
-  version?: string
-  data_source_type: DataSourceType
-  project_id: string
-  database_kwargs?: { [key: string]: string }
-  created?: string
-}
+  name: string;
+  uid?: string;
+  description?: string;
+  labels?: { [key: string]: string };
+  owner_id: string;
+  version?: string;
+  data_source_type: DataSourceType;
+  project_id: string;
+  database_kwargs?: { [key: string]: string };
+  created?: string;
+};
 
 export enum DataSourceType {
   RELATIONAL = 'relational',
@@ -36,5 +34,3 @@ export enum DataSourceType {
   STORAGE = 'storage',
   OTHER = 'other',
 }
-
-

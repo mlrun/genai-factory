@@ -12,75 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Flex } from '@chakra-ui/react'
-import Bubble from '@components/shared/Bubble'
-import Message from '@components/shared/Message'
-import Client from '@services/Api'
-import { ChatHistory } from '@shared/types'
-import { messagesAtom, sessionIdAtom, usernameAtom } from '@atoms/index'
-import { useAtom } from 'jotai'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
+
+import { Box, Flex } from '@chakra-ui/react';
+import Chatbar from '@components/feature/Chat/Chatbar';
+import Bubble from '@components/shared/Bubble';
+import Loading from '@components/shared/Loading';
+import Message from '@components/shared/Message';
+import { useSession } from '@queries';
 
 const Chat = () => {
-  const [messages, setMessages] = useAtom<ChatHistory[]>(messagesAtom)
-  const [sessionId] = useAtom(sessionIdAtom)
-  const [username] = useAtom(usernameAtom)
-
-  useEffect(() => {
-    async function fetchData() {
-      await Client.getSession(username, sessionId)
-    }
-
-    if(username.length > 0 && !sessionId) {
-      fetchData()
-    }
-  }, [sessionId, setMessages, username])
-
-  const lastMessageRef = useRef<HTMLDivElement>(null)
+  const { data: session, error, isLoading } = useSession();
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      lastMessageRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
     }
-  }, [messages, setMessages])
+  }, [session?.history]);
+
+  if (isLoading) return <Loading />;
+  if (error) return <div>Failed to load chat.</div>;
 
   return (
-    <Flex
-      paddingX={{ xl: '25%', md: '10%' }}
-      paddingBottom={4}
-      flexDir={'column'}
-      justifyContent={'space-between'}
-      flexGrow={1}
-      height="calc(100vh - 92px)"
-    >
+    <Flex height="100%" width="100%">
+      <Chatbar />
       <Flex
-        sx={{
-          '::-webkit-scrollbar': {
-            display: 'none'
-          }
-        }}
-        justifyContent="flex-start"
+        paddingX={{ xl: '25%', md: '10%' }}
+        paddingBottom={4}
+        flexDir="column"
+        justifyContent="space-between"
         flexGrow={1}
-        flexDirection="column"
-        paddingBottom="92px"
-        overflowY="scroll"
+        height="100%"
       >
-        {messages?.map((message, index) => (
-          <Bubble
-            key={index}
-            content={message.content}
-            bot={message.role}
-            sources={message.sources}
-            html={message.html as string}
-          />
-        ))}
-        <Box height={'2px'} ref={lastMessageRef} />
+        <Flex
+          sx={{ '::-webkit-scrollbar': { display: 'none' } }}
+          justifyContent="flex-start"
+          flexGrow={1}
+          flexDirection="column"
+          paddingBottom="92px"
+          overflowY="scroll"
+        >
+          {session?.history?.map((message, index) => (
+            <Bubble
+              key={index}
+              content={message.content}
+              bot={message.role}
+              sources={message.sources}
+              html={message.html as string}
+            />
+          ))}
+          <Box height="2px" ref={lastMessageRef} />
+        </Flex>
+        <Box>
+          <Message />
+        </Box>
       </Flex>
-      <Box>
-        <Message />
-      </Box>
     </Flex>
-  )
-}
+  );
+};
 
-export default Chat
+export default Chat;

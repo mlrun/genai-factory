@@ -12,77 +12,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { selectedSessionAtom, sessionsWithFetchAtom } from '@atoms/sessions'
-import { AddIcon } from '@chakra-ui/icons'
-import { Button, Flex, useColorMode } from '@chakra-ui/react'
-import Client from '@services/Api'
-import { colors } from '@shared/theme'
-import { generateSessionId } from '@shared/utils'
-import { sessionIdAtom, userWithTokenAtom, usernameAtom } from '@atoms/index'
-import { useAtom } from 'jotai'
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import ChatSessionList from './ChatSessionList'
-import { User } from '@shared/types'
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface ChatbarProps {
-  publicUser: User
-}
+import { AddIcon } from '@chakra-ui/icons';
+import { Button, Flex, useColorMode } from '@chakra-ui/react';
+import { useSessionActions, useUser } from '@queries';
+import { colors } from '@shared/theme';
 
-const Chatbar = ({ publicUser }: ChatbarProps) => {
-  const [, setSessionId] = useAtom(sessionIdAtom)
-  const [username] = useAtom(usernameAtom)
-  const [user] = useAtom(userWithTokenAtom)
-  const [, setIsNew] = useState(true)
-  const { colorMode } = useColorMode()
-  const [, setSelectedSession] = useAtom(selectedSessionAtom)
+import ChatSessionList from './ChatSessionList';
 
-  const [, fetchSessions] = useAtom(sessionsWithFetchAtom)
+import { generateSessionId } from '@shared/utils';
 
-  const { pathname } = useLocation()
-  const navigate = useNavigate()
+import { DEFAULT_WORKFLOW_UID } from '@constants';
 
-  useEffect(() => {
-    if(user) {
-      fetchSessions(user?.username)
-    }
-  }, [])
+const Chatbar = () => {
+  const navigate = useNavigate();
+  const { colorMode } = useColorMode();
+  const { data: publicUser } = useUser();
 
-  useEffect(() => {
-    if (pathname.includes('chat')) {
-      setSessionId(pathname.split('chat/')[1])
-    }
-  }, [pathname])
+  const { createSession } = useSessionActions();
 
-  const newChat = async () => {
+  const newChat = useCallback(async () => {
     try {
-      await Client.createSession(username, {
-        name: generateSessionId(),
+      const sessionName = generateSessionId();
+      const payload = {
+        name: sessionName,
         description: '* New Chat',
         labels: {},
-        workflow_id: '1dfd7fc7c4024501850e3541abc3ed9f',
-        owner_id: publicUser.uid
-      }).then(res => {
-        setSessionId(res.data.uid)
-        setSelectedSession(res.data)
-        navigate(`/chat/${res.data.uid}`)
-      })
-      await fetchSessions(username)
+        workflow_id: DEFAULT_WORKFLOW_UID,
+        owner_id: publicUser?.uid,
+      };
+      const newSession = await createSession.mutateAsync(payload);
+      navigate(`/chat/${newSession.name}`);
     } catch (error) {
-      console.error('Failed to create session:', error)
+      console.error('Failed to create session:', error);
     }
-  }
+  }, [publicUser]);
 
   return (
-    <Flex gap={8} bg={colorMode == 'dark' ? colors.sidebarDark : colors.sidebarLight} flexDirection={'column'}>
-      <ChatSessionList setNew={setIsNew} />
-      <Flex justify={'center'}>
-        <Button width={'30%'} onClick={newChat} iconSpacing={2} leftIcon={<AddIcon />}>
+    <Flex
+      gap={8}
+      bg={colorMode === 'dark' ? colors.sidebarDark : colors.sidebarLight}
+      flexDirection="column"
+    >
+      <ChatSessionList />
+      <Flex justify="center">
+        <Button
+          width="30%"
+          onClick={newChat}
+          iconSpacing={2}
+          leftIcon={<AddIcon />}
+        >
           New
         </Button>
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
-export default Chatbar
+export default Chatbar;

@@ -1,12 +1,38 @@
 # GenAI Mosaik with React + TypeScript + Vite
 
 
-## 1.Project Setup
+## 1. Project Local Setup
 
-1. `npm i` - to install dependencies
-2. `npm run dev` - to start project
-3. Project can be found at at http://localhost:3000
+### 1.1 Backend
+Start the backend by running the following **from the project root**:
+```bash
+make controller
+````
 
+### 1.2 Frontend
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Make sure you have the `.env` with the following variables:
+
+  ```
+
+  VITE_BASE_URL=http://localhost:8001
+  VITE_ENV=development
+
+  ````
+
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+4. Access the project at: [http://localhost:3000](http://localhost:3000)
 
 ## 2. Project Structure
 
@@ -25,43 +51,90 @@ The project structure follows a typical React + TypeScript setup. Here is a brie
 For routing, we are using [React Router](https://reactrouter.com/). React Router is a collection of navigational components that compose declaratively with your application. Whether you want to have bookmarkable URLs for your web app or a composable way to navigate in React Native, React Router works wherever React is rendering.
 
 
-### 3. State management
-For state management, we are using [Jotai](https://jotai.org/). Jotai is a simple and scalable state management library for React. It provides a lightweight and intuitive API for managing state in your application.
+### 3. State Management
 
-To get started with Jotai, follow these steps:
+Our project uses **[Zustand](https://github.com/pmndrs/zustand)** and **[TanStack Query](https://tanstack.com/query/latest)** for state management.
 
-1. Import the necessary functions from Jotai in your code:
+### Client State — Zustand
 
-```javascript
-import { atom, useAtom } from 'jotai';
-```
+We use **Zustand** for managing **client-side UI and app state** (e.g., active session, form values, filters).
+Zustand is a minimal and performant state management library with an intuitive API.
 
-2. Define your state atoms using the `atom` function. For example:
+#### Example
 
-```javascript
-const countAtom = atom(0);
-```
+```typescript
+import { create } from 'zustand';
 
-3. Use the `useAtom` hook to access and update the state in your components. For example:
+// Define a store
+const useCounterStore = create((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+  reset: () => set({ count: 0 }),
+}));
 
-```javascript
+// Use it in your component
 function Counter() {
-  const [count, setCount] = useAtom(countAtom);
-
-  const increment = () => {
-    setCount(count + 1);
-  };
+  const { count, increment, reset } = useCounterStore();
 
   return (
     <div>
       <p>Count: {count}</p>
-      <button onClick={increment}>Increment</button>
+      <button onClick={increment}>+1</button>
+      <button onClick={reset}>Reset</button>
     </div>
   );
 }
 ```
 
-For more information and advanced usage of Jotai, refer to the official documentation: [Jotai Documentation](https://github.com/pmndrs/jotai).
+Zustand works without context providers and supports persistence, middlewares, and TypeScript out of the box.
+official documentation [Zustand Documentation](https://docs.pmnd.rs/zustand)
+
+
+### Server State — TanStack Query
+
+We use **TanStack Query (React Query)** for **server-side data fetching and caching**, such as API requests and backend synchronization.
+
+#### Example
+
+```typescript
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+
+// Fetch example
+function useProjects() {
+  return useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data } = await axios.get('/api/projects');
+      return data;
+    },
+  });
+}
+
+// Mutation example
+function useCreateProject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (newProject) => axios.post('/api/projects', newProject),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+}
+```
+
+TanStack Query manages caching, background refetching, and loading/error states automatically.
+official documentation: [Tanstack Query Documentation](https://tanstack.com/query/latest)
+
+### Why this setup
+
+* **Zustand** — lightweight and ideal for client state (no context overhead).
+* **TanStack Query** — handles server communication, synchronization, and caching.
+* Together, they keep state logic clear:
+
+  * *Client state* lives in Zustand
+  * *Server state* lives in TanStack Query
+
 
 ### 4. UI Library
 To enhance the styling and user interface of our application, we are utilizing the [Chakra UI Library](https://chakra-ui.com/).
@@ -70,3 +143,32 @@ Chakra UI is a simple and accessible component library that provides a set of cu
 
 To get started with Chakra UI, visit the official documentation [Chakra UI Documentation](https://chakra-ui.com/docs/getting-started).
 
+
+
+### 5. Shadcn UI Components
+
+We are also using [shadcn/ui](https://ui.shadcn.com/) for a set of composable, customizable React components.
+
+Shadcn provides a flexible system with a modern design and supports custom alias configurations for seamless integration with our project structure.
+
+#### Adding Components
+
+Add new components with:
+
+```bash
+npx shadcn add <component-name>
+```
+
+**Aliases used in this project:**
+
+```json
+{
+  "components": "@shared/components",
+  "utils": "@shared/cn/utils",
+  "ui": "@components/shared",
+  "hooks": "hooks",
+  "lib": "@shared/cn"
+},
+```
+
+> Generated components follow these aliases. Lint errors may appear after generation—resolve them as needed.

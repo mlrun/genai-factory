@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModalField } from '@shared/types/modalFieldConfigs'
-import { WorkflowType } from '@shared/types/workflow'
+import { ModalField } from '@shared/types/modalFieldConfigs';
+import { WorkflowType } from '@shared/types/workflow';
 
 export const workflowFields: ModalField[] = [
   { name: 'name', label: 'Name', required: true },
@@ -28,8 +28,8 @@ export const workflowFields: ModalField[] = [
       { label: 'Application', value: WorkflowType.APPLICATION },
       { label: 'Data Processing', value: WorkflowType.DATA_PROCESSING },
       { label: 'Training', value: WorkflowType.TRAINING },
-      { label: 'Evaluation', value: WorkflowType.EVALUATION }
-    ]
+      { label: 'Evaluation', value: WorkflowType.EVALUATION },
+    ],
   },
   { name: 'deployment', label: 'Deployment' },
-]
+];
