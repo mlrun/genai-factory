@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 
 const Table = () => {
   return (
-    <div className="py-8 px-14">
+    <div className="py-8 px-14 w-full">
       <Outlet />
     </div>
   );
