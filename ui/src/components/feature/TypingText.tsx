@@ -18,17 +18,42 @@ import Markdown from 'react-markdown';
 interface TypingTextProps {
   text: string;
   speed?: number; // typing speed in ms per character
+  onTextUpdate?: () => void;
 }
 
-const TypingText = ({ speed = 12, text }: TypingTextProps) => {
+const TypingText = ({ onTextUpdate, speed = 12, text }: TypingTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
 
   useEffect(() => {
+    // Reset displayed text and ensure text is valid
+    if (!text || typeof text !== 'string') {
+      setDisplayedText('');
+      return;
+    }
+
+    // Sanitize text: remove undefined/null characters and trim any trailing "undefined" string
+    const sanitizedText = text
+      .split('')
+      .filter((char) => char !== undefined && char !== null)
+      .join('')
+      .replace(/undefined$/g, '') // Remove trailing "undefined" string
+      .trim();
+
+    setDisplayedText('');
     let index = 0;
+
     const interval = setInterval(() => {
-      setDisplayedText((prev) => prev + text[index]);
-      ++index;
-      if (index === text.length - 1) {
+      if (index < sanitizedText.length) {
+        setDisplayedText((prev) => {
+          const nextChar = sanitizedText[index];
+          // Double-check that we're not adding undefined
+          if (nextChar === undefined || nextChar === null) {
+            return prev;
+          }
+          return prev + nextChar;
+        });
+        index++;
+      } else {
         clearInterval(interval);
       }
     }, speed);
@@ -36,7 +61,21 @@ const TypingText = ({ speed = 12, text }: TypingTextProps) => {
     return () => clearInterval(interval);
   }, [text, speed]);
 
-  return <Markdown>{displayedText}</Markdown>;
+  // Trigger scroll when displayedText updates
+  useEffect(() => {
+    if (displayedText && onTextUpdate) {
+      onTextUpdate();
+    }
+  }, [displayedText, onTextUpdate]);
+
+  if (!text) {
+    return null;
+  }
+
+  // Ensure displayedText doesn't contain "undefined" before rendering
+  const safeDisplayedText = displayedText.replace(/undefined$/g, '').trim();
+
+  return <Markdown>{safeDisplayedText}</Markdown>;
 };
 
 export default TypingText;

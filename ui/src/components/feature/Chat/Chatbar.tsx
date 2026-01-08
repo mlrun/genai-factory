@@ -12,63 +12,106 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import { AddIcon } from '@chakra-ui/icons';
-import { Button, Flex, useColorMode } from '@chakra-ui/react';
-import { useSessionActions, useUser } from '@queries';
-import { colors } from '@shared/theme';
+import { Button } from '@components/shared/Button';
+import { useSession, useSessionActions, useSessions, useUser } from '@queries';
+import { Session } from '@shared/types/session';
 
-import ChatSessionList from './ChatSessionList';
+import { SessionsList } from './ChatSessionList';
 
 import { generateSessionId } from '@shared/utils';
+import { useChatStore } from '@stores/chatStore';
 
 import { DEFAULT_WORKFLOW_UID } from '@constants';
 
-const Chatbar = () => {
+export default function Chatbar() {
   const navigate = useNavigate();
-  const { colorMode } = useColorMode();
+  const { pathname } = useLocation();
+
+  const { setCanSend, setIsTyping } = useChatStore();
+
+  const { data: sessions = [] } = useSessions();
+  const { data: selectedSession } = useSession();
   const { data: publicUser } = useUser();
 
-  const { createSession } = useSessionActions();
+  const { createSession, deleteSession, updateSession } = useSessionActions();
 
-  const newChat = useCallback(async () => {
-    try {
-      const sessionName = generateSessionId();
-      const payload = {
-        name: sessionName,
-        description: '* New Chat',
-        labels: {},
-        workflow_id: DEFAULT_WORKFLOW_UID,
-        owner_id: publicUser?.uid,
-      };
-      const newSession = await createSession.mutateAsync(payload);
-      navigate(`/chat/${newSession.name}`);
-    } catch (error) {
-      console.error('Failed to create session:', error);
-    }
-  }, [publicUser]);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
+
+  const activeSessionName = pathname.split('/chat/')[1];
+
+  useEffect(() => {
+    if (pathname !== '/chat') return;
+    if (!sessions.length) return;
+    if (selectedSession) return;
+
+    const firstSession = sessions[0];
+
+    setIsTyping(false);
+    setCanSend(true);
+    navigate(`/chat/${firstSession.name}`, { replace: true });
+  }, [pathname, sessions, selectedSession, navigate, setCanSend, setIsTyping]);
+
+  const handleSelect = (session: Session) => {
+    setIsTyping(false);
+    setCanSend(true);
+    navigate(`/chat/${session.name}`);
+  };
+
+  const handleNewChat = useCallback(async () => {
+    const payload = {
+      name: generateSessionId(),
+      description: '* New Chat',
+      labels: {},
+      workflow_id: DEFAULT_WORKFLOW_UID,
+      owner_id: publicUser?.uid,
+    };
+
+    const newSession = await createSession.mutateAsync(payload);
+
+    // Explicitly navigate to the new session
+    navigate(`/chat/${newSession.name}`);
+  }, [createSession, navigate, publicUser]);
+
+  const handleRename = () => {
+    if (!selectedSession) return;
+
+    updateSession.mutate({
+      ...selectedSession,
+      description,
+    });
+
+    setEditingSessionId(null);
+  };
 
   return (
-    <Flex
-      gap={8}
-      bg={colorMode === 'dark' ? colors.sidebarDark : colors.sidebarLight}
-      flexDirection="column"
-    >
-      <ChatSessionList />
-      <Flex justify="center">
+    <div className="flex h-full w-72 flex-col border-r">
+      <div className="p-3">
         <Button
-          width="30%"
-          onClick={newChat}
-          iconSpacing={2}
-          leftIcon={<AddIcon />}
+          onClick={handleNewChat}
+          className="w-full rounded-md border cursor-pointer bg-[#171717] text-white hover:bg-[#171717]/90"
         >
-          New
+          + New chat
         </Button>
-      </Flex>
-    </Flex>
-  );
-};
+      </div>
 
-export default Chatbar;
+      <SessionsList
+        sessions={sessions}
+        activeSessionName={activeSessionName}
+        editingSessionId={editingSessionId}
+        description={description}
+        onSelect={handleSelect}
+        onStartRename={(session: Session) => {
+          setEditingSessionId(session.uid ?? null);
+          setDescription(session.description);
+        }}
+        onChangeDescription={setDescription}
+        onConfirmRename={handleRename}
+        onDelete={(name: string) => deleteSession.mutate(name)}
+      />
+    </div>
+  );
+}

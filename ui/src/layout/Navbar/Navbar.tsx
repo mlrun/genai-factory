@@ -18,13 +18,17 @@ under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
 
-import { useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 
 import ProjectBreadcrumbs from '@components/feature/Project/ProjectBreadcrumbs';
+import { Button } from '@components/shared/Button';
 
 // TODO: Remove the important from the border after you remove chakra
 const Navbar = () => {
   const { projectName } = useParams();
+  const { pathname } = useLocation();
+
+  const isChatPage = pathname.includes('chat');
   return (
     <div
       className="
@@ -40,6 +44,13 @@ const Navbar = () => {
           <ProjectBreadcrumbs />
         </div>
       )}
+      <div className="pr-14 ml-auto">
+        <Button variant="secondary">
+          <Link to={isChatPage ? '/projects' : '/chat'}>
+            {isChatPage ? 'Projects' : 'Chat'}
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 };

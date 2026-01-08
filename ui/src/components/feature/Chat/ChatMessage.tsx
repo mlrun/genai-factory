@@ -17,21 +17,23 @@ import ReactMarkdown from 'react-markdown';
 
 import TypingText from '../TypingText';
 
-import { useChatStore } from '@stores/chatStore';
-
 interface ChatMessageProps {
   message: string;
+  isNewMessage?: boolean;
+  onTextUpdate?: () => void;
 }
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
-  const isTyping = useChatStore((state) => state.isTyping);
-
-  if (isTyping) {
-    return <TypingText text={message} />;
+const ChatMessage = ({ isNewMessage = false, message, onTextUpdate }: ChatMessageProps) => {
+  // Ensure message is a valid string and remove any trailing "undefined"
+  let safeMessage = typeof message === 'string' ? message : String(message || '');
+  safeMessage = safeMessage.replace(/undefined$/g, '').trim();
+  
+  if (isNewMessage) {
+    return <TypingText text={safeMessage} onTextUpdate={onTextUpdate} />;
   }
   return (
     <ReactMarkdown skipHtml components={ChakraUIRenderer()}>
-      {message}
+      {safeMessage}
     </ReactMarkdown>
   );
 };
