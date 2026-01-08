@@ -59,9 +59,7 @@ export const ClassNameStepDetail = ({ value }: WorkflowStepDetailProps) => {
   const { updateClassArgs } = useWorkflowActions();
   const { selectedWorkflowStep } = useWorkflowDrawerStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [tempValue, setTempValue] = useState(
-    (value.base_url as string) || ''
-  );
+  const [tempValue, setTempValue] = useState((value.base_url as string) || '');
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -84,7 +82,7 @@ export const ClassNameStepDetail = ({ value }: WorkflowStepDetailProps) => {
   };
 
   return (
-    <div className="w-full bg-white antialiased">
+    <div className="w-full antialiased">
       {Object.entries(value).map(([key, val]) => {
         const isBaseUrl = key === 'base_url';
         const displayValue = isBaseUrl ? tempValue : val;

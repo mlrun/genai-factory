@@ -31,7 +31,7 @@ const WorkflowHeader = () => {
   const { projectName } = useParams();
 
   return (
-    <header className="flex justify-between items-center bg-white gap-6 pt-6 pr-8 pb-4 pl-8 self-stretch">
+    <header className="flex justify-between items-center gap-6 pt-6 pr-8 pb-4 pl-8 self-stretch">
       {/* Header Section */}
       <Link
         to={`/projects/${projectName}/workflows`}

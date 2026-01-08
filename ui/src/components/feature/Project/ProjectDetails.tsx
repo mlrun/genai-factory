@@ -78,7 +78,7 @@ const ProjectDetails = ({
       </div>
 
       {/* Project Details Section */}
-      <section>
+      <section className="mb-10">
         <h2 className="text-xl font-bold mb-4 text-[#2a2d30]">
           Project details
         </h2>
@@ -133,7 +133,7 @@ const ProjectDetails = ({
         defaultValue="liveMonitoring"
         className="flex flex-col justify-start mt-auto"
       >
-        <TabsList className="gap-4 bg-white justify-normal py-0">
+        <TabsList className="gap-4 bg-transparent justify-normal py-0">
           <TabsTrigger value="liveMonitoring">Live Monitoring</TabsTrigger>
           <TabsTrigger value="alerts">Alerts</TabsTrigger>
         </TabsList>

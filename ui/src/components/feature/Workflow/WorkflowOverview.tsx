@@ -27,7 +27,7 @@ export const WorkflowDetails = () => {
   if (!workflow) return null;
 
   return (
-    <div className="w-full bg-white text-[#2a2d30] antialiased">
+    <div className="w-full text-[#2a2d30] antialiased">
       <section className="mb-6">
         {/* Two Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 border-t border-gray-100">
