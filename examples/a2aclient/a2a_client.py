@@ -45,13 +45,14 @@ class A2AClient(ChainRunner):
 
         # Set a generous timeout (e.g., 5 minutes) for LLM processing
         timeout = httpx.Timeout(300.0, read=300.0)
-        async with httpx.AsyncClient(timeout=timeout) as http_client:
+        async with httpx.AsyncClient(timeout=timeout, verify= False) as http_client:
             # 1. Resolve agent card
             resolver = A2ACardResolver(
                 httpx_client=http_client,
                 base_url=self.base_url,
             )
             card = await resolver.get_agent_card()
+            card.url = self.base_url
 
             # 2. Create agent client
             factory = ClientFactory(
