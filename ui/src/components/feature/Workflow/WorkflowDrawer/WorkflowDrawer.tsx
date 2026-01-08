@@ -33,7 +33,7 @@ const WorkflowDrawer = () => {
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction="right">
       <DrawerContent
         aria-describedby={undefined}
-        className="flex flex-col w-2/5 py-6 pl-8 pr-10 gap-y-4 border-0"
+        className="flex flex-col w-1/4 py-6 pl-8 pr-10 gap-y-4 border-0"
       >
         <WorkflowDrawerHeader />
         {selectedWorkflowStep &&
