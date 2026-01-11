@@ -27,9 +27,27 @@ class A2AClient(ChainRunner):
     async def _run(self, event: WorkflowEvent):
         # 🔹 Inject task intent HERE (correct place)
         prompt = f"""
-        Please write a concise summary and a todo list based on the following Zoom conversation recording.
+        You are an assistant that summarizes Zoom meeting transcripts into a fixed, consistent format.
 
-        Conversation:
+        Follow this format EXACTLY:
+
+        1) **Summary:**  
+           - Write a concise 4–6 sentence summary of the meeting.
+           - Focus only on the key decisions, blockers, deadlines, and agreements.
+
+        2) **To-Do List (per person):**  
+           - Create a separate bullet list for EACH participant.
+           - Use their actual names from the transcript.
+           - Each bullet should be 1 short, actionable task.
+           - Do NOT add people who did not speak or receive action items.
+
+        3) **General / Cross-Team To-Dos:**  
+           - Add a short bullet list only if there were shared responsibilities.
+
+        Be strict with structure. Do NOT write long narrative summaries.
+
+        Here is the meeting transcript:
+
         ---
         {event.query}
         ---
