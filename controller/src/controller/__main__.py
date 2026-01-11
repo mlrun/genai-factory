@@ -74,8 +74,8 @@ def initdb():
     click.echo("Creating default project")
     project_id = client.create_project(
         Project(
-            name="default",
-            description="Default Project",
+            name="Talk2Tasks",
+            description="Turns spoken dialogue into clear action items",
             owner_id=user_id,
         ),
         db_session=db_session,

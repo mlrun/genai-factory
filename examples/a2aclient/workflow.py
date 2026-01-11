@@ -72,7 +72,7 @@ language_guardrail_task.to(hallucination_guardrail).to(history_saver).respond()
 
 
 workflow_server.add_workflow(
-    name="default",
+    name="Talk2Tasks",
     graph=root,
     workflow_type="application",
 )

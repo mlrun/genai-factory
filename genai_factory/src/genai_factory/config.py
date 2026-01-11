@@ -36,7 +36,7 @@ class WorkflowServerConfig(BaseModel):
     Username to use for the controller API. Default: admin.
     """
 
-    project_name: str = "default"
+    project_name: str = "Talk2Tasks"
     """
     MLRun project name to use for the workflows. Default: default.
     """
