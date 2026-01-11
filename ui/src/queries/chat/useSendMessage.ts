@@ -25,7 +25,7 @@ export function useSendMessage() {
   return useMutation({
     mutationFn: async (payload: SendMessagePayload) => {
       // TODO: replace mock infer
-      const response = await Client.inferWorkflow('default', 'default', {
+      const response = await Client.inferWorkflow('Talk2Tasks', 'Talk2Tasks', {
         question: payload.question,
         session_name: payload.session_name,
         data_source: payload.data_source ?? 'test',
