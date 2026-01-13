@@ -31,7 +31,7 @@ from genai_factory.schemas import (
     OutputMode,
     QueryItem,
     Workflow,
-    WorkflowType,
+    WorkflowType, WorkflowState,
 )
 
 router = APIRouter(prefix="/projects/{project_name}")
@@ -175,6 +175,7 @@ def list_workflows(
     name: str = None,
     version: str = None,
     workflow_type: Union[WorkflowType, str] = None,
+    state: Union[WorkflowState, str] = None,
     labels: Optional[List[Tuple[str, str]]] = None,
     mode: OutputMode = OutputMode.DETAILS,
     db_session=Depends(get_db),
@@ -187,6 +188,7 @@ def list_workflows(
     :param name:          The name to filter by.
     :param version:       The version to filter by.
     :param workflow_type: The workflow type to filter by.
+    :param state:         The workflow state to filter by.
     :param labels:        The labels to filter by.
     :param mode:          The output mode.
     :param db_session:    The database session.
@@ -204,6 +206,7 @@ def list_workflows(
             owner_id=owner_id,
             version=version,
             workflow_type=workflow_type,
+            state=state,
             labels_match=labels,
             output_mode=mode,
             db_session=db_session,
@@ -263,7 +266,9 @@ def infer_workflow(
         "item": query.model_dump(),
         "workflow": workflow.to_dict(short=True),
     }
-    path = workflow.deployment
+    #Todo:  change for db refactor, there is no deployment field in workflow after refactor
+    #path = workflow.deployment
+    path = f"http://localhost:8000/api/workflows/{workflow.name}/infer"
 
     # Sent the event to the application's workflow:
     try:

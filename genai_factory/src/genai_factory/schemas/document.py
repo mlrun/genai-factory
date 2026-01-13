@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
+from typing import Optional, List
+
+from pydantic import Field
 
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
 class Document(BaseWithVerMetadata):
-    _top_level_fields = ["path", "origin"]
+    _top_level_fields = ["path","keywords"]
     path: str
     project_id: str
-    origin: Optional[str] = None
+    summary: str = ""
+    ingestions: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
+    metadata: dict[str,str] = Field(default_factory=dict)
+    extra_data: dict[str,str] = Field(default_factory=dict)

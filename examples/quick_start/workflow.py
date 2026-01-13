@@ -25,5 +25,5 @@ workflow_graph = [
 ]
 
 workflow_server.add_workflow(
-    name="default", graph=workflow_graph, workflow_type="application"
+    name="default", structure=workflow_graph, workflow_type="application", type_kwargs={}
 )
