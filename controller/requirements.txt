@@ -8,4 +8,4 @@ pyyaml>=6.0.2
 click
 requests
 tabulate
-git+https://github.com/mlrun/genai-factory.git
+git+https://github.com/samHoeger/genai-factory

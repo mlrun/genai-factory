@@ -31,11 +31,11 @@ RUN apt update -qqq \
 WORKDIR /controller
 
 # Install requirements:
-COPY /controller/requirements.txt /controller/
+COPY requirements.txt /controller/
 RUN pip install -r /controller/requirements.txt
 
 # Copy controller source code
-COPY /controller/src /controller/src
+COPY /src ./src
 
 # Make the data directory:
 RUN mkdir -p ../data
@@ -48,7 +48,7 @@ ENV CTRL_DATA_PATH="/data"
 EXPOSE 8001
 
 # Initiate database:
-RUN python -m controller initdb
+#RUN python -m controller initdb
 
 # Run the controller's API server:
 CMD ["uvicorn", "controller.api:app","--host", "0.0.0.0", "--port", "8001", "--reload"]
