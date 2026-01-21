@@ -18,11 +18,4 @@ from genai_factory.schemas.base import BaseWithMetadata
 
 
 class User(BaseWithMetadata):
-    _extra_fields = ["policy", "features"]
-    _top_level_fields = ["email", "full_name"]
-
-    email: str
-    full_name: Optional[str] = None
-    features: Optional[dict[str, str]] = None
-    policy: Optional[dict[str, str]] = None
-    is_admin: bool = False
+    extra_data: dict

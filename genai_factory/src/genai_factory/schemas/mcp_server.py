@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional
+from enum import Enum
 
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas.base import BaseWithWorkMetadata
 
 
-class PromptTemplate(BaseWithVerMetadata):
-    _extra_fields = ["arguments"]
-    _top_level_fields = ["text"]
+class McpType(str, Enum):
+    GAITOR = "gaitor"
+    CUSTOM = "custom"
 
-    text: str
-    project_id: str
-    arguments: Optional[List[str]] = None
+
+class McpServer(BaseWithWorkMetadata):
+    _top_level_fields = ["mcp_type","project_id","state"]
+    mcp_type: McpType

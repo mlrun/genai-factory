@@ -20,7 +20,7 @@ class SessionStore:
         self.client = client
 
     def read_state(self, event: WorkflowEvent):
-        event.user = self.client.get_user(username=event.username, email=event.username)
+        event.user = self.client.get_user(username=event.username)
         event.username = event.user.name or "guest"
         if not event.session and event.session_name:
             event.session = self.client.get_session(
