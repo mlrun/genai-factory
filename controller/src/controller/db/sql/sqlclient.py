@@ -17,7 +17,7 @@ import uuid
 from typing import List, Type, Union
 
 import sqlalchemy
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, selectinload
 
 import controller.db.sql.sqldb as db
 import genai_factory.schemas as api_models
@@ -33,8 +33,21 @@ class SqlClient(Client):
 
     def __init__(self, db_url: str, verbose: bool = False):
         self.db_url = db_url
+        # SQLite-specific configuration
+        connect_args = {"check_same_thread": False} if "sqlite" in db_url else {}
+        # Connection pooling configuration
+        pool_kwargs = {}
+        if "sqlite" not in db_url:
+            pool_kwargs = {
+                "pool_size": 10,
+                "max_overflow": 20,
+                "pool_recycle": 3600,
+            }
         self.engine = sqlalchemy.create_engine(
-            self.db_url, echo=verbose, connect_args={"check_same_thread": False}
+            self.db_url,
+            echo=verbose,
+            connect_args=connect_args,
+            **pool_kwargs
         )
         self._session_maker = sessionmaker(bind=self.engine)
         self._local_maker = sessionmaker(
@@ -177,12 +190,16 @@ class SqlClient(Client):
         :return: The created object.
         """
         session = self.get_db_session(session)
-        # try:
-        uid = uuid.uuid4().hex
-        db_object = self._to_db_object(obj, db_class, uid=uid)
-        session.add(db_object)
-        session.commit()
-        return self._to_schema_object(db_object, obj.__class__)
+        try:
+            uid = uuid.uuid4().hex
+            db_object = self._to_db_object(obj, db_class, uid=uid)
+            session.add(db_object)
+            session.commit()
+            return self._to_schema_object(db_object, obj.__class__)
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to create object: {e}")
+            raise
 
     def _get(
         self, session: sqlalchemy.orm.Session, db_class, api_class, **kwargs
@@ -201,6 +218,9 @@ class SqlClient(Client):
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
         query = session.query(db_class).filter_by(**kwargs)
+        # Eager load labels to avoid N+1 query problem
+        if hasattr(db_class, 'labels'):
+            query = query.options(selectinload(db_class.labels))
         num_objects = query.count()
         if num_objects > 1:
             # Take the latest created:
@@ -212,7 +232,7 @@ class SqlClient(Client):
 
     def _update(
         self, session: sqlalchemy.orm.Session, db_class, api_object, **kwargs
-    ) -> Type[api_models.Base]:
+    ) -> Union[Type[api_models.Base], None]:
         """
         Update an object in the database.
 
@@ -221,20 +241,24 @@ class SqlClient(Client):
         :param api_object: The API object with the new data.
         :param kwargs:     The keyword arguments to filter the object.
 
-        :return: The updated object.
+        :return: The updated object, or None if not found.
         """
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
-        obj = session.query(db_class).filter_by(**kwargs).one_or_none()
-        if obj:
-            obj = self._merge_into_db_object(api_object, obj)
-            session.add(obj)
-            session.commit()
-            return self._to_schema_object(obj, api_object.__class__)
-        else:
-            # Create a new object if not found
-            logger.debug(f"Object not found, creating a new one: {api_object}")
-            return self._create(session, db_class, api_object)
+        try:
+            obj = session.query(db_class).filter_by(**kwargs).one_or_none()
+            if obj:
+                obj = self._merge_into_db_object(api_object, obj)
+                session.add(obj)
+                session.commit()
+                return self._to_schema_object(obj, api_object.__class__)
+            else:
+                logger.warning(f"Object not found for update: {kwargs}")
+                return None
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to update object: {e}")
+            raise
 
     def _delete(self, session: sqlalchemy.orm.Session, db_class, **kwargs):
         """
@@ -246,10 +270,15 @@ class SqlClient(Client):
         """
         kwargs = self._drop_none(**kwargs)
         session = self.get_db_session(session)
-        query = session.query(db_class).filter_by(**kwargs)
-        for obj in query:
-            session.delete(obj)
-        session.commit()
+        try:
+            query = session.query(db_class).filter_by(**kwargs)
+            for obj in query:
+                session.delete(obj)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to delete object: {e}")
+            raise
 
     def _list(
         self,
@@ -275,6 +304,9 @@ class SqlClient(Client):
         session = self.get_db_session(session)
 
         query = session.query(db_class)
+        # Eager load labels to avoid N+1 query problem
+        if hasattr(db_class, 'labels'):
+            query = query.options(selectinload(db_class.labels))
         for filter_statement in filters:
             query = query.filter(filter_statement)
         # TODO: Implement labels_match
@@ -1228,252 +1260,6 @@ class SqlClient(Client):
             filters=filters,
         )
 
-    def create_agent(
-            self,
-            agent: Union[api_models.Agent, dict],
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        Create a new agent in the database.
-
-        :param agent:      The agent object to create.
-        :param db_session: The session to use.
-
-        :return: The created agent.
-        """
-        logger.debug(f"Creating agent: {agent}")
-        if isinstance(agent, dict):
-            agent = api_models.Agent.from_dict(agent)
-        return self._create(db_session, db.Agent, agent)
-
-    def get_agent(
-            self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
-    ):
-        """
-        Get a agent from the database.
-
-        :param name:       The name of the agent to get.
-        :param db_session: The session to use.
-        :param kwargs:     Additional keyword arguments to filter the agent.
-
-        :return: The requested agent.
-        """
-        logger.debug(f"Getting agent: name={name}")
-        return self._get(
-            db_session, db.Agent, api_models.Agent, name=name, **kwargs
-        )
-
-    def update_agent(
-            self,
-            name: str,
-            agent: Union[api_models.Agent, dict],
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        Update an existing agent in the database.
-
-        :param name:       The name of the agent to update.
-        :param agent:      The agent object with the new data.
-        :param db_session: The session to use.
-
-        :return: The updated agent.
-        """
-        logger.debug(f"Updating agent: {agent}")
-        if isinstance(agent, dict):
-            agent = api_models.Agent.from_dict(agent)
-        return self._update(
-            db_session, db.Agent, agent, name=name, uid=agent.uid
-        )
-
-    def delete_agent(
-            self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
-    ):
-        """
-        Delete a agent from the database.
-
-        :param name:       The name of the agent to delete.
-        :param db_session: The session to use.
-        :param kwargs:     Additional keyword arguments to filter the agent.
-        """
-        logger.debug(f"Deleting agent: name={name}")
-        self._delete(db_session, db.Agent, name=name, **kwargs)
-
-    def list_agents(
-            self,
-            name: str = None,
-            owner_id: str = None,
-            version: str = None,
-            project_id: str = None,
-            agent_type: Union[api_models.AgentType, str] = None,
-            state: Union[api_models.WorkflowState, str] = None,
-            labels_match: Union[list, str] = None,
-            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        List agents from the database.
-
-        :param name:          The name to filter the agents by.
-        :param owner_id:      The owner to filter the agents by.
-        :param version:       The version to filter the agents by.
-        :param project_id:    The project to filter the agents by.
-        :param agent_type:    The agent type to filter the agents by.
-        :param state:         The agent state to filter the agents by.
-        :param labels_match:  The labels to match, filter the agents by labels.
-        :param output_mode:   The output mode.
-        :param db_session:    The session to use.
-
-        :return: The list of agents.
-        """
-        logger.debug(
-            f"Getting agents: name={name}, owner_id={owner_id}, version={version}, project_id={project_id},"
-            f" agent_type={agent_type}, state={state}, labels_match={labels_match}, mode={output_mode}"
-        )
-        filters = []
-        if name:
-            filters.append(db.Agent.name == name)
-        if owner_id:
-            filters.append(db.Agent.owner_id == owner_id)
-        if version:
-            filters.append(db.Agent.version == version)
-        if project_id:
-            filters.append(db.Agent.project_id == project_id)
-        if agent_type:
-            filters.append(db.Agent.agent_type == agent_type)
-        if state:
-            filters.append(db.Agent.state == state)
-        return self._list(
-            session=db_session,
-            db_class=db.Agent,
-            api_class=api_models.Agent,
-            output_mode=output_mode,
-            labels_match=labels_match,
-            filters=filters,
-        )
-
-    def create_mcp_server(
-            self,
-            mcp_server: Union[api_models.McpServer, dict],
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        Create a new mcp_server in the database.
-
-        :param mcp_server: The mcp_server object to create.
-        :param db_session: The session to use.
-
-        :return: The created mcp_server.
-        """
-        logger.debug(f"Creating mcp_server: {mcp_server}")
-        if isinstance(mcp_server, dict):
-            mcp_server = api_models.McpServer.from_dict(mcp_server)
-        return self._create(db_session, db.McpServer, mcp_server)
-
-    def get_mcp_server(
-            self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
-    ):
-        """
-        Get a mcp_server from the database.
-
-        :param name:       The name of the mcp_server to get.
-        :param db_session: The session to use.
-        :param kwargs:     Additional keyword arguments to filter the mcp_server.
-
-        :return: The requested mcp_server.
-        """
-        logger.debug(f"Getting mcp_server: name={name}")
-        return self._get(
-            db_session, db.McpServer, api_models.McpServer, name=name, **kwargs
-        )
-
-    def update_mcp_server(
-            self,
-            name: str,
-            mcp_server: Union[api_models.McpServer, dict],
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        Update an existing mcp_server in the database.
-
-        :param name:       The name of the mcp_server to update.
-        :param mcp_server: The mcp_server object with the new data.
-        :param db_session: The session to use.
-
-        :return: The updated mcp_server.
-        """
-        logger.debug(f"Updating mcp_server: {mcp_server}")
-        if isinstance(mcp_server, dict):
-            mcp_server = api_models.McpServer.from_dict(mcp_server)
-        return self._update(
-            db_session, db.McpServer, mcp_server, name=name, uid=mcp_server.uid
-        )
-
-    def delete_mcp_server(
-            self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
-    ):
-        """
-        Delete a mcp_server from the database.
-
-        :param name:       The name of the mcp_server to delete.
-        :param db_session: The session to use.
-        :param kwargs:     Additional keyword arguments to filter the mcp_server.
-        """
-        logger.debug(f"Deleting mcp_server: name={name}")
-        self._delete(db_session, db.McpServer, name=name, **kwargs)
-
-    def list_mcp_servers(
-            self,
-            name: str = None,
-            owner_id: str = None,
-            version: str = None,
-            project_id: str = None,
-            mcp_type: Union[api_models.McpType, str] = None,
-            state: Union[api_models.WorkflowState, str] = None,
-            labels_match: Union[list, str] = None,
-            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        List mcp_servers from the database.
-
-        :param name:          The name to filter the mcp_servers by.
-        :param owner_id:      The owner to filter the mcp_servers by.
-        :param version:       The version to filter the mcp_servers by.
-        :param project_id:    The project to filter the mcp_servers by.
-        :param mcp_type:      The mcp_server type to filter the mcp_servers by.
-        :param state:         The mcp_server state to filter the mcp_servers by.
-        :param labels_match:  The labels to match, filter the mcp_servers by labels.
-        :param output_mode:   The output mode.
-        :param db_session:    The session to use.
-
-        :return: The list of mcp_servers.
-        """
-        logger.debug(
-            f"Getting mcp_servers: name={name}, owner_id={owner_id}, version={version}, project_id={project_id},"
-            f" mcp_server_type={mcp_type}, state={state}, labels_match={labels_match}, mode={output_mode}"
-        )
-        filters = []
-        if name:
-            filters.append(db.McpServer.name == name)
-        if owner_id:
-            filters.append(db.McpServer.owner_id == owner_id)
-        if version:
-            filters.append(db.McpServer.version == version)
-        if project_id:
-            filters.append(db.McpServer.project_id == project_id)
-        if mcp_type:
-            filters.append(db.McpServer.mcp_type == mcp_type)
-        if state:
-            filters.append(db.McpServer.state == state)
-        return self._list(
-            session=db_session,
-            db_class=db.McpServer,
-            api_class=api_models.McpServer,
-            output_mode=output_mode,
-            labels_match=labels_match,
-            filters=filters,
-        )
-
     def create_session(
         self,
         session: Union[api_models.ChatSession, dict],
@@ -1604,126 +1390,6 @@ class SqlClient(Client):
             query = query.limit(last)
         return self._process_output(query.all(), api_models.ChatSession, output_mode)
 
-    def create_step_configuration(
-        self,
-        step_configuration: Union[api_models.StepConfiguration, dict],
-        db_session: sqlalchemy.orm.Session = None,
-    ) :
-        """
-        Create a new step configuration in the database.
-
-        :param step_configuration: The step configuration object to create.
-        :param db_session: The session to use.
-
-        :return: The created step configuration.
-        """
-        logger.debug(f"Creating step configuration: {step_configuration}")
-        if isinstance(step_configuration, dict):
-            step_configuration = api_models.StepConfiguration.from_dict(step_configuration)
-        return self._create(db_session, db.StepConfiguration, step_configuration)
-
-    def get_step_configuration(
-        self,
-        name: str,
-        db_session: sqlalchemy.orm.Session = None,
-        **kwargs
-    ):
-        """
-        Get a step configuration from the database.
-
-        :param name:       The name of the step configuration to get.
-        :param db_session: The session to use.
-        :param kwargs:     Additional keyword arguments to filter the step configuration.
-
-        :return: The requested step configuration.
-        """
-        logger.debug(f"Getting step configuration: name={name}")
-        return self._get(
-            db_session, db.StepConfiguration, api_models.StepConfiguration, name=name, **kwargs
-        )
-
-    def update_step_configuration(
-        self,
-        name: str,
-        step_configuration: Union[api_models.StepConfiguration, dict],
-        db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        Update a step configuration in the database.
-
-        :param name:    The name of the step configuration to update.
-        :param step_configuration: The step configuration object with the new data.
-        :param db_session: The session to use.
-
-        :return: The updated chat step configuration.
-        """
-        logger.debug(f"Updating step configuration: {step_configuration}")
-        if isinstance(step_configuration, dict):
-            step_configuration = api_models.StepConfiguration.from_dict(step_configuration)
-        return self._update(
-            db_session, db.StepConfiguration, step_configuration, name=name, uid=step_configuration.uid)
-
-    def delete_step_configuration(
-            self, name: str, db_session: sqlalchemy.orm.Session = None, **kwargs
-    ):
-        """
-        Delete a step configuration from the database.
-
-        :param name: The name of the step configuration to delete.
-        :param db_session: The DB session to use.
-        :param kwargs: Additional keyword arguments to filter the step configuration.
-        """
-        logger.debug(f"Deleting step configuration: name={name}")
-        self._delete(db_session, db.StepConfiguration, name=name, **kwargs)
-
-    def list_step_configurations(
-            self,
-            name: str = None,
-            owner_id: str = None,
-            version: str = None,
-            project_id: str = None,
-            workflow_id: str = None,
-            labels_match: Union[list, str] = None,
-            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-            db_session: sqlalchemy.orm.Session = None,
-    ):
-        """
-        List step configurations from the database.
-
-        :param name:         The name to filter the step configuration by.
-        :param owner_id:     The owner to filter the step configuration by.
-        :param version:      The version to filter the step configuration by.
-        :param project_id:   The project to filter the step configuration by.
-        :param workflow_id:   The workflow to filter the step configuration by.
-        :param labels_match: The labels to match, filter the step configuration by labels.
-        :param output_mode:  The output mode.
-        :param db_session:   The session to use.
-
-        :return: The list of step configuration.
-        """
-        logger.debug(
-            f"Getting step configurations: owner_id={owner_id}, version={version}, project_id={project_id}, workflow_id={workflow_id}, labels_match={labels_match}, mode={output_mode}"
-        )
-        filters = []
-        if name:
-            filters.append(db.StepConfiguration.name == name)
-        if owner_id:
-            filters.append(db.StepConfiguration.owner_id == owner_id)
-        if version:
-            filters.append(db.StepConfiguration.version == version)
-        if project_id:
-            filters.append(db.StepConfiguration.project_id == project_id)
-        if workflow_id:
-            filters.append(db.StepConfiguration.workflow_id == workflow_id)
-        return self._list(
-            session=db_session,
-            db_class=db.StepConfiguration,
-            api_class=api_models.StepConfiguration,
-            output_mode=output_mode,
-            labels_match=labels_match,
-            filters=filters,
-        )
-
     def create_deployment(
         self,
         deployment: Union[api_models.Deployment, dict],
@@ -1804,8 +1470,6 @@ class SqlClient(Client):
             project_id: str = None,
             workflow_id: str = None,
             model_id: str = None,
-            agent_id: str = None,
-            mcp_server_id: str = None,
             type: Union[api_models.DeploymentType, str] = None,
             is_remote: bool = None,
             labels_match: Union[list, str] = None,
@@ -1821,8 +1485,6 @@ class SqlClient(Client):
         :param project_id:   The project to filter the deployments by.
         :param workflow_id:  The workflow to filter the deployments by.
         :param model_id:     The model to filter the deployments by.
-        :param agent_id:     The agent to filter the deployments by.
-        :param mcp_server_id:The mcp server to filter the deployments by.
         :param type:         The Deployment Type to filter the deployments by.
         :param is_remote:    The boolean value of is_remote to filter the deployments by.
         :param labels_match: The labels to match, filter the deployments by labels.
@@ -1833,7 +1495,7 @@ class SqlClient(Client):
         """
         logger.debug(
             f"Getting deployments: owner_id={owner_id}, version={version}, project_id={project_id}, workflow_id={workflow_id},"
-            f" model_id={model_id}, agent_id={agent_id}, mcp_server_id={mcp_server_id}, type={type}, is_remote={is_remote}, labels_match={labels_match}, mode={output_mode}"
+            f" model_id={model_id}, type={type}, is_remote={is_remote}, labels_match={labels_match}, mode={output_mode}"
         )
         filters = []
         if name:
@@ -1848,10 +1510,6 @@ class SqlClient(Client):
             filters.append(db.Deployment.workflow_id == workflow_id)
         if model_id:
             filters.append(db.Deployment.model_id == model_id)
-        if agent_id:
-            filters.append(db.Deployment.agent_id == agent_id)
-        if mcp_server_id:
-            filters.append(db.Deployment.mcp_server_id == mcp_server_id)
         if type:
             filters.append(db.Deployment.type == type)
         if is_remote:
@@ -2101,7 +1759,7 @@ class SqlClient(Client):
         if schedule_id:
             filters.append(db.Run.schedule_id == schedule_id)
         if status:
-            filters.append(db.Schedule.status == status)
+            filters.append(db.Run.status == status)
         return self._list(
             session=db_session,
             db_class=db.Run,

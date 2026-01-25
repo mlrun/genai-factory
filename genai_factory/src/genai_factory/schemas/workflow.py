@@ -13,6 +13,9 @@
 # limitations under the License.
 
 from enum import Enum
+from typing import List
+
+from pydantic import Field
 
 from genai_factory.schemas import Conversation
 from genai_factory.schemas.base import BaseWithWorkMetadata
@@ -32,6 +35,7 @@ class WorkflowType(str, Enum):
 class Workflow(BaseWithWorkMetadata):
     _top_level_fields = ["workflow_type","project_id","state"]
     workflow_type: WorkflowType
+    step_configurations: List[dict] = Field(default_factory=list)
 
 class WorkflowEvent:
     """

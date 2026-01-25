@@ -1,18 +1,20 @@
 import os
 from pathlib import Path
 
-import pytest
 from dotenv import load_dotenv
+
+# ---- ENV -------------------------------------------------
+# Load test env BEFORE importing controller modules
+# so that CTRL_DB_PATH and other vars are set correctly
+
+TEST_ENV_PATH = Path(__file__).parent / ".env"
+load_dotenv(TEST_ENV_PATH, override=True)
+
+import pytest
 from fastapi.testclient import TestClient
 
 from controller.api import app
 from controller.db import client as db_client
-
-
-# ---- ENV -------------------------------------------------
-
-TEST_ENV_PATH = Path(__file__).parent / ".env"
-load_dotenv(TEST_ENV_PATH, override=True)
 
 
 # ---- DB RESET --------------------------------------------

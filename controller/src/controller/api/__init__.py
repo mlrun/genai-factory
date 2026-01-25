@@ -24,12 +24,9 @@ from controller.api.endpoints import (
     sessions,
     users,
     workflows,
-    step_configurations,
     deployments,
     schedules,
     runs,
-    agents,
-    mcp_servers,
     prompts
 )
 
@@ -83,10 +80,6 @@ api_router.include_router(
     tags=["sessions"],
 )
 api_router.include_router(
-    step_configurations.router,
-    tags=["step_configurations"],
-)
-api_router.include_router(
     deployments.router,
     tags=["deployments"],
 )
@@ -97,14 +90,6 @@ api_router.include_router(
 api_router.include_router(
     runs.router,
     tags=["runs"],
-)
-api_router.include_router(
-    agents.router,
-    tags=["agents"],
-)
-api_router.include_router(
-    mcp_servers.router,
-    tags=["mcp_servers"],
 )
 api_router.include_router(
     prompts.router,

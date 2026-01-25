@@ -631,160 +631,6 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def create_agent(
-        self, agent: Union[api_models.Agent, dict], **kwargs
-    ) -> api_models.Agent:
-        """
-        Create a new agent in the database.
-
-        :param agent: The agent object to create.
-
-        :return: The created agent.
-        """
-        pass
-
-    @abstractmethod
-    def get_agent(self, name: str, **kwargs) -> Type[api_models.Base]:
-        """
-        Get an agent from the database.
-
-        :param name: The name of the agent to get.
-
-        :return:       The requested agent.
-        """
-        pass
-
-    @abstractmethod
-    def update_agent(
-        self, name: str, agent: Union[api_models.Agent, dict], **kwargs
-    ) -> api_models.Agent:
-        """
-        Update an existing agent in the database.
-
-        :param name:  The name of the agent to update.
-        :param agent: The agent object with the new data.
-
-        :return: The updated agent.
-        """
-        pass
-
-    @abstractmethod
-    def delete_agent(self, name: str, **kwargs):
-        """
-        Delete an agent from the database.
-
-        :param name: The name of the agent to delete.
-        """
-        pass
-
-    @abstractmethod
-    def list_agents(
-        self,
-        name: str = None,
-        owner_id: str = None,
-        version: str = None,
-        project_id: str = None,
-        agent_type: Union[api_models.AgentType, str] = None,
-        labels_match: Union[list, str] = None,
-        state: Union[api_models.WorkflowState, str] = None,
-        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-        **kwargs,
-    ) -> List[Optional[api_models.Agent]]:
-        """
-        List agents from the database.
-
-        :param name:          The name to filter the agents by.
-        :param owner_id:      The owner to filter the agents by.
-        :param version:       The version to filter the agents by.
-        :param project_id:    The project to filter the agents by.
-        :param agent_type:    The agent type to filter the agents by.
-        :param labels_match:  The labels to match, filter the agents by labels.
-        :param state:         The state to match, filter the agents by state.
-        :param output_mode:   The output mode.
-
-        :return: The list of agents.
-        """
-        pass
-
-    @abstractmethod
-    def create_mcp_server(
-        self, mcp_server: Union[api_models.McpServer, dict], **kwargs
-    ) -> api_models.McpServer:
-        """
-        Create a new mcp_server in the database.
-
-        :param mcp_server: The mcp_server object to create.
-
-        :return: The created mcp_server.
-        """
-        pass
-
-    @abstractmethod
-    def get_mcp_server(self, name: str, **kwargs) -> Type[api_models.Base]:
-        """
-        Get a mcp_server from the database.
-
-        :param name: The name of the mcp_server to get.
-
-        :return:       The requested mcp_server.
-        """
-        pass
-
-    @abstractmethod
-    def update_mcp_server(
-        self, name: str, mcp_server: Union[api_models.McpServer, dict], **kwargs
-    ) -> api_models.McpServer:
-        """
-        Update an existing mcp_server in the database.
-
-        :param name:       The name of the mcp_server to update.
-        :param mcp_server: The mcp_server object with the new data.
-
-        :return: The updated mcp_server.
-        """
-        pass
-
-    @abstractmethod
-    def delete_mcp_server(self, name: str, **kwargs):
-        """
-        Delete a mcp_server from the database.
-
-        :param name: The name of the mcp_server to delete.
-        """
-        pass
-
-    @abstractmethod
-    def list_mcp_servers(
-        self,
-        name: str = None,
-        owner_id: str = None,
-        version: str = None,
-        project_id: str = None,
-        mcp_type: Union[api_models.McpType, str] = None,
-        labels_match: Union[list, str] = None,
-        state: Union[api_models.WorkflowState, str] = None,
-        output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-        **kwargs,
-    ) -> List[Optional[api_models.McpServer]]:
-        """
-        List mcp_servers from the database.
-
-        :param name:          The name to filter the mcp_servers by.
-        :param owner_id:      The owner to filter the mcp_servers by.
-        :param version:       The version to filter the mcp_servers by.
-        :param project_id:    The project to filter the mcp_servers by.
-        :param mcp_type:      The mcp_server type to filter the mcp_servers by.
-        :param labels_match:  The labels to match, filter the mcp_servers by labels.
-        :param state:         The state to match, filter the mcp_servers by state.
-        :param output_mode:   The output mode.
-
-        :return: The list of mcp_servers.
-        """
-        pass
-
-
-
-    @abstractmethod
     def create_session(
         self, session: Union[api_models.ChatSession, dict], **kwargs
     ) -> api_models.ChatSession:
@@ -861,83 +707,6 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def create_step_configuration(
-            self, step_configuration: Union[api_models.StepConfiguration, dict], **kwargs
-    ) -> api_models.StepConfiguration:
-        """
-        Create a new step configuration in the database.
-
-        :param step_configuration: The step configuration object to create.
-
-        :return: The created step configuration.
-        """
-        pass
-
-    @abstractmethod
-    def get_step_configuration(
-            self, name: str = None, uid: str = None, **kwargs
-    ) -> Optional[api_models.StepConfiguration]:
-        """
-        Get a step configuration from the database.
-
-        :param name:    The name of the step configuration to get.
-        :param uid:     The ID of the step configuration to get.
-
-        :return: The requested step configuration.
-        """
-        pass
-
-    @abstractmethod
-    def update_step_configuration(
-            self, name: str, step_configuration: Union[api_models.StepConfiguration, dict], **kwargs
-    ) -> api_models.StepConfiguration:
-        """
-        Update a step configuration in the database.
-
-        :param name:    The name of the step configuration to update.
-        :param          step_configuration: The step configuration object with the new data.
-
-        :return: The updated chat step configuration.
-        """
-        pass
-
-    @abstractmethod
-    def delete_step_configuration(self, name: str, **kwargs):
-        """
-        Delete a step configuration from the database.
-
-        :param name: The name of the step configuration to delete.
-        """
-        pass
-
-    @abstractmethod
-    def list_step_configurations(
-            self,
-            name: str = None,
-            owner_id: str = None,
-            version: str = None,
-            project_id: str = None,
-            workflow_id: str = None,
-            labels_match: Union[list, str] = None,
-            output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
-            **kwargs,
-    )-> List[Optional[api_models.StepConfiguration]]:
-        """
-        List step configurations from the database.
-
-        :param name:         The name to filter the step configurations by.
-        :param owner_id:     The owner to filter the step configurations by.
-        :param version:      The version to filter the step configurations by.
-        :param project_id:   The project to filter the step configurations by.
-        :param workflow_id:  The workflow to filter the step configurations by.
-        :param labels_match: The labels to match, filter the step configurations by labels.
-        :param output_mode:  The output mode.
-
-        :return: The list of step configurations.
-        """
-        pass
-
-    @abstractmethod
     def create_deployment(
             self, deployment: Union[api_models.Deployment, dict], **kwargs
     ) -> api_models.Deployment:
@@ -996,8 +765,6 @@ class Client(ABC):
             project_id: str = None,
             workflow_id: str = None,
             model_id: str = None,
-            agent_id: str = None,
-            mcp_server_id: str = None,
             labels_match: Union[list, str] = None,
             output_mode: api_models.OutputMode = api_models.OutputMode.DETAILS,
             **kwargs,
@@ -1011,8 +778,6 @@ class Client(ABC):
         :param project_id:   The project to filter the deployments by.
         :param workflow_id:  The workflow to filter the deployments by.
         :param model_id:     The model to filter the deployments by.
-        :param agent_id:     The agent to filter the deployments by.
-        :param mcp_server_id:The mcp server to filter the deployments by.
         :param labels_match: The labels to match, filter the deployments by labels.
         :param output_mode:  The output mode.
 

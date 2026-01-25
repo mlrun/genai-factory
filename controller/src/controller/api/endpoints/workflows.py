@@ -124,6 +124,10 @@ def update_workflow(
         data = client.update_workflow(
             name=name, workflow=workflow, db_session=db_session
         )
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Workflow with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

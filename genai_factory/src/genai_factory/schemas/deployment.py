@@ -23,11 +23,9 @@ class DeploymentType(str, Enum):
     MODEL = "model"
     WORKFLOW = "workflow"
     KNOWLEDGE_BASE = "knowledge-base"
-    AGENT = "agent"
-    MCP_SERVER = "mcp_server"
 
 class Deployment(BaseWithComparableData):
-    _top_level_fields = ["project_id","workflow_id","model_id","agent_id","mcp_server_id","is_remote","type"]
+    _top_level_fields = ["project_id","workflow_id","model_id","is_remote","type"]
 
     #required
     project_id: str
@@ -37,8 +35,6 @@ class Deployment(BaseWithComparableData):
     #Optional (nullable in Db)
     workflow_id: Optional[str] = None
     model_id: Optional[str] = None
-    agent_id: Optional[str] = None
-    mcp_server_id: Optional[str] = None
 
     type_kwargs: dict[str, str] = Field(default_factory=dict)
     configuration: dict

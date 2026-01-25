@@ -69,7 +69,7 @@ def get_user(
     except Exception as e:
         return APIResponse(
             success=False,
-            error=f"Failed to get user with name = {name}, email = {email}: {e}",
+            error=f"Failed to get user with name = {name}: {e}",
         )
 
 

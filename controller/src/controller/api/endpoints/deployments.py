@@ -32,9 +32,9 @@ def create_deployment(
     """
     Create a new deployment in the database.
 
-    :param project_name: The name of the project to create the dataset in.
+     :param project_name: The name of the project to create the deployment in.
     :param deployment:   The deployment to create.
-    :param db_session:   The deployment session.
+    :param db_session:   The database session.
 
     :return: The response from the database.
     """
@@ -108,6 +108,10 @@ def update_deployment(
     """
     try:
         data = client.update_deployment(name=name, deployment=deployment, db_session=db_session)
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Deployment with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

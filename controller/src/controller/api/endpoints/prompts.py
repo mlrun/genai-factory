@@ -110,6 +110,10 @@ def update_prompt(
         data = client.update_prompt(
             name=name, prompt=prompt, db_session=db_session
         )
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Prompt with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

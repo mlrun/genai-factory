@@ -125,6 +125,10 @@ def update_data_source(
         data = client.update_data_source(
             name=name, data_source=data_source, db_session=db_session
         )
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Data source with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

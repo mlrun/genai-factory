@@ -72,7 +72,7 @@ def get_schedule(
         )
         if data is None:
             return APIResponse(
-                success=False, error=f"Deployment with uid = {uid} not found"
+                success=False, error=f"Schedule with name = {name} not found"
             )
         return APIResponse(success=True, data=data)
     except Exception as e:
@@ -99,6 +99,10 @@ def update_schedule(
     """
     try:
         data = client.update_schedule(name=name, schedule=schedule, db_session=db_session)
+        if data is None:
+            return APIResponse(
+                success=False, error=f"Schedule with name = {name} not found"
+            )
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

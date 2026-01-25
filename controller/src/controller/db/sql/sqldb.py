@@ -52,7 +52,7 @@ def make_label(table):
         uid = Column(Integer, primary_key=True)
         name = Column(String(255, None))  # in mysql collation="utf8_bin"
         value = Column(String(255, collation=None))
-        parent = Column(Integer, ForeignKey(f"{table}.name"))
+        parent = Column(String(255), ForeignKey(f"{table}.name"))
 
     return Label
 
@@ -127,7 +127,10 @@ class OwnerBaseSchema(BaseSchema):
 
     __abstract__ = True
     owner_id: Mapped[Optional[str]] = mapped_column(
-        String(ID_LENGTH), ForeignKey("user.uid")
+        String(ID_LENGTH),
+        ForeignKey("user.uid", ondelete="SET NULL"),
+        nullable=True,
+        index=True
     )
 
     def __init__(self, uid, name, spec, description=None, owner_id=None, labels=None):
@@ -217,10 +220,7 @@ class Project(VersionedOwnerBaseSchema):
     prompt: Mapped[List["Prompt"]] = relationship(**relationship_args)
     documents: Mapped[List["Document"]] = relationship(**relationship_args)
     workflows: Mapped[List["Workflow"]] = relationship(**relationship_args)
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(**relationship_args)
     deployments: Mapped[List["Deployment"]] = relationship(**relationship_args)
-    agent: Mapped[List["Agent"]] = relationship(**relationship_args)
-    mcp_server: Mapped[List["McpServer"]] = relationship(**relationship_args)
 
     # fields:
     source: Mapped[str] = mapped_column(default="", server_default="")
@@ -520,8 +520,8 @@ class Workflow(VersionedOwnerBaseSchema):
         index = True
     )
 
-    workflow_type: Mapped[str] = mapped_column()
-    state: Mapped[str] = mapped_column()
+    workflow_type: Mapped[str] = mapped_column(index=True)
+    state: Mapped[str] = mapped_column(index=True)
 
     # Relationships:
 
@@ -538,13 +538,7 @@ class Workflow(VersionedOwnerBaseSchema):
         back_populates="workflow"
     )
 
-    # 3. STEP CONFIGURATIONS: Keep when Workflow is deleted
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(
-        "StepConfiguration",
-        back_populates="workflow"
-    )
-
-    # 4. DEPLOYMENTS: Keep when Workflow is deleted
+    # 3. DEPLOYMENTS: Keep when Workflow is deleted
     deployments: Mapped[List["Deployment"]] = relationship(
         "Deployment",
         back_populates="workflow"
@@ -584,140 +578,6 @@ class Workflow(VersionedOwnerBaseSchema):
         self.state = state
 
 
-class Agent(VersionedOwnerBaseSchema):
-    """
-    The Agent table which is used to define Agent for the project.
-
-    :arg project_id:    The project's id.
-    :arg agent_type: The type of the Agent.
-                     Can be one of the values in genai_factory.schemas.Agent.AgentType.
-    :arg state:      the state of the workflow.
-                     Can be on of the values in genai_factory.schemas.base.WorkflowState.
-    """
-
-    # Columns:
-    project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("project.uid"),
-        nullable = False,
-        index = True
-    )
-
-    agent_type: Mapped[str] = mapped_column()
-    state: Mapped[str] = mapped_column()
-
-    # Relationships:
-
-    # 1. STEP CONFIGURATIONS: Keep when Agent is deleted
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(
-        "StepConfiguration",
-        back_populates="agent"
-    )
-
-    # 2. DEPLOYMENTS: Keep when Agent is deleted
-    deployments: Mapped[List["Deployment"]] = relationship(
-        "Deployment",
-        back_populates="agent"
-    )
-
-
-
-
-    # many-to-one relationship with projects:
-    project: Mapped["Project"] = relationship(back_populates="agent")
-
-    def __init__(
-        self,
-        uid,
-        name,
-        spec,
-        version,
-        project_id,
-        agent_type,
-        state,
-        description=None,
-        owner_id=None,
-        labels=None,
-    ):
-        super().__init__(
-            uid=uid,
-            name=name,
-            version=version,
-            spec=spec,
-            description=description,
-            owner_id=owner_id,
-            labels=labels,
-        )
-        self.project_id = project_id
-        self.agent_type = agent_type
-        self.state = state
-
-class McpServer(VersionedOwnerBaseSchema):
-    """
-    The MCP server table which is used to define MCP Server's for the project.
-
-    :arg project_id: The project's id.
-    :arg agent_type: The type of the MCP server.
-                     Can be one of the values in genai_factory.schemas.McpServer.McpType.
-    :arg state:      the state of the MCP server.
-                     Can be on of the values in genai_factory.schemas.base.WorkflowState.
-    """
-
-    # Columns:
-    project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("project.uid"),
-        nullable = False,
-        index = True
-    )
-
-    mcp_type: Mapped[str] = mapped_column()
-    state: Mapped[str] = mapped_column()
-
-    # Relationships:
-
-    # 1. STEP CONFIGURATIONS: Keep when Workflow is deleted
-    step_configurations: Mapped[List["StepConfiguration"]] = relationship(
-        "StepConfiguration",
-        back_populates="mcp_server"
-    )
-
-    # 2. DEPLOYMENTS: Keep when Workflow is deleted
-    deployments: Mapped[List["Deployment"]] = relationship(
-        "Deployment",
-        back_populates="mcp_server"
-    )
-
-    # many-to-one relationship with projects:
-    project: Mapped["Project"] = relationship(back_populates="mcp_server")
-
-    def __init__(
-        self,
-        uid,
-        name,
-        spec,
-        version,
-        project_id,
-        mcp_type,
-        state,
-        description=None,
-        owner_id=None,
-        labels=None,
-    ):
-        super().__init__(
-            uid=uid,
-            name=name,
-            version=version,
-            spec=spec,
-            description=description,
-            owner_id=owner_id,
-            labels=labels,
-        )
-        self.project_id = project_id
-        self.mcp_type = mcp_type
-        self.state = state
-
-
 class Session(VersionedOwnerBaseSchema):
     """
     The Chat Session table which is used to define chat sessions of an application workflow per user.
@@ -727,7 +587,10 @@ class Session(VersionedOwnerBaseSchema):
 
     # Columns:
     workflow_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("workflow.uid")
+        String(ID_LENGTH),
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
+        nullable=True,
+        index=True
     )
 
     # Relationships:
@@ -752,72 +615,6 @@ class Session(VersionedOwnerBaseSchema):
             labels=labels,
         )
         self.workflow_id = workflow_id
-
-class StepConfiguration(VersionedOwnerBaseSchema):
-    """
-    The Step Configuration table which is used to define step configurations of steps.
-
-    :arg workflow_id: The workflow's id.
-    :arg project_id: The project's id.
-    """
-
-    # Columns:
-    project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid"),
-        nullable = False,
-        index = True
-    )
-    workflow_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("workflow.uid", ondelete="SET NULL"),
-        nullable = True,
-        index = True
-    )
-
-    agent_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("agent.uid", ondelete="SET NULL"),
-        nullable = True,
-        index = True
-    )
-
-    mcp_server_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("mcp_server.uid", ondelete="SET NULL"),
-        nullable = True,
-        index = True
-    )
-
-    # Relationships:
-
-    # many-to-one relationship with projects:
-    project: Mapped["Project"] = relationship(back_populates="step_configurations")
-
-    # Many-to-one relationship with workflows:
-    workflow: Mapped["Workflow"] = relationship(back_populates="step_configurations")
-
-    # Many-to-one relationship with workflows:
-    agent: Mapped["Agent"] = relationship(back_populates="step_configurations")
-
-    # Many-to-one relationship with workflows:
-    mcp_server: Mapped["McpServer"] = relationship(back_populates="step_configurations")
-
-    def __init__(
-        self, uid, name, spec, version, workflow_id, project_id, agent_id, mcp_server_id, description=None, owner_id=None, labels=None
-    ):
-        super().__init__(
-            uid=uid,
-            name=name,
-            spec=spec,
-            version=version,
-            description=description,
-            owner_id=owner_id,
-            labels=labels,
-        )
-        self.project_id = project_id
-        self.workflow_id = workflow_id
-        self.agent_id = agent_id
-        self.mcp_server_id = mcp_server_id
 
 class Deployment(VersionedOwnerBaseSchema):
     """
@@ -853,20 +650,6 @@ class Deployment(VersionedOwnerBaseSchema):
         index = True
     )
 
-    agent_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("agent.uid", ondelete="SET NULL"),
-        nullable = True,
-        index = True
-    )
-
-    mcp_server_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH),
-        ForeignKey("mcp_server.uid", ondelete="SET NULL"),
-        nullable = True,
-        index = True
-    )
-
     is_remote: Mapped[bool] = mapped_column()
 
     type: Mapped[str] = mapped_column()
@@ -885,15 +668,9 @@ class Deployment(VersionedOwnerBaseSchema):
     # Many-to-one relationship with model:
     model: Mapped["Model"] = relationship(back_populates="deployments")
 
-    # Many-to-one relationship with agent:
-    agent: Mapped["Agent"] = relationship(back_populates="deployments")
-
-    # Many-to-one relationship with McpServer:
-    mcp_server: Mapped["McpServer"] = relationship(back_populates="deployments")
-
     def __init__(
-        self, uid, name, spec, version, workflow_id, project_id, model_id, agent_id,
-            mcp_server_id, is_remote, type, description=None, owner_id=None, labels=None
+        self, uid, name, spec, version, workflow_id, project_id, model_id,
+            is_remote, type, description=None, owner_id=None, labels=None
     ):
         super().__init__(
             uid=uid,
@@ -907,8 +684,6 @@ class Deployment(VersionedOwnerBaseSchema):
         self.workflow_id = workflow_id
         self.project_id = project_id
         self.model_id = model_id
-        self.agent_id = agent_id
-        self.mcp_server_id = mcp_server_id
         self.is_remote = is_remote
         self.type = type
 
@@ -927,7 +702,7 @@ class Schedule(VersionedOwnerBaseSchema):
         index = True
     )
 
-    status: Mapped[str] = mapped_column()
+    status: Mapped[str] = mapped_column(index=True)
 
     # Relationships:
 
@@ -975,7 +750,7 @@ class Run(VersionedOwnerBaseSchema):
         index = True
     )
 
-    status: Mapped[str] = mapped_column()
+    status: Mapped[str] = mapped_column(index=True)
 
     # Relationships:
 
