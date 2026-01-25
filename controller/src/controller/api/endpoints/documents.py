@@ -111,9 +111,8 @@ def update_document(
             name=name, document=document, db_session=db_session
         )
         if data is None:
-            return APIResponse(
-                success=False, error=f"Document with name = {name} not found"
-            )
+            # Document doesn't exist, create it
+            data = client.create_document(document=document, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

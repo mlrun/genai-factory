@@ -14,8 +14,10 @@
 
 from typing import Optional
 
+from pydantic import Field
+
 from genai_factory.schemas.base import BaseWithMetadata
 
 
 class User(BaseWithMetadata):
-    extra_data: dict
+    extra_data: dict = Field(default_factory=dict)

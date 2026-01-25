@@ -109,9 +109,8 @@ def update_dataset(
     try:
         data = client.update_dataset(name=name, dataset=dataset, db_session=db_session)
         if data is None:
-            return APIResponse(
-                success=False, error=f"Dataset with name = {name} not found"
-            )
+            # Dataset doesn't exist, create it
+            data = client.create_dataset(dataset=dataset, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

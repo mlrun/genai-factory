@@ -109,9 +109,8 @@ def update_model(
     try:
         data = client.update_model(name=name, model=model, db_session=db_session)
         if data is None:
-            return APIResponse(
-                success=False, error=f"Model with name = {name} not found"
-            )
+            # Model doesn't exist, create it
+            data = client.create_model(model=model, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

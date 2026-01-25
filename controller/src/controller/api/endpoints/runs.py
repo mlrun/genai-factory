@@ -101,9 +101,8 @@ def update_run(
     try:
         data = client.update_run(name=name, run=run, db_session=db_session)
         if data is None:
-            return APIResponse(
-                success=False, error=f"Run with name = {name} not found"
-            )
+            # Run doesn't exist, create it
+            data = client.create_run(run=run, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

@@ -109,9 +109,8 @@ def update_deployment(
     try:
         data = client.update_deployment(name=name, deployment=deployment, db_session=db_session)
         if data is None:
-            return APIResponse(
-                success=False, error=f"Deployment with name = {name} not found"
-            )
+            # Deployment doesn't exist, create it
+            data = client.create_deployment(deployment=deployment, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(

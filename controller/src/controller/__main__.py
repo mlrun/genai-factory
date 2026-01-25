@@ -34,14 +34,12 @@ from genai_factory.schemas import (
     DataSourceType,
     Dataset,
     Model,
-    StepConfiguration,
     Deployment, DeploymentType,
     Schedule,
     Run,
     Status,
-    Agent, AgentType,
     WorkflowState,
-    McpServer, McpType, Workflow, WorkflowType
+    Workflow, WorkflowType
 )
 
 
@@ -179,56 +177,6 @@ def initdb():
         db_session=db_session,
     )
 
-    # create agent
-    click.echo("Creating default agent")
-    client.create_agent(
-        Agent(
-            name="default",
-            description="Default Agent",
-            owner_id=guest_id,
-            project_id=project_id,
-            configuration={},
-            type_kwargs={},
-            structure={},
-            state=WorkflowState.DRAFT,
-            agent_type=AgentType.SINGLE,
-            branch="",
-        ),
-        db_session=db_session,
-    )
-
-    # create Mcp
-    click.echo("Creating default Mcp Server")
-    client.create_mcp_server(
-        McpServer(
-            name="default",
-            description="Default Schedule",
-            owner_id=guest_id,
-            project_id=project_id,
-            configuration={},
-            type_kwargs={},
-            structure={},
-            mcp_type=McpType.GAITOR,
-            state=WorkflowState.DRAFT,
-            branch="",
-        ),
-        db_session=db_session,
-    )
-
-    # create step configuration
-    click.echo("Creating default step configuration")
-    client.create_step_configuration(
-        StepConfiguration(
-            name="default",
-            description="Default Step Configuration",
-            owner_id=guest_id,
-            project_id=project_id,
-            branch="default",
-            step_name="default",
-            workflow_id=workflow_id,
-        ),
-        db_session=db_session,
-    )
     # create deployment
     click.echo("Creating default deployment")
     client.create_deployment(
