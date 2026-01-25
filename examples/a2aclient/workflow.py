@@ -43,7 +43,7 @@ refine_query = RefineQuery(
 )
 intent_classifier = IntentClassifier()
 intent_choice = IntentChoice()
-a2a_client = A2AClient(base_url=os.getenv("A2A_BASE_URL", "http://localhost:10000"), name= "a2a")
+a2a_client = A2AClient(base_url=os.getenv("A2A_BASE_URL", "http://localhost:10000"), name= "Atomic Agent(a2a)")
 communicator = Communicator(name="communicator")
 language_guardrail = LanguageGuardrail()
 hallucination_guardrail= HallucinationGuardrail()
@@ -62,15 +62,13 @@ choice_task = classify_task.to(intent_choice)
 a2a_client_task = choice_task.to(a2a_client)
 communicator_task = choice_task.to(communicator)
 
-
 # Merge back choice steps
-language_guardrail_task = root.add_step(language_guardrail, after=["a2a","communicator"])
+language_guardrail_task = root.add_step(language_guardrail, after=["Atomic Agent(a2a)","communicator"])
 
-# Conncet Last steps
+# Connect Last Gaurdrail steps
 language_guardrail_task.to(hallucination_guardrail).to(history_saver).respond()
 
-
-
+# root.to_yaml()
 workflow_server.add_workflow(
     name="Talk2Tasks",
     graph=root,

@@ -26,5 +26,5 @@ class IntentChoice(storey.Choice):
         intent = event.results.get("intent")
 
         if intent == "meeting":
-            return ["a2a"]
+            return ["Atomic Agent(a2a)"]
         return ["communicator"]
