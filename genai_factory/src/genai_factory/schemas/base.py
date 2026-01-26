@@ -15,10 +15,10 @@
 from datetime import datetime
 from enum import Enum
 from http.client import HTTPException
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Any, Union, List, Type
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 metadata_fields = [
     "uid",
@@ -79,6 +79,21 @@ class Base(BaseModel):
         return str(self.to_dict(to_datestr=True))
 
 
+class WorkflowState(str, Enum):
+    DRAFT = "draft"
+    TESTED = "tested"
+    EVALUATED = "evaluated"
+    READY = "ready"
+
+class Status(str, Enum):
+    PENDING = "pending"
+    QUEUED = "queued"
+    RUNNING = "running"
+    FAILED = "failed"
+    SUCCEED = "succeed"
+
+
+
 class BaseWithMetadata(Base):
     name: str
     uid: Optional[str] = None
@@ -95,10 +110,21 @@ class BaseWithOwner(BaseWithMetadata):
 class BaseWithVerMetadata(BaseWithOwner):
     version: str = ""
 
+class BaseWithWorkMetadata(BaseWithVerMetadata):
+    branch: str
+    project_id: str
+    type_kwargs: dict
+    structure: dict
+    configuration: dict
+    state: WorkflowState
+
+class BaseWithComparableData(BaseWithVerMetadata):
+    evaluations: List[str] = Field(default_factory=list)
+
 
 class APIResponse(BaseModel):
     success: bool
-    data: Optional[Union[list, Type[BaseModel], dict]] = None
+    data: Optional[Any] = None
     error: Optional[str] = None
 
     def with_raise(self, format=None) -> "APIResponse":

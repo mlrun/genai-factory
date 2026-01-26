@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional
+import storey
 
-from genai_factory.schemas.base import BaseWithVerMetadata
+from genai_factory.schemas import WorkflowEvent
 
 
-class PromptTemplate(BaseWithVerMetadata):
-    _extra_fields = ["arguments"]
-    _top_level_fields = ["text"]
+class IntentChoice(storey.Choice):
+    """
+    Routes events based on event.intent.
+    """
 
-    text: str
-    project_id: str
-    arguments: Optional[List[str]] = None
+    def select_outlets(self, event: WorkflowEvent):
+        intent = event.results.get("intent")
+
+        if intent == "meeting":
+            return ["a2a"]
+        return ["communicator"]

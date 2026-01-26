@@ -23,3 +23,24 @@ root_packages = [
     "controller.src",
 ]
 include_external_packages = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--disable-warnings",
+    "--ignore=tests/test_a2a_workflow",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+# Ensure PYTHONPATH includes both src directories
+pythonpath = [
+    "controller/src",
+    "genai_factory/src",
+]

@@ -11,9 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
+
+from pydantic import Field
 
 from genai_factory.schemas.base import BaseWithVerMetadata
 
 
 class Project(BaseWithVerMetadata):
-    pass
+    _top_level_fields = ["source"]
+
+    source: str = ""
+    steps: dict = Field(default_factory=dict)
