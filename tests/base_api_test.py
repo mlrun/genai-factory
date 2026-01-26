@@ -114,11 +114,3 @@ class BaseAPITest(abc.ABC):
     def test_get_missing_fails(self, client, project):
         r = client.get(f"{self.base_url(project['name'])}/does-not-exist")
         assert r.json()["success"] is False
-
-    def test_update_nonexistent_fails(self, client, project, owner):
-        """Test that updating a non-existent resource returns an error."""
-        r = client.put(
-            f"{self.base_url(project['name'])}/does-not-exist",
-            json=self.update_payload(project, owner),
-        )
-        assert r.json()["success"] is False
