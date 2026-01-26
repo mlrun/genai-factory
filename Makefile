@@ -64,3 +64,15 @@ fmt-check: ## Check the code (using ruff)
 	@echo "Running ruff checks..."
 	python -m ruff check --exit-non-zero-on-fix
 	python -m ruff format --check
+
+.PHONY: test
+test: ## Run tests
+	@echo "Running tests..."
+	python -m pytest
+
+.PHONY: test-all
+test-all: ## Run all tests including a2a_workflow tests
+	@echo "Running all tests including a2a_workflow..."
+	python -m pytest --override-ini="addopts=-v --strict-markers --tb=short --disable-warnings" tests/
+
+

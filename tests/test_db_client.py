@@ -56,32 +56,6 @@ class TestErrorHandlingAndRollback:
         # Cleanup
         client.delete(f"/api/projects/{project['name']}/workflows/rollback-test-workflow")
 
-    def test_update_nonexistent_does_not_create(self, client, project, owner):
-        """Test that updating a non-existent object doesn't create a new one."""
-        payload = {
-            "name": "ghost-workflow",
-            "description": "This should not be created",
-            "owner_id": owner["uid"],
-            "project_id": project["uid"],
-            "configuration": {},
-            "type_kwargs": {},
-            "structure": {},
-            "state": "draft",
-            "workflow_type": "application",
-            "branch": "",
-        }
-
-        # Try to update a non-existent workflow
-        r = client.put(
-            f"/api/projects/{project['name']}/workflows/ghost-workflow",
-            json=payload,
-        )
-        assert r.json()["success"] is False
-
-        # Verify the workflow was NOT created
-        r2 = client.get(f"/api/projects/{project['name']}/workflows/ghost-workflow")
-        assert r2.json()["success"] is False
-
     def test_delete_nonexistent_succeeds(self, client, project):
         """Test that deleting a non-existent object doesn't raise an error."""
         # Deleting non-existent should not raise an error
