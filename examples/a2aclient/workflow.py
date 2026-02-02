@@ -10,7 +10,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under thxsse License.
+# limitations under the License.
 
 from genai_factory.chains.a2a_client import A2AClient
 from genai_factory.chains.communicator import Communicator
@@ -68,7 +68,6 @@ language_guardrail_task = root.add_step(language_guardrail, after=["Atomic Agent
 # Connect Last Gaurdrail steps
 language_guardrail_task.to(hallucination_guardrail).to(history_saver).respond()
 
-# root.to_yaml()
 workflow_server.add_workflow(
     name="Talk2Tasks",
     graph=root,
