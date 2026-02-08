@@ -21,10 +21,13 @@ from controller.api.endpoints import (
     documents,
     models,
     projects,
-    prompt_templates,
     sessions,
     users,
     workflows,
+    deployments,
+    schedules,
+    runs,
+    prompts
 )
 
 app = FastAPI()
@@ -65,10 +68,6 @@ api_router.include_router(
     tags=["models"],
 )
 api_router.include_router(
-    prompt_templates.router,
-    tags=["prompt_templates"],
-)
-api_router.include_router(
     documents.router,
     tags=["documents"],
 )
@@ -79,6 +78,22 @@ api_router.include_router(
 api_router.include_router(
     sessions.router,
     tags=["sessions"],
+)
+api_router.include_router(
+    deployments.router,
+    tags=["deployments"],
+)
+api_router.include_router(
+    schedules.router,
+    tags=["schedules"],
+)
+api_router.include_router(
+    runs.router,
+    tags=["runs"],
+)
+api_router.include_router(
+    prompts.router,
+    tags=["prompts"],
 )
 
 # Include the router in the main app

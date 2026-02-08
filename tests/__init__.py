@@ -11,16 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import List, Optional
-
-from genai_factory.schemas.base import BaseWithVerMetadata
-
-
-class PromptTemplate(BaseWithVerMetadata):
-    _extra_fields = ["arguments"]
-    _top_level_fields = ["text"]
-
-    text: str
-    project_id: str
-    arguments: Optional[List[str]] = None

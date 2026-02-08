@@ -18,13 +18,17 @@ from genai_factory.schemas.base import (
     Base,
     OutputMode,
     metadata_fields,
+    WorkflowState
 )
 from genai_factory.schemas.data_source import DataSource, DataSourceType
 from genai_factory.schemas.dataset import Dataset
 from genai_factory.schemas.document import Document
-from genai_factory.schemas.model import Model, ModelType
+from genai_factory.schemas.model import Model
 from genai_factory.schemas.project import Project
-from genai_factory.schemas.prompt_template import PromptTemplate
+from genai_factory.schemas.prompt import Prompt, PromptFormatType
 from genai_factory.schemas.session import ChatSession, Conversation, QueryItem
 from genai_factory.schemas.user import User
 from genai_factory.schemas.workflow import Workflow, WorkflowEvent, WorkflowType
+from genai_factory.schemas.deployment import Deployment, DeploymentType
+from genai_factory.schemas.run import Run, Status
+from genai_factory.schemas.schedule import Schedule

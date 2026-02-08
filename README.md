@@ -1,3 +1,4 @@
+
 # GenAI Factory
 
 Demo an end to end LLM agent solution with modular architecture, persistent storage and front-end UI that can work with various LLM models and storage solutions.
@@ -95,6 +96,29 @@ There are three main types of configuration in the GenAI Factory:
     ```
 
     The application is responsible for the vector database persistence, configuration, and retrieval. It is also responsible for generations using the defined completion model.
+
+## Development and Testing
+
+### Setting Up Development Environment
+
+**Install dependencies**:
+```bash
+# Install production dependencies
+pip install -r controller/requirements.txt
+pip install -r genai_factory/requirements.txt
+
+# Install development and testing dependencies
+pip install -r requirements-dev.txt
+```
+
+### Running Tests
+
+**Run all tests**:
+```bash
+make test
+```
+
+The test suite automatically configures paths and environment variables. No manual setup is required.
 
 ## Full Controller CLI
 

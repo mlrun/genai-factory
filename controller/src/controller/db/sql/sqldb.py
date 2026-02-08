@@ -23,10 +23,9 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
-    Table,
     UniqueConstraint,
 )
-from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import (
     Mapped,
     declarative_base,
@@ -41,7 +40,7 @@ TEXT_LENGTH = 1024
 # Create a base class for declarative class definitions
 Base = declarative_base()
 
-
+#Todo: improve nullable of fields in each table and pydantic objects
 def make_label(table):
     class Label(Base):
         __tablename__ = f"{table}_labels"
@@ -53,7 +52,7 @@ def make_label(table):
         uid = Column(Integer, primary_key=True)
         name = Column(String(255, None))  # in mysql collation="utf8_bin"
         value = Column(String(255, collation=None))
-        parent = Column(Integer, ForeignKey(f"{table}.name"))
+        parent = Column(String(255), ForeignKey(f"{table}.name"))
 
     return Label
 
@@ -128,7 +127,10 @@ class OwnerBaseSchema(BaseSchema):
 
     __abstract__ = True
     owner_id: Mapped[Optional[str]] = mapped_column(
-        String(ID_LENGTH), ForeignKey("user.uid")
+        String(ID_LENGTH),
+        ForeignKey("user.uid", ondelete="SET NULL"),
+        nullable=True,
+        index=True
     )
 
     def __init__(self, uid, name, spec, description=None, owner_id=None, labels=None):
@@ -154,40 +156,29 @@ class VersionedOwnerBaseSchema(OwnerBaseSchema):
         self.version = version
 
 
-# Association table between users and projects for many-to-many relationship
-user_to_project = Table(
-    "user_to_project",
-    Base.metadata,
-    Column("user_id", ForeignKey("user.uid")),
-    Column("project_id", ForeignKey("project.uid")),
-    Column("project_version", ForeignKey("project.version")),
-)
+class ComparableBaseSchema(VersionedOwnerBaseSchema):
+    """
+    Base class for all Comparable tables.
+    We use this class to define common columns and methods for all Comparable tables.
 
-# Association table between models and prompt templates for many-to-many relationship
-prompt_template_to_model = Table(
-    "prompt_template_to_model",
-    Base.metadata,
-    Column("prompt_id", String(ID_LENGTH), ForeignKey("prompt_template.uid")),
-    Column(
-        "prompt_version", String(TEXT_LENGTH), ForeignKey("prompt_template.version")
-    ),
-    Column("model_id", String(ID_LENGTH), ForeignKey("model.uid")),
-    Column("model_version", String(TEXT_LENGTH), ForeignKey("model.version")),
-    Column("generation_config", JSON),
-)
+    :arg evaluation: The entry's evaluation list.
+    """
 
-# Association table between documents and data sources (ingestions) for many-to-many relationship
-document_to_data_source = Table(
-    "document_to_data_source",
-    Base.metadata,
-    Column("document_id", String(ID_LENGTH), ForeignKey("document.uid")),
-    Column("document_version", String(TEXT_LENGTH), ForeignKey("document.version")),
-    Column("data_source_id", String(ID_LENGTH), ForeignKey("data_source.uid")),
-    Column(
-        "data_source_version", String(TEXT_LENGTH), ForeignKey("data_source.version")
-    ),
-    Column("extra_data", JSON),
-)
+    __abstract__ = True
+    evaluations: Mapped[list[str]] = mapped_column(
+        MutableList.as_mutable(JSON),
+        default=list,
+        server_default="[]"
+    )
+
+    def __init__(
+        self, uid, name, spec, version, evaluations, description=None, owner_id=None, labels=None
+    ):
+        super().__init__(uid, name, spec, version, description, owner_id, labels)
+        self.evaluations = evaluations
+
+
+#Todo: check all relationships logic between tables
 
 
 class User(BaseSchema):
@@ -195,41 +186,23 @@ class User(BaseSchema):
     The User table which is used to define users.
 
     :arg full_name: The user's full name.
-    :arg email:     The user's email.
     """
 
     # Columns:
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Relationships:
 
-    # many-to-many relationship with projects:
-    projects: Mapped[List["Project"]] = relationship(
-        back_populates="users",
-        secondary=user_to_project,
-        primaryjoin="User.uid == user_to_project.c.user_id",
-        secondaryjoin="and_(Project.uid == user_to_project.c.project_id,"
-        " Project.version == user_to_project.c.project_version)",
-        foreign_keys=[
-            user_to_project.c.user_id,
-            user_to_project.c.project_id,
-            user_to_project.c.project_version,
-        ],
-    )
     # one-to-many relationship with sessions:
     sessions: Mapped[List["Session"]] = relationship(
         back_populates="user", foreign_keys="Session.owner_id"
     )
 
     def __init__(
-        self, uid, name, email, full_name, spec, description=None, labels=None
+        self, uid, name, spec, description=None, labels=None
     ):
         super().__init__(
             uid=uid, name=name, description=description, spec=spec, labels=labels
         )
-        self.email = email
-        self.full_name = full_name
 
 
 class Project(VersionedOwnerBaseSchema):
@@ -239,31 +212,21 @@ class Project(VersionedOwnerBaseSchema):
 
     # Relationships:
 
-    # many-to-many relationship with user:
-    users: Mapped[List["User"]] = relationship(
-        back_populates="projects",
-        secondary=user_to_project,
-        primaryjoin="and_(Project.uid == user_to_project.c.project_id,"
-        " Project.version == user_to_project.c.project_version)",
-        secondaryjoin="User.uid == user_to_project.c.user_id",
-        foreign_keys=[
-            user_to_project.c.user_id,
-            user_to_project.c.project_id,
-            user_to_project.c.project_version,
-        ],
-    )
-
     # one-to-many relationships:
     relationship_args = {"back_populates": "project", "cascade": "all, delete-orphan"}
     data_sources: Mapped[List["DataSource"]] = relationship(**relationship_args)
     datasets: Mapped[List["Dataset"]] = relationship(**relationship_args)
     models: Mapped[List["Model"]] = relationship(**relationship_args)
-    prompt_templates: Mapped[List["PromptTemplate"]] = relationship(**relationship_args)
+    prompt: Mapped[List["Prompt"]] = relationship(**relationship_args)
     documents: Mapped[List["Document"]] = relationship(**relationship_args)
     workflows: Mapped[List["Workflow"]] = relationship(**relationship_args)
+    deployments: Mapped[List["Deployment"]] = relationship(**relationship_args)
+
+    # fields:
+    source: Mapped[str] = mapped_column(default="", server_default="")
 
     def __init__(
-        self, uid, name, spec, version, description=None, owner_id=None, labels=None
+        self, uid, name, spec, version, source, description=None, owner_id=None, labels=None
     ):
         super().__init__(
             uid=uid,
@@ -274,6 +237,7 @@ class Project(VersionedOwnerBaseSchema):
             owner_id=owner_id,
             labels=labels,
         )
+        self.source = source
         update_labels(self, {"_GENAI_FACTORY": True})
 
 
@@ -288,29 +252,17 @@ class DataSource(VersionedOwnerBaseSchema):
 
     # Columns:
     project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid")
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable=False,
+        index=True
     )
-    data_source_type: Mapped[str]
+    data_source_type: Mapped[str] = mapped_column()
 
     # Relationships:
 
     # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="data_sources")
-    # many-to-many relationship with documents:
-    documents: Mapped[List["Document"]] = relationship(
-        back_populates="data_sources",
-        secondary=document_to_data_source,
-        primaryjoin="and_(DataSource.uid == document_to_data_source.c.data_source_id,"
-        " DataSource.version == document_to_data_source.c.data_source_version)",
-        secondaryjoin="and_(Document.uid == document_to_data_source.c.document_id,"
-        " Document.version == document_to_data_source.c.document_version)",
-        foreign_keys=[
-            document_to_data_source.c.data_source_id,
-            document_to_data_source.c.data_source_version,
-            document_to_data_source.c.document_id,
-            document_to_data_source.c.document_version,
-        ],
-    )
 
     def __init__(
         self,
@@ -347,13 +299,18 @@ class Dataset(VersionedOwnerBaseSchema):
 
     # Columns:
     project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid")
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable=False,
+        index=True
     )
-    task: Mapped[Optional[str]]
+    task: Mapped[str] = mapped_column()
+    path : Mapped[Optional[str]] = mapped_column()
+
 
     # Relationships:
 
-    # Many-to-one relationship with projects:
+    # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="datasets")
 
     def __init__(
@@ -367,6 +324,7 @@ class Dataset(VersionedOwnerBaseSchema):
         description=None,
         owner_id=None,
         labels=None,
+        path=None,
     ):
         super().__init__(
             uid=uid,
@@ -377,6 +335,7 @@ class Dataset(VersionedOwnerBaseSchema):
             owner_id=owner_id,
             labels=labels,
         )
+        self.path = path
         self.project_id = project_id
         self.task = task
 
@@ -392,29 +351,25 @@ class Model(VersionedOwnerBaseSchema):
 
     # Columns:
     project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid")
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable=False,
+        index=True
     )
-    model_type: Mapped[str]
-    task: Mapped[Optional[str]]
+    is_adapter: Mapped[bool] = mapped_column()
+    task: Mapped[str] = mapped_column()
+
+
 
     # Relationships:
-
     # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="models")
-    # many-to-many relationship with prompt_templates:
-    prompt_templates: Mapped[List["PromptTemplate"]] = relationship(
-        back_populates="models",
-        secondary=prompt_template_to_model,
-        primaryjoin="and_(Model.uid == prompt_template_to_model.c.model_id,"
-        " Model.version == prompt_template_to_model.c.model_version)",
-        secondaryjoin="and_(PromptTemplate.uid == prompt_template_to_model.c.prompt_id,"
-        " PromptTemplate.version == prompt_template_to_model.c.prompt_version)",
-        foreign_keys=[
-            prompt_template_to_model.c.model_id,
-            prompt_template_to_model.c.model_version,
-            prompt_template_to_model.c.prompt_id,
-            prompt_template_to_model.c.prompt_version,
-        ],
+
+    # one-to-many relationship with deployments
+    # 2. DEPLOYMENTS: Keep when Agent is deleted
+    deployments: Mapped[List["Deployment"]] = relationship(
+        "Deployment",
+        back_populates="model"
     )
 
     def __init__(
@@ -424,8 +379,8 @@ class Model(VersionedOwnerBaseSchema):
         spec,
         version,
         project_id,
-        model_type,
         task,
+        is_adapter,
         description=None,
         owner_id=None,
         labels=None,
@@ -440,43 +395,31 @@ class Model(VersionedOwnerBaseSchema):
             labels=labels,
         )
         self.project_id = project_id
-        self.model_type = model_type
+        self.is_adapter = is_adapter
         self.task = task
 
 
-class PromptTemplate(VersionedOwnerBaseSchema):
+class Prompt(VersionedOwnerBaseSchema):
     """
-    The PromptTemplate table which is used to define prompt templates for the project.
-    Each prompt template is associated with a model.
+    The Prompt table which is used to define prompts for the project.
+    Each prompt is associated with a project.
 
     :arg project_id: The project's id.
     """
 
     # Columns:
     project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid")
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable=False,
+        index=True
     )
-    text: Mapped[str]
+    format: Mapped[str] = mapped_column()
 
     # Relationships:
 
     # many-to-one relationship with the 'Project' table
-    project: Mapped["Project"] = relationship(back_populates="prompt_templates")
-    # many-to-many relationship with the 'Model' table
-    models: Mapped[List["Model"]] = relationship(
-        back_populates="prompt_templates",
-        secondary=prompt_template_to_model,
-        primaryjoin="and_(PromptTemplate.uid == prompt_template_to_model.c.prompt_id,"
-        " PromptTemplate.version == prompt_template_to_model.c.prompt_version)",
-        secondaryjoin="and_(Model.uid == prompt_template_to_model.c.model_id,"
-        " Model.version == prompt_template_to_model.c.model_version)",
-        foreign_keys=[
-            prompt_template_to_model.c.prompt_id,
-            prompt_template_to_model.c.prompt_version,
-            prompt_template_to_model.c.model_id,
-            prompt_template_to_model.c.model_version,
-        ],
-    )
+    project: Mapped["Project"] = relationship(back_populates="prompt")
 
     def __init__(
         self,
@@ -484,8 +427,8 @@ class PromptTemplate(VersionedOwnerBaseSchema):
         name,
         spec,
         version,
-        text,
         project_id,
+        format,
         description=None,
         owner_id=None,
         labels=None,
@@ -500,7 +443,7 @@ class PromptTemplate(VersionedOwnerBaseSchema):
             labels=labels,
         )
         self.project_id = project_id
-        self.text = text
+        self.format = format
 
 
 class Document(VersionedOwnerBaseSchema):
@@ -514,30 +457,21 @@ class Document(VersionedOwnerBaseSchema):
 
     # Columns:
     project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid")
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable=False,
+        index=True
     )
-    path: Mapped[str]
-    origin: Mapped[Optional[str]]
-
+    path: Mapped[str] = mapped_column()
+    keywords: Mapped[list[str]] = mapped_column(
+        MutableList.as_mutable(JSON),
+        default=list,
+        server_default="[]"
+    )
     # Relationships:
 
     # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="documents")
-    # many-to-many relationship with ingestion:
-    data_sources: Mapped[List["DataSource"]] = relationship(
-        back_populates="documents",
-        secondary=document_to_data_source,
-        primaryjoin="and_(Document.uid == document_to_data_source.c.document_id,"
-        " Document.version == document_to_data_source.c.document_version)",
-        secondaryjoin="and_(DataSource.uid == document_to_data_source.c.data_source_id,"
-        " DataSource.version == document_to_data_source.c.data_source_version)",
-        foreign_keys=[
-            document_to_data_source.c.document_id,
-            document_to_data_source.c.document_version,
-            document_to_data_source.c.data_source_id,
-            document_to_data_source.c.data_source_version,
-        ],
-    )
 
     def __init__(
         self,
@@ -547,7 +481,7 @@ class Document(VersionedOwnerBaseSchema):
         version,
         project_id,
         path,
-        origin,
+        keywords,
         description=None,
         owner_id=None,
         labels=None,
@@ -563,7 +497,7 @@ class Document(VersionedOwnerBaseSchema):
         )
         self.project_id = project_id
         self.path = path
-        self.origin = origin
+        self.keywords = keywords
 
 
 class Workflow(VersionedOwnerBaseSchema):
@@ -574,19 +508,47 @@ class Workflow(VersionedOwnerBaseSchema):
     :arg project_id:    The project's id.
     :arg workflow_type: The type of the workflow.
                         Can be one of the values in genai_factory.schemas.workflow.WorkflowType.
+    :arg state:         the state of the workflow.
+                        Can be on of the values in genai_factory.schemas.base.WorkflowState.
     """
 
     # Columns:
     project_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("project.uid")
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable = False,
+        index = True
     )
-    workflow_type: Mapped[str]
+
+    workflow_type: Mapped[str] = mapped_column(index=True)
+    state: Mapped[str] = mapped_column(index=True)
 
     # Relationships:
 
+    # 1. SCHEDULES: Deleted when Workflow is deleted
+    schedules: Mapped[List["Schedule"]] = relationship(
+        "Schedule",
+        back_populates="workflow",
+        cascade="all, delete-orphan"  # This handles the deletion
+    )
+
+    # 2. RUNS: Keep when Workflow is deleted
+    runs: Mapped[List["Run"]] = relationship(
+        "Run",
+        back_populates="workflow"
+    )
+
+    # 3. DEPLOYMENTS: Keep when Workflow is deleted
+    deployments: Mapped[List["Deployment"]] = relationship(
+        "Deployment",
+        back_populates="workflow"
+    )
+
+
+
     # many-to-one relationship with projects:
     project: Mapped["Project"] = relationship(back_populates="workflows")
-    # one-to-many relationship with sessions:
+    # many-to-one relationship with sessions:
     sessions: Mapped[List["Session"]] = relationship(back_populates="workflow")
 
     def __init__(
@@ -597,6 +559,7 @@ class Workflow(VersionedOwnerBaseSchema):
         version,
         project_id,
         workflow_type,
+        state,
         description=None,
         owner_id=None,
         labels=None,
@@ -612,9 +575,10 @@ class Workflow(VersionedOwnerBaseSchema):
         )
         self.project_id = project_id
         self.workflow_type = workflow_type
+        self.state = state
 
 
-class Session(OwnerBaseSchema):
+class Session(VersionedOwnerBaseSchema):
     """
     The Chat Session table which is used to define chat sessions of an application workflow per user.
 
@@ -623,7 +587,10 @@ class Session(OwnerBaseSchema):
 
     # Columns:
     workflow_id: Mapped[str] = mapped_column(
-        String(ID_LENGTH), ForeignKey("workflow.uid")
+        String(ID_LENGTH),
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
+        nullable=True,
+        index=True
     )
 
     # Relationships:
@@ -636,14 +603,176 @@ class Session(OwnerBaseSchema):
     )
 
     def __init__(
-        self, uid, name, spec, workflow_id, description=None, owner_id=None, labels=None
+        self, uid, name, version, spec, workflow_id, description=None, owner_id=None, labels=None
     ):
         super().__init__(
             uid=uid,
             name=name,
+            version=version,
             spec=spec,
             description=description,
             owner_id=owner_id,
             labels=labels,
         )
         self.workflow_id = workflow_id
+
+class Deployment(VersionedOwnerBaseSchema):
+    """
+    The Deployment table which is used to define deployments.
+
+    :arg workflow_id: The workflow's id.
+    :arg project_id: The project's id.
+    :arg model_id: the model's id.
+    :arg is_remote: if the deployment is a remote deployment by the builder or is managed by gaitor.
+    :arg type: the deployments type.
+    """
+
+    # Columns:
+
+    project_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH),
+        ForeignKey("project.uid"),
+        nullable = False,
+        index = True
+    )
+
+    workflow_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH),
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
+        nullable = True,
+        index = True
+    )
+
+    model_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH),
+        ForeignKey("model.uid", ondelete="SET NULL"),
+        nullable = True,
+        index = True
+    )
+
+    is_remote: Mapped[bool] = mapped_column()
+
+    type: Mapped[str] = mapped_column()
+
+
+    # Relationships:
+
+    # many-to-one relationship with projects:
+    project: Mapped["Project"] = relationship(back_populates="deployments")
+
+
+    # Many-to-one relationship with workflows:
+    workflow: Mapped["Workflow"] = relationship(back_populates="deployments")
+
+
+    # Many-to-one relationship with model:
+    model: Mapped["Model"] = relationship(back_populates="deployments")
+
+    def __init__(
+        self, uid, name, spec, version, workflow_id, project_id, model_id,
+            is_remote, type, description=None, owner_id=None, labels=None
+    ):
+        super().__init__(
+            uid=uid,
+            name=name,
+            spec=spec,
+            version=version,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.workflow_id = workflow_id
+        self.project_id = project_id
+        self.model_id = model_id
+        self.is_remote = is_remote
+        self.type = type
+
+class Schedule(VersionedOwnerBaseSchema):
+    """
+    The Schedule table which is used to define schdules.
+
+    :arg workflow_id: The workflow's id.
+    """
+
+    # Columns:
+    workflow_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH),
+        ForeignKey("workflow.uid", ondelete="CASCADE"),
+        nullable = False,
+        index = True
+    )
+
+    status: Mapped[str] = mapped_column(index=True)
+
+    # Relationships:
+
+    # one-to-many relationship with step configuration:
+    runs: Mapped[List["Run"]] = relationship(back_populates="schedule")
+    # many-to-one relationship with workflows:
+    workflow: Mapped["Workflow"] = relationship(back_populates="schedules")
+
+
+
+
+    def __init__(
+        self, uid, name, spec, version, workflow_id, status, description=None, owner_id=None, labels=None
+    ):
+        super().__init__(
+            uid=uid,
+            name=name,
+            spec=spec,
+            version=version,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.workflow_id = workflow_id
+        self.status = status
+
+class Run(VersionedOwnerBaseSchema):
+    """
+    The Run table which is used to define runs.
+
+    :arg workflow_id: The workflow's id.
+    :arg schedule_id: the schedule's id.
+    """
+
+    # Columns:
+    workflow_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH),
+        ForeignKey("workflow.uid", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+    schedule_id: Mapped[str] = mapped_column(
+        String(ID_LENGTH), ForeignKey("schedule.uid", ondelete="SET NULL"),
+        nullable = True,
+        index = True
+    )
+
+    status: Mapped[str] = mapped_column(index=True)
+
+    # Relationships:
+
+    # Many-to-one relationship with workflows:
+    workflow: Mapped["Workflow"] = relationship(back_populates="runs")
+    schedule: Mapped["Schedule"] = relationship(back_populates="runs")
+
+
+
+    def __init__(
+        self, uid, name, spec, version, workflow_id, schedule_id, status, description=None, owner_id=None, labels=None
+    ):
+        super().__init__(
+            uid=uid,
+            name=name,
+            spec=spec,
+            version=version,
+            description=description,
+            owner_id=owner_id,
+            labels=labels,
+        )
+        self.workflow_id = workflow_id
+        self.schedule_id = schedule_id
+        self.status = status
+

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import json
 import os
 from typing import List, Optional, Tuple, Union
@@ -124,6 +125,9 @@ def update_data_source(
         data = client.update_data_source(
             name=name, data_source=data_source, db_session=db_session
         )
+        if data is None:
+            # Data source doesn't exist, create it
+            data = client.create_data_source(data_source=data_source, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -149,7 +153,7 @@ def delete_data_source(
     :param version:      The version of the data source to delete.
     :param db_session:   The database session.
 
-    :returThe response from the database.
+    :return The response from the database.
     """
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
@@ -275,7 +279,7 @@ def ingest(
 
     data = {
         "document": document.to_dict(),
-        "database_kwargs": data_source.database_kwargs,
+        "kwargs": data_source.kwargs,
     }
     if metadata is not None:
         params["metadata"] = json.dumps(metadata)

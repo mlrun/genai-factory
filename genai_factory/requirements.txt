@@ -6,4 +6,6 @@ langchain-huggingface==0.1.2
 pymilvus==2.5.17
 fastapi==0.110.3
 uvicorn==0.30.6
+chromadb==0.5.3
+sentence_transformers
 mlrun==1.9.1

@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Depends
 
 from controller.api.utils import AuthInfo, get_auth_user, get_db, parse_version
 from controller.db import client
-from genai_factory.schemas import APIResponse, OutputMode, PromptTemplate
+from genai_factory.schemas import APIResponse, OutputMode, Prompt, PromptFormatType
 
 router = APIRouter(prefix="/projects/{project_name}")
 
 
-@router.post("/prompt_templates")
+@router.post("/prompts")
 def create_prompt(
     project_name: str,
-    prompt: PromptTemplate,
+    prompt: Prompt,
     db_session=Depends(get_db),
 ) -> APIResponse:
     """
@@ -39,7 +39,7 @@ def create_prompt(
     :return: The response from the database.
     """
     try:
-        data = client.create_prompt_template(prompt_template=prompt, db_session=db_session)
+        data = client.create_prompt(prompt=prompt, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -48,7 +48,7 @@ def create_prompt(
         )
 
 
-@router.get("/prompt_templates/{name}")
+@router.get("/prompts/{name}")
 def get_prompt(
     project_name: str,
     name: str,
@@ -70,7 +70,7 @@ def get_prompt(
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
-        data = client.get_prompt_template(
+        data = client.get_prompt(
             project_id=project_id,
             name=name,
             uid=uid,
@@ -89,10 +89,10 @@ def get_prompt(
         )
 
 
-@router.put("/prompt_templates/{name}")
+@router.put("/prompts/{name}")
 def update_prompt(
     project_name: str,
-    prompt: PromptTemplate,
+    prompt: Prompt,
     name: str,
     db_session=Depends(get_db),
 ) -> APIResponse:
@@ -107,9 +107,12 @@ def update_prompt(
     :return: The response from the database.
     """
     try:
-        data = client.update_prompt_template(
-            name=name, prompt_template=prompt, db_session=db_session
+        data = client.update_prompt(
+            name=name, prompt=prompt, db_session=db_session
         )
+        if data is None:
+            # Prompt doesn't exist, create it
+            data = client.create_prompt(prompt=prompt, db_session=db_session)
         return APIResponse(success=True, data=data)
     except Exception as e:
         return APIResponse(
@@ -118,7 +121,7 @@ def update_prompt(
         )
 
 
-@router.delete("/prompt_templates/{name}")
+@router.delete("/prompts/{name}")
 def delete_prompt(
     project_name: str,
     name: str,
@@ -140,7 +143,7 @@ def delete_prompt(
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     uid, version = parse_version(uid, version)
     try:
-        client.delete_prompt_template(
+        client.delete_prompt(
             project_id=project_id,
             name=name,
             uid=uid,
@@ -155,12 +158,13 @@ def delete_prompt(
         )
 
 
-@router.get("/prompt_templates")
+@router.get("/prompts")
 def list_prompts(
     project_name: str,
     name: str = None,
     version: str = None,
     labels: Optional[List[Tuple[str, str]]] = None,
+    format: Union[PromptFormatType, str] = None,
     mode: OutputMode = OutputMode.DETAILS,
     db_session=Depends(get_db),
     auth: AuthInfo = Depends(get_auth_user),
@@ -172,6 +176,7 @@ def list_prompts(
     :param name:         The name to filter by.
     :param version:      The version to filter by.
     :param labels:       The labels to filter by.
+    :param format:       The PromptFormatType to filter by.
     :param mode:         The output mode.
     :param db_session:   The database session.
     :param auth:         The authentication information.
@@ -182,12 +187,13 @@ def list_prompts(
     owner_id = getattr(owner, "uid", None)
     project_id = client.get_project(name=project_name, db_session=db_session).uid
     try:
-        data = client.list_prompt_templates(
+        data = client.list_prompts(
             project_id=project_id,
             name=name,
             owner_id=owner_id,
             version=version,
             labels_match=labels,
+            format=format,
             output_mode=mode,
             db_session=db_session,
         )

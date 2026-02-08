@@ -165,20 +165,17 @@ class ControllerClient:
         dict_response = dict(raw_response) if isinstance(raw_response, list) else raw_response
         return ChatSession(**dict_response)
 
-    def get_user(self, username: str = "", email: str = None, uid: str = None) -> User:
+    def get_user(self, username: str = "", uid: str = None) -> User:
         """
         Get a user from the database.
 
         :param username: The name of the user to get.
-        :param email:    The email address to get the user by if the name is not provided.
         :param uid:      The UID of the user to get.
 
         :return: The user from the database.
         """
         username = username or self._username
         params = {}
-        if email:
-            params["email"] = email
         if uid:
             params["uid"] = uid
         response = self._send_request(
@@ -234,7 +231,7 @@ class ControllerClient:
         """
         project_id = self.get_project().uid
         if isinstance(workflow, dict):
-            workflow["graph"] = [step.to_dict() for step in workflow["graph"]]
+            workflow["structure"] = [step.to_dict() for step in workflow["structure"]]
             workflow = Workflow(**workflow)
 
         workflow.project_id = project_id
